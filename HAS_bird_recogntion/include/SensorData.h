@@ -3,10 +3,14 @@
 
 #include <DFRobot_B_LUX_V30B.h>
 #include <Adafruit_AHTX0.h>
+#include <Arduino.h>
 
-#define LIGHT_SENSOR_INPUT_PIN  1
-#define LIGHT_SENSOR_SCL_PIN    2
-#define LIGHT_SENSOR_SDA_PIN    3
+#define LIGHT_SENSOR_INPUT_PIN      1
+#define LIGHT_SENSOR_SCL_PIN        2
+#define LIGHT_SENSOR_SDA_PIN        3
+
+#define RAIN_SENSOR_ANALOG_INPUT    0
+#define RAIN_SENSOR_DIGITAL_INPUT   0
 
 class SensorData {
     public:
@@ -16,9 +20,13 @@ class SensorData {
         //Light sensor
         float   GetLightIntensity();  //Method which returns the light intensity of the SEN0390 light sensor
 
-        //Temperature and humidity sensor
+        //Temp and humidity sensor
         float   GetTemperature();     //Method to get the temperature from the SEN0527 T/H sensor
         float   GetHumidity();        //Method to get the humidity from the SEN0527 T/H sensor
+
+        //Rain sensor
+        bool    GetRainThreshold();   //Method which returns if the sensor is wet or not
+        int     GetRainSurface();     //Method which returns the coverage of the rain on the sensor
 
         SensorData() {}
         ~SensorData(){}
