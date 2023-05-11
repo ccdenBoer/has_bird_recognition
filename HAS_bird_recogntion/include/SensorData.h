@@ -10,12 +10,15 @@
 
 class SensorData {
     public:
-        void InitSensors();         //Method to init all the sensors
+        //Initializing
+        void    InitSensors();        //Method to init all the sensors
 
-        float GetLightIntensity();  //Method which returns the light intensity of the SEN0390 light sensor
+        //Light sensor
+        float   GetLightIntensity();  //Method which returns the light intensity of the SEN0390 light sensor
 
-        float GetTemperature();     //Method to get the temperature from the SEN0527 T/H sensor
-        float GetHumidity();        //Method to get the humidity from the SEN0527 T/H sensor
+        //Temperature and humidity sensor
+        float   GetTemperature();     //Method to get the temperature from the SEN0527 T/H sensor
+        float   GetHumidity();        //Method to get the humidity from the SEN0527 T/H sensor
 
         SensorData() {}
         ~SensorData(){}
