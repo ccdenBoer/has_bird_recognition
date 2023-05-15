@@ -2,6 +2,8 @@
 #define HAS_FSM_H
 
 #include <FSM.h>
+#include <SensorData.h>
+#include <LoRaConnection.h>
 
 enum FSM_States {
   STATE_START,

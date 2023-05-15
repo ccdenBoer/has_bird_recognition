@@ -1,9 +1,15 @@
 #include <Arduino.h>
+#include <HASFSM.h>
+
+HASFiniteStateMachine hasFSM;
 
 void setup() {
-  // put your setup code here, to run once:
+  hasFSM = HASFiniteStateMachine();
+
+  hasFSM.InitHASFSM();
+  hasFSM.birdSensorFSM.setup(FSM_States::STATE_INITIALIZING, FSM_Events::EVENTS_STATE_EXECUTED);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  hasFSM.birdSensorFSM.loop();
 }
