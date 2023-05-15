@@ -15,10 +15,16 @@ void SDCardReaderAndWriter::WriteToSDCard() {
 
 char* SDCardReaderAndWriter::ReadFileData(char* fileName) {
     FILE* filePointer = fopen(fileName, "a");
-    char buffer[100];
+
+    int end = fseek(filePointer, 0, SEEK_END);
+    char buffer[end];
     
     /* Seek to the beginning of the file */
     fseek(filePointer, 0, SEEK_SET);
 
-    return nullptr;
+    fread(buffer, end + 1, 1, filePointer);
+    printf("%s\n", buffer);
+    fclose(filePointer);
+
+    return buffer;
 }
