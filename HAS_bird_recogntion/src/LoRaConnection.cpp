@@ -9,6 +9,27 @@ LoRaConnection::LoRaConnection() {
 
 void LoRaConnection::InitConnection() {
     LORA_SERIAL.begin(9600); //Start the LoRa serial at a BaudRate of 9600
+
+    this->SendKey("null", "null", "null");
+    
+    this->SetDeviceMode(LWOTAA);
+    this->SetDataRate(DR0, EU868);
+
+    this->SetChannel(0, 868.1);
+    this->SetChannel(1, 868.3);
+    this->SetChannel(2, 868.5);
+
+    this->SetClassType(CLASS_A);
+
+    this->SetPort(8);
+
+    this->SetReceiveWindow(1, 0, 868.1);
+    this->SetReceiveWindow(2, 869.5, DR3);
+
+    this->EnableDutyCycle(false);
+    this->EnableDutyCycleJoin(false);
+
+    this->SetPowerMode(HIGH_POWER);
 }
 
 void LoRaConnection::SendKey(char* networkSessionKey, char* applicationSessionKey, char* applicationKey) {
