@@ -2,7 +2,7 @@
 #define SENSOR_DATA_H
 
 #include <DFRobot_B_LUX_V30B.h>
-#include <Adafruit_AHTX0.h>
+#include <DFRobot_AHT20.h>
 #include <Arduino.h>
 #include <Adafruit_GPS.h>
 
@@ -43,7 +43,7 @@ class SensorData {
 
     private:
         DFRobot_B_LUX_V30B  lightSensor = DFRobot_B_LUX_V30B(LIGHT_SENSOR_INPUT_PIN, LIGHT_SENSOR_SCL_PIN, LIGHT_SENSOR_SDA_PIN);
-        Adafruit_AHTX0      tempAndHumiditySensor;
+        DFRobot_AHT20       tempAndHumiditySensor;
 
         Adafruit_GPS        GPS     = Adafruit_GPS(&GPS_SERIAL);
         uint32_t            timer   = millis();

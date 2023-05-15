@@ -1,6 +1,7 @@
 #include <HASFSM.h>
+#include <SensorData.h>
 
-//SensorData      sensorData;
+SensorData      sensorData;
 LoRaConnection  connection;
 
 void Start() {
@@ -8,10 +9,10 @@ void Start() {
 }
 
 void Initializing() {
-    //sensorData = SensorData();
+    sensorData = SensorData();
     connection = LoRaConnection();
 
-    //sensorData.InitSensors();
+    sensorData.InitSensors();
     connection.InitConnection();
 }
 
