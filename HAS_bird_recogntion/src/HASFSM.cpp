@@ -20,7 +20,24 @@ void Listening() {
 }
 
 void GatheringData() {
+    //Rain data
+    bool    raining             = sensorData.GetRainThreshold();
+    int     rainSensorCoverage  = sensorData.GetRainSurface();
 
+    //TODO: Battery percentage
+
+    //Temperature
+    float   temp    = sensorData.GetTemperature();
+
+    //Humidity
+    float   hum     = sensorData.GetHumidity();
+
+    //Light
+    float   light   = sensorData.GetLightIntensity();
+
+    //TODO: Validate
+
+    //TODO: Check send interval
 }
 
 void Sending() {

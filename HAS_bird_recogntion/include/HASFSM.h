@@ -5,6 +5,8 @@
 #include <SensorData.h>
 #include <LoRaConnection.h>
 
+#define SEND_INTERVAL 15 //Minutes
+
 enum FSM_States {
   STATE_START,
   STATE_INITIALIZING,
