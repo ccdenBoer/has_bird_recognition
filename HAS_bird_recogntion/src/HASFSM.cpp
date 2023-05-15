@@ -1,6 +1,6 @@
 #include <HASFSM.h>
 
-SensorData      sensorData;
+//SensorData      sensorData;
 LoRaConnection  connection;
 
 void Start() {
@@ -8,10 +8,10 @@ void Start() {
 }
 
 void Initializing() {
-    sensorData = SensorData();
+    //sensorData = SensorData();
     connection = LoRaConnection();
 
-    sensorData.InitSensors();
+    //sensorData.InitSensors();
     connection.InitConnection();
 }
 
@@ -20,20 +20,7 @@ void Listening() {
 }
 
 void GatheringData() {
-    //Rain data
-    bool    raining             = sensorData.GetRainThreshold();
-    int     rainSensorCoverage  = sensorData.GetRainSurface();
-
-    //TODO: Battery percentage
-
-    //Temperature
-    float   temp    = sensorData.GetTemperature();
-
-    //Humidity
-    float   hum     = sensorData.GetHumidity();
-
-    //Light
-    float   light   = sensorData.GetLightIntensity();
+    
 
     //TODO: Validate
 

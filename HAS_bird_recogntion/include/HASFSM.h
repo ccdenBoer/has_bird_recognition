@@ -2,7 +2,7 @@
 #define HAS_FSM_H
 
 #include <FSM.h>
-#include <SensorData.h>
+//#include <SensorData.h>
 #include <LoRaConnection.h>
 
 #define SEND_INTERVAL 15 //Minutes
