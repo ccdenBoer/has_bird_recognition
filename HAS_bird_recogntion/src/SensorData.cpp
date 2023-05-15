@@ -33,11 +33,11 @@ float SensorData::GetLightIntensity() {
 }
 
 float SensorData::GetTemperature() {
-    tempAndHumiditySensor.getTemperature_C();
+    return tempAndHumiditySensor.getTemperature_C();
 }
 
 float SensorData::GetHumidity() {
-    tempAndHumiditySensor.getHumidity_RH();
+    return tempAndHumiditySensor.getHumidity_RH();
 }
 
 bool SensorData::GetRainThreshold() {
