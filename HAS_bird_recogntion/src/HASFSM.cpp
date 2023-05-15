@@ -1,11 +1,18 @@
 #include <HASFSM.h>
 
+SensorData      sensorData;
+LoRaConnection  connection;
+
 void Start() {
 
 }
 
 void Initializing() {
+    sensorData = SensorData();
+    connection = LoRaConnection();
 
+    sensorData.InitSensors();
+    connection.InitConnection();
 }
 
 void Listening() {
