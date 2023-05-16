@@ -32,15 +32,20 @@ enum FSM_Events {
   EVENTS_TOTAL
 };
 
-class HASFiniteStateMachine
-{
-    public:
-      FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
+FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
 
-      HASFiniteStateMachine() {};
-      ~HASFiniteStateMachine() {};
+SensorData      sensorData;
+LoRaConnection  connection;
 
-      void InitHASFSM();
-};
+uint32_t        lastTimeSent;
+
+float   lightIntensity;
+float   temperature;
+float   humidity;
+bool    raining;
+float   rainCoverage;
+float   batteryPercentage;
+
+void InitHASFSM();
 
 #endif
