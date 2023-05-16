@@ -4,6 +4,15 @@
 SensorData      sensorData;
 LoRaConnection  connection;
 
+uint32_t        lastTimeSent;
+
+float   lightIntensity;
+float   temperature;
+float   humidity;
+bool    raining;
+float   rainCoverage;
+float   batteryPercentage;
+
 void Start() {
 
 }
@@ -22,22 +31,24 @@ void Listening() {
 
 void GatheringData() {
     //Gather data
-    float   lightIntensity  = sensorData.GetLightIntensity();
-    float   temperature     = sensorData.GetTemperature();
-    float   humidity        = sensorData.GetHumidity();
-    bool    raining         = sensorData.GetRainThreshold();
-    float   rainCoverage    = sensorData.GetRainSurface();
+    lightIntensity  = sensorData.GetLightIntensity();
+    temperature     = sensorData.GetTemperature();
+    humidity        = sensorData.GetHumidity();
+    raining         = sensorData.GetRainThreshold();
+    rainCoverage    = sensorData.GetRainSurface();
 
     //TODO: Get battery percentage
+    batteryPercentage = 20; //TEMP VALUE
 
-    //TODO: Validate
-    if (sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage)) {
-        //TODO: Write data to SD-Card
+    //Validate
+    uint8_t correctMeasurements = sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
+
+    //Check send interval
+    if ((millis() - lastTimeSent) >= (SEND_INTERVAL * 60 * 1000)) {
+        //TODO: Raise send event
     } else {
-        //TODO: What to do when data is invalid
+        //TODO: Go back to measuring state
     }
-
-    //TODO: Check send interval
 }
 
 void Sending() {
@@ -68,4 +79,6 @@ void HASFiniteStateMachine::InitHASFSM() {
     this->birdSensorFSM.addTransition(FSM_States::STATE_NOT_CONNECTED,  FSM_Events::JOIN_SUCCESFULL,            FSM_States::STATE_SENDING);
     this->birdSensorFSM.addTransition(FSM_States::STATE_NOT_CONNECTED,  FSM_Events::CONNECT_FAILED,             FSM_States::STATE_NOT_CONNECTED);
     this->birdSensorFSM.addTransition(FSM_States::STATE_NOT_CONNECTED,  FSM_Events::CONNECTION_TIMEOUT,         FSM_States::STATE_LISTENING);
+
+    lastTimeSent = millis();
 }

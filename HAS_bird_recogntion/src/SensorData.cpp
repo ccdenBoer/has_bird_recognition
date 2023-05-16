@@ -4,6 +4,7 @@ void SensorData::InitSensors() {
     //Init light sensor
     lightSensor.begin();
 
+    //Init AHT20
     tempAndHumiditySensor.begin();
 
     uint8_t status;
