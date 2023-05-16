@@ -49,6 +49,8 @@ class LoRaConnection
         ~LoRaConnection(){};
 
         void InitConnection();
+
+        void InitialSetup();
         
         void SendKey(char* networkSessionKey, char* applicationSessionKey, char* applicationKey);
 

@@ -32,6 +32,31 @@ void LoRaConnection::InitConnection() {
     this->SetPowerMode(HIGH_POWER);
 }
 
+void LoRaConnection::InitialSetup() {
+    
+    this->SendCommand("AT\r\n");
+    this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 1000);
+
+    if (loraBuffer == "+AT: OK") {
+        //DevEui
+        this->SendCommand("AT+ID=DevEui\r\n");
+        this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 1000);
+        Serial.println(loraBuffer);
+
+        //DevAddr
+        this->SendCommand("AT+ID=DevAddr\r\n");
+        this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 1000);
+        Serial.println(loraBuffer);
+
+        //AppEUI
+        this->SendCommand("AT+ID=AppEui\r\n");
+        this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 1000);
+        Serial.println(loraBuffer);
+    } else {
+        Serial.println("No connection");
+    }
+}
+
 void LoRaConnection::SendKey(char* networkSessionKey, char* applicationSessionKey, char* applicationKey) {
     char command[64];
     
