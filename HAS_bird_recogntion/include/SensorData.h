@@ -19,6 +19,18 @@
 #define GPS_SERIAL                  Serial1 //RX1 and TX1
 #define GPS_ECHO                    false
 
+#define MIN_TEMP                    -45
+#define MAX_TEMP                    85
+
+#define MIN_LIGHT_VALUE             0
+#define MAX_LIGHT_VALUE             200
+
+#define MIN_HUM                     0
+#define MAX_HUM                     100
+
+#define MIN_COVERAGE                0
+#define MAX_COVERAGE                256
+
 class SensorData {
     public:
         //Initializing
@@ -36,7 +48,10 @@ class SensorData {
         int     GetRainSurface();     //Method which returns the coverage of the rain on the sensor
 
         //GPS sensor
-        float*    GetGPSLocation();     //Method which returns the current location of the sensor
+        float*  GetGPSLocation();     //Method which returns the current location of the sensor
+
+        //Validate measurements
+        bool    ValidateSensorData(float lightIntensity, float temp, float hum, int rainSurface);
 
         SensorData() {}
         ~SensorData(){}

@@ -45,7 +45,7 @@ bool SensorData::GetRainThreshold() {
 }
 
 int SensorData::GetRainSurface() {
-    return analogRead(RAIN_SENSOR_ANALOG_INPUT);
+    return map(analogRead(RAIN_SENSOR_ANALOG_INPUT), 1950, 0, 0, 256);
 }
 
 float* SensorData::GetGPSLocation() {
@@ -86,4 +86,20 @@ float* SensorData::GetGPSLocation() {
     }
 
     return location;
+}
+
+bool SensorData::ValidateSensorData(float lightIntensity, float temp, float hum, int rainSurface) {
+    //Check light intensity, cant be under 0 and above 200klx
+    bool correctLightIntensity = (lightIntensity >= MIN_LIGHT_VALUE && lightIntensity <= MAX_LIGHT_VALUE);
+
+    //Check temp, cant be under -40 or above 85 degrees celsius
+    bool correctTemperature = (temp >= MIN_TEMP && temp <= MAX_TEMP);
+
+    //Check humidity, cant be under 0% and 100%
+    bool correctHumidity = (hum >= MIN_HUM && hum <= MAX_HUM);
+
+    //Check rain coverage, cant be under 0 and above 256
+    bool corretRainCoverage = (rainSurface >= MIN_COVERAGE && rainSurface < MAX_COVERAGE);
+
+    return (correctLightIntensity && correctTemperature && correctHumidity && corretRainCoverage);
 }
