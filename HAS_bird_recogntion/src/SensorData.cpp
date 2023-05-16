@@ -103,7 +103,7 @@ uint8_t SensorData::ValidateSensorData(float lightIntensity, float temp, float h
     bool corretRainCoverage = (rainSurface >= MIN_COVERAGE && rainSurface < MAX_COVERAGE);
 
     //Check percentage, cant be below 0% or above 100%
-    bool correctPercentage = (percentage >= 0 && percentage <= 100);
+    bool correctPercentage = (percentage >= MIN_BATTERY_PERCENTAGE && percentage <= MAX_BATTERY_PERCENTAGE);
 
     return (correctLightIntensity << 5)
         | (correctTemperature << 4)

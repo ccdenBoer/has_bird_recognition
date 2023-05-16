@@ -31,6 +31,9 @@
 #define MIN_COVERAGE                0
 #define MAX_COVERAGE                256
 
+#define MIN_BATTERY_PERCENTAGE      0
+#define MAX_BATTERY_PERCENTAGE      100
+
 class SensorData {
     public:
         //Initializing
