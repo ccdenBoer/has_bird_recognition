@@ -51,7 +51,7 @@ class SensorData {
         float*  GetGPSLocation();     //Method which returns the current location of the sensor
 
         //Validate measurements
-        bool    ValidateSensorData(float lightIntensity, float temp, float hum, int rainSurface);
+        uint8_t ValidateSensorData(float lightIntensity, float temp, float hum, int rainSurface, bool raining, int percentage);
 
         SensorData() {}
         ~SensorData(){}

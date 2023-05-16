@@ -88,7 +88,7 @@ float* SensorData::GetGPSLocation() {
     return location;
 }
 
-bool SensorData::ValidateSensorData(float lightIntensity, float temp, float hum, int rainSurface) {
+uint8_t SensorData::ValidateSensorData(float lightIntensity, float temp, float hum, int rainSurface, bool raining, int percentage) {
     //Check light intensity, cant be under 0 and above 200klx
     bool correctLightIntensity = (lightIntensity >= MIN_LIGHT_VALUE && lightIntensity <= MAX_LIGHT_VALUE);
 
@@ -101,5 +101,13 @@ bool SensorData::ValidateSensorData(float lightIntensity, float temp, float hum,
     //Check rain coverage, cant be under 0 and above 256
     bool corretRainCoverage = (rainSurface >= MIN_COVERAGE && rainSurface < MAX_COVERAGE);
 
-    return (correctLightIntensity && correctTemperature && correctHumidity && corretRainCoverage);
+    //Check percentage, cant be below 0% or above 100%
+    bool correctPercentage = (percentage >= 0 && percentage <= 100);
+
+    return (correctLightIntensity << 5)
+        | (correctTemperature << 4)
+        | (correctHumidity << 3)
+        | (raining << 2)
+        | (corretRainCoverage << 1)
+        | (correctPercentage << 0);
 }

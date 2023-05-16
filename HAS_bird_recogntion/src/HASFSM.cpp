@@ -21,9 +21,21 @@ void Listening() {
 }
 
 void GatheringData() {
-    
+    //Gather data
+    float   lightIntensity  = sensorData.GetLightIntensity();
+    float   temperature     = sensorData.GetTemperature();
+    float   humidity        = sensorData.GetHumidity();
+    bool    raining         = sensorData.GetRainThreshold();
+    float   rainCoverage    = sensorData.GetRainSurface();
+
+    //TODO: Get battery percentage
 
     //TODO: Validate
+    if (sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage)) {
+        //TODO: Write data to SD-Card
+    } else {
+        //TODO: What to do when data is invalid
+    }
 
     //TODO: Check send interval
 }
