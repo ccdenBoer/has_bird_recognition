@@ -1,5 +1,7 @@
 #include <SDCardReaderAndWriter.h>
 
+mbed::FATFileSystem fs("fs");
+
 bool SDCardReaderAndWriter::InitSDCardReaderAndWriter() {
     if (fs.mount(&blockDevice)) {
         Serial.println("No filesystem found");
@@ -9,7 +11,7 @@ bool SDCardReaderAndWriter::InitSDCardReaderAndWriter() {
     }
 }
 
-void SDCardReaderAndWriter::WriteToSDCard(char* birdType, float birdAccuracy, float lightIntensity, float temp, float hum, int rainSurface, bool raining, int batteryPercentage, float lat, float lon, uint8_t validation) {
+void SDCardReaderAndWriter::WriteToSDCard(int birdType, float birdAccuracy, float lightIntensity, float temp, float hum, int rainSurface, bool raining, int batteryPercentage, float lat, float lon, uint8_t validation) {
     //TODO: Generate name with timestamp
     char* fileName = "test.txt";
     
@@ -30,7 +32,7 @@ void SDCardReaderAndWriter::WriteToSDCard(char* birdType, float birdAccuracy, fl
     doc["longtitude"] = lon;
     doc["validation"] = validation;
 
-    char* output;
+    char output[256];
     serializeJson(doc, output);
     
     //Write JSON object to file

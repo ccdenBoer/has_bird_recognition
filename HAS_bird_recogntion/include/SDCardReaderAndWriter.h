@@ -7,8 +7,6 @@
 
 #define AMOUNT_OF_ITEMS_TO_WRITE    JSON_OBJECT_SIZE(11)
 
-mbed::FATFileSystem fs("fs");
-
 class SDCardReaderAndWriter {
     public:
         SDCardReaderAndWriter(){};
@@ -16,7 +14,7 @@ class SDCardReaderAndWriter {
 
         bool InitSDCardReaderAndWriter();
 
-        void WriteToSDCard(char* birdType, float birdAccuracy, float lightIntensity, float temp, float hum, int rainSurface, bool raining, int batteryPercentage, float lat, float lon, uint8_t validation);
+        void WriteToSDCard(int birdType, float birdAccuracy, float lightIntensity, float temp, float hum, int rainSurface, bool raining, int batteryPercentage, float lat, float lon, uint8_t validation);
         char* ReadFileData(char* fileName);
 
     private:

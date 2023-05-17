@@ -3,6 +3,8 @@
 
 #include <FSM.h>
 #include <LoRaConnection.h>
+#include <SensorData.h>
+#include <SDCardReaderAndWriter.h>
 
 #define SEND_INTERVAL 15 //Minutes
 
@@ -32,19 +34,20 @@ enum FSM_Events {
   EVENTS_TOTAL
 };
 
-FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
+enum Available_Birds {
+  ANAS_PLATYRHYNCHOS_LINNAEUS,
+  COLUMBA_PALUMBUS_LINNAEUS,
+  FRINGILLA_COELEBS_LINNAEUS,
+  PARUS_MAJOR_LINNAEUS,
+  PASSER_DOMESTICUS,
+  PHYLLOSCOPUS_COLLYBITA,
+  PHYLLOSCOPUS_TROCHILUS,
+  STURNUS_VULGARIS_LINNAEUS,
+  TROGLODYTES_TROGLODTYES,
+  TURDUS_MERULA_LINNAEUS
+};
 
-SensorData      sensorData;
-LoRaConnection  connection;
-
-uint32_t        lastTimeSent;
-
-float   lightIntensity;
-float   temperature;
-float   humidity;
-bool    raining;
-float   rainCoverage;
-float   batteryPercentage;
+extern FSM birdSensorFSM;
 
 void InitHASFSM();
 

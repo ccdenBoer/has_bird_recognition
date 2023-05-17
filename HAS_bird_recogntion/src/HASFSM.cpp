@@ -1,6 +1,25 @@
 #include <HASFSM.h>
 #include <SensorData.h>
 
+FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
+
+SensorData              sensorData;
+LoRaConnection          connection;
+SDCardReaderAndWriter   sd;
+
+uint32_t            lastTimeSent;
+
+Available_Birds   lastRecognizedBird;
+float             recognitionAccuracy;
+float             lightIntensity;
+float             temperature;
+float             humidity;
+bool              raining;
+float             rainCoverage;
+float             batteryPercentage;
+float             lattitude;
+float             longtitude;
+
 void Start() {
 
 }
@@ -31,11 +50,13 @@ void GatheringData() {
     //Validate
     uint8_t correctMeasurements = sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
 
-    //TODO: Sent measurements to SDCard
+    //Sent measurements to SDCard
+    sd.WriteToSDCard(lastRecognizedBird, recognitionAccuracy, lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage, lattitude, longtitude, correctMeasurements);
 
     //Check send interval
     if ((millis() - lastTimeSent) >= (SEND_INTERVAL * 60 * 1000)) {
         birdSensorFSM.raiseEvent(SEND_INTERVAL_REACHED);
+        lastTimeSent = millis();
     } else {
         birdSensorFSM.raiseEvent(SEND_INTERVAL_NOT_REACHED);
     }
