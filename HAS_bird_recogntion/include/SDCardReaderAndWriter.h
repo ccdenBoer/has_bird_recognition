@@ -3,6 +3,9 @@
 
 #include <SDMMCBlockDevice.h>
 #include <FATFileSystem.h>
+#include <ArduinoJson.h>
+
+#define AMOUNT_OF_ITEMS_TO_WRITE    JSON_OBJECT_SIZE(11)
 
 mbed::FATFileSystem fs("fs");
 
@@ -13,7 +16,7 @@ class SDCardReaderAndWriter {
 
         bool InitSDCardReaderAndWriter();
 
-        void WriteToSDCard();
+        void WriteToSDCard(char* birdType, float birdAccuracy, float lightIntensity, float temp, float hum, int rainSurface, bool raining, int batteryPercentage, float lat, float lon, uint8_t validation);
         char* ReadFileData(char* fileName);
 
     private:
