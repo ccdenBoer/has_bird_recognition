@@ -30,6 +30,20 @@ void Initializing() {
 
     sensorData.InitSensors();
     connection.InitConnection();
+
+    //TODO: Check if mic is working
+    bool micIsOkey = true;
+    
+    //Raise new event after checking mic
+    if(micIsOkey) {
+        birdSensorFSM.raiseEvent(SENSORS_INITIALIZED);
+    } else {
+        birdSensorFSM.raiseEvent(INITIALIZING_FAILED);
+    }
+}
+
+void InitializingFailed() {
+
 }
 
 void Listening() {
@@ -72,16 +86,18 @@ void NotConnected() {
 
 void InitHASFSM() {
     //Initializing states
-    birdSensorFSM.addState(FSM_States::STATE_START,           Start);
-    birdSensorFSM.addState(FSM_States::STATE_INITIALIZING,    Initializing);
-    birdSensorFSM.addState(FSM_States::STATE_LISTENING,       Listening);
-    birdSensorFSM.addState(FSM_States::STATE_GATHERING_DATA,  GatheringData);
-    birdSensorFSM.addState(FSM_States::STATE_SENDING,         Sending);
-    birdSensorFSM.addState(FSM_States::STATE_NOT_CONNECTED,   NotConnected);
+    birdSensorFSM.addState(FSM_States::STATE_START,                 Start);
+    birdSensorFSM.addState(FSM_States::STATE_INITIALIZING,          Initializing);
+    birdSensorFSM.addState(FSM_States::STATE_INITIALIZING_FAILED,   InitializingFailed);
+    birdSensorFSM.addState(FSM_States::STATE_LISTENING,             Listening);
+    birdSensorFSM.addState(FSM_States::STATE_GATHERING_DATA,        GatheringData);
+    birdSensorFSM.addState(FSM_States::STATE_SENDING,               Sending);
+    birdSensorFSM.addState(FSM_States::STATE_NOT_CONNECTED,         NotConnected);
 
     //Initializing transistions
     birdSensorFSM.addTransition(FSM_States::STATE_START,          FSM_Events::EVENT_START,                FSM_States::STATE_INITIALIZING);
     birdSensorFSM.addTransition(FSM_States::STATE_INITIALIZING,   FSM_Events::SENSORS_INITIALIZED,        FSM_States::STATE_LISTENING);
+    birdSensorFSM.addTransition(FSM_States::STATE_INITIALIZING,   FSM_Events::INITIALIZING_FAILED,        FSM_States::STATE_INITIALIZING_FAILED);
     birdSensorFSM.addTransition(FSM_States::STATE_LISTENING,      FSM_Events::BIRD_FOUND,                 FSM_States::STATE_GATHERING_DATA);
     birdSensorFSM.addTransition(FSM_States::STATE_GATHERING_DATA, FSM_Events::SEND_INTERVAL_NOT_REACHED,  FSM_States::STATE_LISTENING);
     birdSensorFSM.addTransition(FSM_States::STATE_GATHERING_DATA, FSM_Events::SEND_INTERVAL_REACHED,      FSM_States::STATE_SENDING);
