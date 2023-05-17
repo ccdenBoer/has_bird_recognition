@@ -47,7 +47,20 @@ void InitializingFailed() {
 }
 
 void Listening() {
+    int startListeningTime = millis();
 
+    while ((millis() - startListeningTime) < (LISTEN_TIME * 1000)) {
+        //TODO: Take audio fragment
+    }
+
+    //TODO: Check for bird
+    bool birdFound = true;
+    //TODO: Update bird variable and accuracy
+
+    //Update state if a bird was found
+    if (birdFound) {
+        birdSensorFSM.raiseEvent(BIRD_FOUND);
+    }
 }
 
 void GatheringData() {

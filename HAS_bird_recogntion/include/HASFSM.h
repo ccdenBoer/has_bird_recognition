@@ -7,6 +7,7 @@
 #include <SDCardReaderAndWriter.h>
 
 #define SEND_INTERVAL 15 //Minutes
+#define LISTEN_TIME   20 //Seconds
 
 enum FSM_States {
   STATE_START,
