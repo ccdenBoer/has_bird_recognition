@@ -42,7 +42,7 @@ class LoRaConnection
         char loraBuffer[256];
 
         void SendCommand(char* commandToSend);
-        short ReadBuffer(char* buffer, short length, unsigned char timeout);
+        short ReadBuffer(char* buffer, short length, unsigned short timeout);
 
     public:
         LoRaConnection();

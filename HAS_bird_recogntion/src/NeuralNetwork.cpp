@@ -40,5 +40,5 @@ int NeuralNetwork::ScanData() {
     }
 
     TfLiteTensor* output = interpreter.output(0);
-    return output->type;
+    return output->data.f[0];
 }
