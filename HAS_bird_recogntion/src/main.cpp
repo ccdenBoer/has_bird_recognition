@@ -1,5 +1,8 @@
 #include <Arduino.h>
 #include <HASFSM.h>
+#include <NeuralNetwork.h>
+
+NeuralNetwork nn = NeuralNetwork();
 
 void setup() {
   InitHASFSM();
@@ -7,5 +10,7 @@ void setup() {
 }
 
 void loop() {
+  nn.InputData(nullptr, nullptr, nullptr);
   birdSensorFSM.loop();
+  delay(1000);
 }
