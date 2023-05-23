@@ -1,5 +1,12 @@
 {
     "files.associations": {
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "mstd_functional": "cpp",
+        "mstd_mutex": "cpp",
+        "mstd_tuple": "cpp",
+        "mstd_type_traits": "cpp",
+        "*.tcc": "cpp",
+        "cmath": "cpp",
+        "functional": "cpp"
     }
 }

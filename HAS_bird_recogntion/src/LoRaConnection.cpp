@@ -10,7 +10,7 @@ LoRaConnection::LoRaConnection() {
 void LoRaConnection::InitConnection() {
     LORA_SERIAL.begin(9600); //Start the LoRa serial at a BaudRate of 9600
 
-    this->SendKey("null", "null", "null");
+    this->SendKey((char*)"null", (char*)"null", (char*)"null");
     
     this->SetDeviceMode(LWOTAA);
     this->SetDataRate(DR0, EU868);
@@ -34,22 +34,22 @@ void LoRaConnection::InitConnection() {
 
 void LoRaConnection::InitialSetup() {
     
-    this->SendCommand("AT\r\n");
+    this->SendCommand((char*)"AT\r\n");
     this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 1000);
 
-    if (loraBuffer == "+AT: OK") {
+    if (loraBuffer == (char*)"+AT: OK") {
         //DevEui
-        this->SendCommand("AT+ID=DevEui\r\n");
+        this->SendCommand((char*)"AT+ID=DevEui\r\n");
         this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 1000);
         Serial.println(loraBuffer);
 
         //DevAddr
-        this->SendCommand("AT+ID=DevAddr\r\n");
+        this->SendCommand((char*)"AT+ID=DevAddr\r\n");
         this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 1000);
         Serial.println(loraBuffer);
 
         //AppEUI
-        this->SendCommand("AT+ID=AppEui\r\n");
+        this->SendCommand((char*)"AT+ID=AppEui\r\n");
         this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 1000);
         Serial.println(loraBuffer);
     } else {
@@ -88,10 +88,10 @@ void LoRaConnection::SendKey(char* networkSessionKey, char* applicationSessionKe
 void LoRaConnection::SetDeviceMode(device_mode mode) {
     switch (mode) {
     case device_mode::LWABP:
-        this->SendCommand("AT+MODE=LWABP\r\n");
+        this->SendCommand((char*)"AT+MODE=LWABP\r\n");
         break;
     case device_mode::LWOTAA:
-        this->SendCommand("AT+MODE=LWOTAA\r\n");
+        this->SendCommand((char*)"AT+MODE=LWOTAA\r\n");
         break;
     default:
         Serial.println("Device mode not found");
@@ -104,10 +104,10 @@ void LoRaConnection::SetDataRate(data_rate dataRate, physical_type physicalType)
 
     switch(physicalType) {
         case physical_type::EU434:
-            this->SendCommand("AT+DR=EU433\r\n");
+            this->SendCommand((char*)"AT+DR=EU433\r\n");
             break;
         case physical_type::EU868:
-            this->SendCommand("AT+DR=EU868\r\n");
+            this->SendCommand((char*)"AT+DR=EU868\r\n");
             break;
         default:
             Serial.println("Physical type not found");
@@ -135,10 +135,10 @@ void LoRaConnection::SetChannel(unsigned char channel, float frequency) {
 void LoRaConnection::SetClassType(class_type type) {
     switch (type) {
         case class_type::CLASS_A:
-            this->SendCommand("AT+CLASS=A\r\n");
+            this->SendCommand((char*)"AT+CLASS=A\r\n");
             break;
         case class_type::CLASS_C:
-            this->SendCommand("AT+CLASS=C\r\n");
+            this->SendCommand((char*)"AT+CLASS=C\r\n");
             break;
         default:
             Serial.println("Class type not found");
@@ -179,9 +179,9 @@ void LoRaConnection::SetReceiveWindow(unsigned int window, float frequency, data
 
 void LoRaConnection::EnableDutyCycle(bool enabled) {
     if (enabled) {
-        this->SendCommand("AT+LW=DC, ON\r\n");
+        this->SendCommand((char*)"AT+LW=DC, ON\r\n");
     } else {
-        this->SendCommand("AT+LW=DC, OFF\r\n");
+        this->SendCommand((char*)"AT+LW=DC, OFF\r\n");
     } 
 
     delay(LORA_TIMEOUT);
@@ -189,9 +189,9 @@ void LoRaConnection::EnableDutyCycle(bool enabled) {
 
 void LoRaConnection::EnableDutyCycleJoin(bool enabled) {
     if (enabled) {
-        this->SendCommand("AT+LW=JDC,ON\r\n");
+        this->SendCommand((char*)"AT+LW=JDC,ON\r\n");
     } else {
-        this->SendCommand("AT+LW=JDC,OFF\r\n");
+        this->SendCommand((char*)"AT+LW=JDC,OFF\r\n");
     }
 
     delay(LORA_TIMEOUT);
@@ -200,13 +200,13 @@ void LoRaConnection::EnableDutyCycleJoin(bool enabled) {
 void LoRaConnection::SetPowerMode(power_mode powerMode) {
     switch (powerMode){
         case power_mode::LOW_POWER:
-            this->SendCommand("AT+LOWPOWER\r\n");
+            this->SendCommand((char*)"AT+LOWPOWER\r\n");
             break;
         case power_mode::MEDIUM_POWER:
-            this->SendCommand("AT+POWER=7\r\n");
+            this->SendCommand((char*)"AT+POWER=7\r\n");
             break;
         case power_mode::HIGH_POWER:
-            this->SendCommand("AT+POWER=14\r\n");
+            this->SendCommand((char*)"AT+POWER=14\r\n");
             break;
         default:
             Serial.println("Power mode not found");
@@ -229,9 +229,9 @@ bool LoRaConnection::SendPacket(char* buffer, unsigned char timeout) {
     
     while(SerialLoRa.available())SerialLoRa.read();
     
-    this->SendCommand("AT+MSG=\"");
+    this->SendCommand((char*)"AT+MSG=\"");
     for(unsigned char i = 0; i < bufferLength; i ++)SerialLoRa.write(buffer[i]);
-    this->SendCommand("\"\r\n");
+    this->SendCommand((char*)"\"\r\n");
     
     memset(loraBuffer, 0, MAX_BUFFER_LENGTH);
     this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, timeout);
@@ -244,20 +244,20 @@ bool LoRaConnection::SendPacket(char* buffer, unsigned char timeout) {
 }
 
 bool LoRaConnection::SendPacketCayenne(unsigned char *buffer, unsigned char length, unsigned char timeout) {
-    char temp[2] = {0};
+    char temp[3] = {0};
     
     while(SerialLoRa.available()) {
         SerialLoRa.read();
     }
     
-    this->SendCommand("AT+MSGHEX=\"");
+    this->SendCommand((char*)"AT+MSGHEX=\"");
 
     for(unsigned char i = 0; i < length; i ++) {
         sprintf(temp,"%02x", buffer[i]);
         SerialLoRa.write(temp); 
     }
 
-    this->SendCommand("\"\r\n");
+    this->SendCommand((char*)"\"\r\n");
     
     memset(loraBuffer, 0, MAX_BUFFER_LENGTH);
     this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, timeout);
@@ -276,7 +276,7 @@ void LoRaConnection::SendCommand(char* commandToSend) {
     LORA_SERIAL.print(commandToSend);
 }
 
-short LoRaConnection::ReadBuffer(char* buffer, short length, unsigned char timeout) {
+short LoRaConnection::ReadBuffer(char* buffer, short length, unsigned short timeout) {
     short i = 0;
     unsigned long timerStart, timerEnd;
 
