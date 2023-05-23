@@ -34,3 +34,4 @@
 
 /* Include core header */
 #include "Eigen/Core"
+#include "Eigen/FFT"
