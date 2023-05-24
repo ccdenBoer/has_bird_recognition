@@ -8,5 +8,6 @@
         "*.tcc": "cpp",
         "cmath": "cpp",
         "functional": "cpp"
-    }
+    },
+    "editor.renderWhitespace": "all"
 }
