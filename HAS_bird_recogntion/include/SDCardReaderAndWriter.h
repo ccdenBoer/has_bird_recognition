@@ -18,7 +18,6 @@ class SDCardReaderAndWriter {
         char* ReadFileData(char* fileName);
 
     private:
-        SDMMCBlockDevice blockDevice;
 };
 
 #endif

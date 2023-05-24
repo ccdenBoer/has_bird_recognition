@@ -1,12 +1,18 @@
 #include <SDCardReaderAndWriter.h>
 
+SDMMCBlockDevice blockDevice;
 mbed::FATFileSystem fs("fs");
 
 bool SDCardReaderAndWriter::InitSDCardReaderAndWriter() {
-    if (fs.mount(&blockDevice)) {
+    int err =  fs.mount(&blockDevice);
+
+    if (err) {
         Serial.println("No filesystem found");
+        fflush(stdout);
+        err = fs.reformat(&blockDevice);
         return false;
     } else {
+        Serial.println("Filesystem found");
         return true;
     }
 }
@@ -14,32 +20,43 @@ bool SDCardReaderAndWriter::InitSDCardReaderAndWriter() {
 void SDCardReaderAndWriter::WriteToSDCard(int birdType, float birdAccuracy, float lightIntensity, float temp, float hum, int rainSurface, bool raining, int batteryPercentage, float lat, float lon, uint8_t validation) {
     //TODO: Generate name with timestamp
     char* fileName = "test.txt";
+
+    try { 
+        //Open file or create new file if file doesn't exist
+        FILE *filePointer = fopen("/fs/test2.txt", "w");
+        Serial.println("File opened");
+
+        //Create JSON object
+        StaticJsonDocument<AMOUNT_OF_ITEMS_TO_WRITE> doc;
+        doc["birdType"] = birdType;
+        doc["birdAccuracy"] = birdAccuracy;
+        doc["lightIntensity"] = lightIntensity;
+        doc["temperature"] = temp;
+        doc["humidity"] = hum;
+        doc["rainCoverage"] = rainSurface;
+        doc["raining"] = raining;
+        doc["batteryPercentage"] = batteryPercentage;
+        doc["lattitude"] = lat;
+        doc["longtitude"] = lon;
+        doc["validation"] = validation;
+
+        Serial.println("JSON Created");
+
+        char output[1024];
+        serializeJson(doc, output);
+
+        Serial.println(output);
+
+        //Write JSON object to file
+        fprintf(filePointer, output);
+
+        //Close file
+        fclose(filePointer);
+        Serial.println("File closed");
     
-    //Open file or create new file if file doesn't exist
-    FILE *filePointer = fopen(strcat("/fs/", fileName), "w");
-
-    //Create JSON object
-    StaticJsonDocument<AMOUNT_OF_ITEMS_TO_WRITE> doc;
-    doc["birdType"] = birdType;
-    doc["birdAccuracy"] = birdAccuracy;
-    doc["lightIntensity"] = lightIntensity;
-    doc["temperature"] = temp;
-    doc["humidity"] = hum;
-    doc["rainCoverage"] = rainSurface;
-    doc["raining"] = raining;
-    doc["batteryPercentage"] = batteryPercentage;
-    doc["lattitude"] = lat;
-    doc["longtitude"] = lon;
-    doc["validation"] = validation;
-
-    char output[256];
-    serializeJson(doc, output);
-    
-    //Write JSON object to file
-    fprintf(filePointer, output);
-
-    //Close file
-    fclose(filePointer);
+    } catch (const std::exception& e) { 
+        Serial.println(e.what());
+    }
 
 }
 

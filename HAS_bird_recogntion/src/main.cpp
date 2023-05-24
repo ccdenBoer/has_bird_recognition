@@ -2,6 +2,7 @@
 // #include <HASFSM.h>
 // #include <NeuralNetwork.h>
 #include <Arduino.h>
+#include <SDCardReaderAndWriter.h>
 
 // NeuralNetwork nn = NeuralNetwork();
 
@@ -22,6 +23,7 @@
 
 // }
 int myLED;
+SDCardReaderAndWriter sdcard;
 
 void setup() {
 
@@ -36,11 +38,20 @@ void setup() {
       myLED = LEDG; // built-in greeen LED
    #endif   
    pinMode(myLED, OUTPUT);
+
+   Serial.begin(9600);
+   Serial.println("Hello world!");
+
+  while (sdcard.InitSDCardReaderAndWriter()) {
+    delay(1000);
+  }
 }
 
 void loop() {
-   digitalWrite(myLED, LOW); // turn the LED on 
-   delay(200); 
-   digitalWrite(myLED, HIGH); // turn the LED off 
-   delay( rand() % 2000 + 1000); // wait for a random amount of time between 1 and 3 seconds.
+    Serial.println("Start write");
+
+    sdcard.WriteToSDCard(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    Serial.println("Data written");
+
+    delay(1000);
 } 
