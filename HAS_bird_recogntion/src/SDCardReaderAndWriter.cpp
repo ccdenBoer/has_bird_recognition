@@ -19,12 +19,17 @@ bool SDCardReaderAndWriter::InitSDCardReaderAndWriter() {
 
 void SDCardReaderAndWriter::WriteToSDCard(int birdType, float birdAccuracy, float lightIntensity, float temp, float hum, int rainSurface, bool raining, int batteryPercentage, float lat, float lon, uint8_t validation) {
     //TODO: Generate name with timestamp
-    char* fileName = "test.txt";
+    char* fileName = "/fs/test20.txt";
 
-    try { 
         //Open file or create new file if file doesn't exist
-        FILE *filePointer = fopen("/fs/test2.txt", "w");
-        Serial.println("File opened");
+        FILE *filePointer = fopen("/fs/test20.txt", "w");
+
+        if (filePointer == nullptr) {
+            Serial.println("File not created");
+            return;
+        }
+
+        Serial.println("File created");
 
         //Create JSON object
         StaticJsonDocument<AMOUNT_OF_ITEMS_TO_WRITE> doc;
@@ -53,10 +58,6 @@ void SDCardReaderAndWriter::WriteToSDCard(int birdType, float birdAccuracy, floa
         //Close file
         fclose(filePointer);
         Serial.println("File closed");
-    
-    } catch (const std::exception& e) { 
-        Serial.println(e.what());
-    }
 
 }
 
