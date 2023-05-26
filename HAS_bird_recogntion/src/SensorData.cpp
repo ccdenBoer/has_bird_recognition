@@ -4,6 +4,7 @@ void SensorData::InitSensors() {
     //Init light sensor
     lightSensor.begin();
 
+    /*
     //Init AHT20
     tempAndHumiditySensor.begin();
 
@@ -27,6 +28,7 @@ void SensorData::InitSensors() {
     delay(1000);
 
     GPS_SERIAL.println(PMTK_Q_RELEASE);
+    */
 }
 
 float SensorData::GetLightIntensity() {

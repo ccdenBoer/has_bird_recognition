@@ -6,9 +6,9 @@
 #include <Arduino.h>
 #include <Adafruit_GPS.h>
 
-#define LIGHT_SENSOR_INPUT_PIN      0
-#define LIGHT_SENSOR_SCL_PIN        0
-#define LIGHT_SENSOR_SDA_PIN        0
+#define LIGHT_SENSOR_INPUT_PIN      26
+#define LIGHT_SENSOR_SCL_PIN        145
+#define LIGHT_SENSOR_SDA_PIN        146
 
 #define RAIN_SENSOR_ANALOG_INPUT    0
 #define RAIN_SENSOR_DIGITAL_INPUT   0
