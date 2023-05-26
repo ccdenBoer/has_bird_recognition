@@ -1,13 +1,13 @@
 #include "SensorData.h"
 
 void SensorData::InitSensors() {
+    Serial.println("Start senso init");
+    Serial.println("Start light init");
     //Init light sensor
     lightSensor.begin();
 
     /*
     //Init AHT20
-    tempAndHumiditySensor.begin();
-
     uint8_t status;
     while((status = tempAndHumiditySensor.begin()) != 0){
         Serial.print("AHT20 sensor initialization failed. error status : ");
@@ -18,6 +18,10 @@ void SensorData::InitSensors() {
     //Init of rain sensor
     pinMode(RAIN_SENSOR_ANALOG_INPUT,   INPUT);
     pinMode(RAIN_SENSOR_DIGITAL_INPUT,  INPUT);
+    */
+
+    delay(10000);
+    Serial.println("Start GPS...");
 
     //Init GPS sensor
     GPS.begin(9600);
@@ -28,7 +32,9 @@ void SensorData::InitSensors() {
     delay(1000);
 
     GPS_SERIAL.println(PMTK_Q_RELEASE);
-    */
+
+    Serial.println("GPS Started...");
+    
 }
 
 float SensorData::GetLightIntensity() {
