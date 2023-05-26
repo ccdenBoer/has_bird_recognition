@@ -63,7 +63,9 @@
         "streambuf": "cpp",
         "thread": "cpp",
         "typeinfo": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "mstd_iterator": "cpp"
     },
-    "editor.renderWhitespace": "all"
+    "editor.renderWhitespace": "all",
+    "cmake.configureOnOpen": false
 }

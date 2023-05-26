@@ -1,10 +1,10 @@
 // #include "librosa.h"
 // #include <HASFSM.h>
-// #include <NeuralNetwork.h>
+ #include <NeuralNetwork.h>
 #include <Arduino.h>
 #include <SDCardReaderAndWriter.h>
 
-// NeuralNetwork nn = NeuralNetwork();
+NeuralNetwork nn = NeuralNetwork();
 
 // void setup() {
 //   // InitHASFSM();
@@ -24,6 +24,7 @@
 // }
 int myLED;
 SDCardReaderAndWriter sdcard;
+float mockdata[128][547][1];
 
 void setup() {
 
@@ -42,16 +43,32 @@ void setup() {
    Serial.begin(9600);
    Serial.println("Hello world!");
 
-  while (sdcard.InitSDCardReaderAndWriter()) {
+   for(int x; x < 128; x++){
+      for(int y; y < 547; y++){
+         mockdata[x][y][0] = 1;
+      }
+   }
+
+   nn.InputData(mockdata);
+
+  /*while (sdcard.InitSDCardReaderAndWriter()) {
     delay(1000);
   }
+  */
 }
 
 void loop() {
-    Serial.println("Start write");
+    
+    /*Serial.println("Start write");
 
     sdcard.WriteToSDCard(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     Serial.println("Data written");
 
     delay(1000);
+    */
+   int predict = nn.ScanData(); 
+   char buffer[100];
+   sprintf(buffer, "Predicted %d \n", predict);
+   Serial.println(buffer);
+   delay(1000);
 } 

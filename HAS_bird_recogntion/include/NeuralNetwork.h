@@ -17,7 +17,7 @@ class NeuralNetwork {
         NeuralNetwork(/* args */);
         ~NeuralNetwork();
 
-        void    InputData(float width[128], float height[2188], float channels[3]);
+        void    InputData(float data[128][547][1]);
 
         int     ScanData();
 };
