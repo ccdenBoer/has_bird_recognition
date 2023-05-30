@@ -65,5 +65,12 @@
         "typeinfo": "cpp",
         "valarray": "cpp"
     },
-    "editor.renderWhitespace": "all"
+    "editor.renderWhitespace": "all",
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "clangd.arguments": ["-log=verbose", 
+    "-pretty", 
+    "--background-index",
+    "--clang-tidy"],
+
+
 }
