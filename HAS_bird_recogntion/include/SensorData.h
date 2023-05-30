@@ -51,7 +51,7 @@ class SensorData {
         int     GetRainSurface();     //Method which returns the coverage of the rain on the sensor
 
         //GPS sensor
-        float*  GetGPSLocation();     //Method which returns the current location of the sensor
+        bool  GetGPSLocation(float buffer[2]);     //Method which returns the current location of the sensor
 
         //Validate measurements
         uint8_t ValidateSensorData(float lightIntensity, float temp, float hum, int rainSurface, bool raining, int percentage);
