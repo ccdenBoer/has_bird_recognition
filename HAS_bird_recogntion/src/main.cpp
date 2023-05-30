@@ -31,7 +31,7 @@ void setup() {
    randomSeed(analogRead(0));
 
    #ifdef CORE_CM7  
-      bootM4();  
+      //bootM4();  
       myLED = LEDB; // built-in blue LED
    #endif
 

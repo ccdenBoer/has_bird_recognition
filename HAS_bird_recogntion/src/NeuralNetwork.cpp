@@ -1,12 +1,12 @@
 #include <NeuralNetwork.h>
 #include <Arduino.h>
 
-#include "model.h"
+#include "mounttest.h"
 
 NeuralNetwork::NeuralNetwork() {
     this->error_reporter = &this->micro_error_reporter;
 
-    this->model = tflite::GetModel(model_tflite);
+    this->model = tflite::GetModel(mounttest_tflite);
     if (this->model->version() != TFLITE_SCHEMA_VERSION) {
         TF_LITE_REPORT_ERROR(this->error_reporter,
         "Model provided is schema version %d not equal "
