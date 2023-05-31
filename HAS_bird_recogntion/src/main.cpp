@@ -1,28 +1,66 @@
+// global includes
+#include "RPC.h"
 #include <Arduino.h>
-#include <SensorData.h>
 
-uint32_t timer = millis();
-SensorData sensor;
+#ifdef TARGET_PORTENTA_H7_M4
+#define Serial RPC
+#endif
 
-float buffer[2];
+#ifdef TARGET_PORTENTA_H7_M7
+// m7 includes
+#include <Arduino_PortentaBreakout.h>
+#include <SDCardReaderAndWriter.h>
+#include "FirmwareLoader.h"
+
+// m7 defines
+SDCardReaderAndWriter sdcard;
+#endif
+
+#ifdef TARGET_PORTENTA_H7_M4
+// #include <NeuralNetwork.h>
+// NeuralNetwork nn = NeuralNetwork();
+
+int led = LEDB;
+int delay_ms = 1000;
+#endif
+
 
 void setup() {
-   Serial.begin(115200);
+#ifdef TARGET_PORTENTA_H7_M7
+  Serial.begin(115200);
+  while (!Serial);
+  setupM4Firmware();
 
-   while (!Serial) delay(10);
-   
-   sensor = SensorData();
-   sensor.InitSensors();
+  // InitHASFSM();
+  // birdSensorFSM.setup(FSM_States::STATE_INITIALIZING,
+  // FSM_Events::EVENTS_STATE_EXECUTED);
+  // bootM4();
+#endif
+RPC.begin();
 
-   while (!sensor.GetGPSLocation(buffer)) {
-      Serial.println("Fuck");
-      delay(50);
-   }
-
-   Serial.println(buffer[0]);
-   Serial.println(buffer[1]);
+#ifdef TARGET_PORTENTA_H7_M4
+  pinMode(led, OUTPUT);
+#endif
 }
 
 void loop() {
-   // read data from the GPS in the 'main loop'
-} 
+  // nn.InputData(nullptr, nullptr, nullptr);
+  // birdSensorFSM.loop();
+  delay(1000);
+#ifdef TARGET_PORTENTA_H7_M7
+  Serial.println("Hello from m7");
+#endif
+
+#ifdef TARGET_PORTENTA_H7_M4
+  Serial.println("Hello from m4");
+  digitalWrite(led, HIGH);
+  delay(1000);
+  digitalWrite(led, LOW);
+#endif
+
+#ifdef TARGET_PORTENTA_H7_M7
+  while (RPC.available()) {
+    Serial.write(RPC.read());
+  }
+#endif
+}
