@@ -66,11 +66,13 @@
         "valarray": "cpp"
     },
     "editor.renderWhitespace": "all",
-    "C_Cpp.intelliSenseEngine": "disabled",
+    "C_Cpp.intelliSenseEngine": "default",
     "clangd.arguments": ["-log=verbose", 
     "-pretty", 
     "--background-index",
-    "--clang-tidy"],
+    "--clang-tidy"
+],
+"C_Cpp.dimInactiveRegions": false,
 
 
 }

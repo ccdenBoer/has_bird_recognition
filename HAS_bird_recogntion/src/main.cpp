@@ -21,14 +21,12 @@ SDCardReaderAndWriter sdcard;
 // NeuralNetwork nn = NeuralNetwork();
 
 int led = LEDB;
-int delay_ms = 1000;
 #endif
 
 
 void setup() {
 #ifdef TARGET_PORTENTA_H7_M7
   Serial.begin(115200);
-  while (!Serial);
   setupM4Firmware();
 
   // InitHASFSM();
@@ -46,21 +44,27 @@ RPC.begin();
 void loop() {
   // nn.InputData(nullptr, nullptr, nullptr);
   // birdSensorFSM.loop();
-  delay(1000);
+  
 #ifdef TARGET_PORTENTA_H7_M7
+  delay(1000);
   Serial.println("Hello from m7");
 #endif
 
 #ifdef TARGET_PORTENTA_H7_M4
+  delay(100);
   Serial.println("Hello from m4");
   digitalWrite(led, HIGH);
-  delay(1000);
+  delay(100);
   digitalWrite(led, LOW);
 #endif
 
 #ifdef TARGET_PORTENTA_H7_M7
+  String data = "";
   while (RPC.available()) {
-    Serial.write(RPC.read());
+    data += (char)RPC.read();
+  }
+  if (data.length() > 0) {
+    Serial.println(data);
   }
 #endif
 }

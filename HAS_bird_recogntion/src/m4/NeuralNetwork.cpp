@@ -1,5 +1,5 @@
 #include <NeuralNetwork.h>
-#include <Arduino.h>
+#include <RPC.h>
 
 #include "model.h"
 
@@ -28,7 +28,7 @@ NeuralNetwork::~NeuralNetwork()
 }
 
 void NeuralNetwork::InputData(float width[128], float height[2188], float channels[3]) {
-    Serial.println(input->dims->size);
+  RPC.println(input->dims->size);
 }
 
 int NeuralNetwork::ScanData() {
