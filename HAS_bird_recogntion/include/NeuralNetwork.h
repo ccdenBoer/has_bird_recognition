@@ -10,6 +10,7 @@ class NeuralNetwork {
         tflite::ErrorReporter*      error_reporter;
         const tflite::Model*        model;
         tflite::AllOpsResolver      resolver;
+        tflite::MicroInterpreter*   interpreter;
         TfLiteTensor*               input;
         TfLiteTensor*               tensor;
         uint8_t                     tensor_arena[2048];
@@ -17,7 +18,7 @@ class NeuralNetwork {
         NeuralNetwork(/* args */);
         ~NeuralNetwork();
 
-        void    InputData(float data[128][547][1]);
+        void    InputData(float **data);
 
         int     ScanData();
 };

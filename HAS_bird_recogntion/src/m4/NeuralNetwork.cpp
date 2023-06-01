@@ -4,6 +4,7 @@
 #include "mounttest.h"
 
 NeuralNetwork::NeuralNetwork() {
+
     Serial.print("Starting NN init");
     this->error_reporter = &this->micro_error_reporter;
     Serial.print("error repotrer initialized");
@@ -24,32 +25,35 @@ NeuralNetwork::NeuralNetwork() {
     resolver.AddRelu();
     resolver.AddTanh();
 
-    const int tensor_arena_size = 2 * sizeof(float[128][547][1]);
+    const int tensor_arena_size = 128 * 547 * sizeof(float[128]);
     uint8_t tensor_arena[tensor_arena_size];
     Serial.print("initialized tensor arena");
 
-    tflite::MicroInterpreter interpreter(model, resolver, tensor_arena, 2048, error_reporter);
+    tflite::MicroInterpreter interpreter(model, resolver, tensor_arena, tensor_arena_size, error_reporter);
+    this->interpreter = &interpreter;
     interpreter.AllocateTensors();
     Serial.print("Allocated tensor arena");
 
     // Obtain a pointer to the model's input tensor
     input = interpreter.input(0);
     Serial.print("Finished nn init");
+    delete &interpreter;
 }
 
 NeuralNetwork::~NeuralNetwork()
 {
 }
 
-void NeuralNetwork::InputData(float data[128][547][1]) {
-    tflite::MicroInterpreter interpreter(model, resolver, tensor_arena, 2048, error_reporter);
+void NeuralNetwork::InputData(float** data) {
+    tflite::MicroInterpreter interpreter = *this->interpreter;
     float *inputLayer = interpreter.typed_input_tensor<float>(0);
-    memcpy(inputLayer, *data,
+    memcpy(inputLayer, data,
             (128 * 547 * 1 * sizeof(float)));
 }
 
 int NeuralNetwork::ScanData() {
-    tflite::MicroInterpreter interpreter(model, resolver, tensor_arena, 2048, error_reporter);
+    
+    tflite::MicroInterpreter interpreter = *this->interpreter;
     TfLiteStatus invoke_status = interpreter.Invoke();
     if (invoke_status != kTfLiteOk) {
         TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed\n");
