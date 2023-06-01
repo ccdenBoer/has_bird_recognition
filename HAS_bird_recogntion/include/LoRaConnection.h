@@ -1,10 +1,8 @@
 #ifndef LORA_CONNECTION_H
 #define LORA_CONNECTION_H
 
-#include <Arduino.h>
 #include <iostream>
 
-#define LORA_SERIAL         Serial2 //RX2 and TX2
 #define LORA_TIMEOUT        100     //MS
 #define MAX_BUFFER_LENGTH   256
 
@@ -45,8 +43,8 @@ class LoRaConnection
         short ReadBuffer(char* buffer, short length, unsigned short timeout);
 
     public:
-        LoRaConnection();
-        ~LoRaConnection(){};
+        LoRaConnection() {}
+        ~LoRaConnection(){}
 
         void InitConnection();
 

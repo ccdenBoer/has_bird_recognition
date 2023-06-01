@@ -1,15 +1,15 @@
 #include <LoRaConnection.h>
+#include <Arduino.h>
+
+#define LORA_SERIAL Serial2
 
 /*
 * Public methods declaration
 */
-LoRaConnection::LoRaConnection() {
-    memset(loraBuffer, 0, 256);
-}
 
 void LoRaConnection::InitConnection() {
+    memset(loraBuffer, 0, 256);
     LORA_SERIAL.begin(9600); //Start the LoRa serial at a BaudRate of 9600
-
     this->SendKey((char*)"null", (char*)"null", (char*)"null");
     
     this->SetDeviceMode(LWOTAA);
@@ -33,28 +33,37 @@ void LoRaConnection::InitConnection() {
 }
 
 void LoRaConnection::InitialSetup() {
-    
+    Serial.println("Setup start");
+    memset(loraBuffer, 0, 256);
+    Serial.println("buffer");
+
+    LORA_SERIAL.begin(9600);
+    Serial.println("Serial start");
+
+    //Serial.println("LoRa Initial");
     this->SendCommand((char*)"AT\r\n");
-    this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 1000);
+    /*
+    this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 10);
 
     if (loraBuffer == (char*)"+AT: OK") {
         //DevEui
         this->SendCommand((char*)"AT+ID=DevEui\r\n");
-        this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 1000);
+        this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 10);
         Serial.println(loraBuffer);
 
         //DevAddr
         this->SendCommand((char*)"AT+ID=DevAddr\r\n");
-        this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 1000);
+        this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 10);
         Serial.println(loraBuffer);
 
         //AppEUI
         this->SendCommand((char*)"AT+ID=AppEui\r\n");
-        this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 1000);
+        this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 10);
         Serial.println(loraBuffer);
     } else {
         Serial.println("No connection");
     }
+    */
 }
 
 void LoRaConnection::SendKey(char* networkSessionKey, char* applicationSessionKey, char* applicationKey) {
@@ -227,10 +236,10 @@ void LoRaConnection::SetPowerMode(short power) {
 bool LoRaConnection::SendPacket(char* buffer, unsigned char timeout) {
     unsigned char bufferLength = strlen(buffer);
     
-    while(SerialLoRa.available())SerialLoRa.read();
+    while(LORA_SERIAL.available())LORA_SERIAL.read();
     
     this->SendCommand((char*)"AT+MSG=\"");
-    for(unsigned char i = 0; i < bufferLength; i ++)SerialLoRa.write(buffer[i]);
+    for(unsigned char i = 0; i < bufferLength; i ++)LORA_SERIAL.write(buffer[i]);
     this->SendCommand((char*)"\"\r\n");
     
     memset(loraBuffer, 0, MAX_BUFFER_LENGTH);
@@ -246,15 +255,15 @@ bool LoRaConnection::SendPacket(char* buffer, unsigned char timeout) {
 bool LoRaConnection::SendPacketCayenne(unsigned char *buffer, unsigned char length, unsigned char timeout) {
     char temp[3] = {0};
     
-    while(SerialLoRa.available()) {
-        SerialLoRa.read();
+    while(LORA_SERIAL.available()) {
+        LORA_SERIAL.read();
     }
     
     this->SendCommand((char*)"AT+MSGHEX=\"");
 
     for(unsigned char i = 0; i < length; i ++) {
         sprintf(temp,"%02x", buffer[i]);
-        SerialLoRa.write(temp); 
+        LORA_SERIAL.write(temp); 
     }
 
     this->SendCommand((char*)"\"\r\n");
@@ -273,7 +282,9 @@ bool LoRaConnection::SendPacketCayenne(unsigned char *buffer, unsigned char leng
 * Private methods declaration
 */
 void LoRaConnection::SendCommand(char* commandToSend) {
+    Serial.println("Write start");
     LORA_SERIAL.print(commandToSend);
+    Serial.println("Write done");
 }
 
 short LoRaConnection::ReadBuffer(char* buffer, short length, unsigned short timeout) {
@@ -282,13 +293,14 @@ short LoRaConnection::ReadBuffer(char* buffer, short length, unsigned short time
 
     timerStart = millis();
 
+    Serial.println("Read start");
     while(1)
     {
         if(i < length)
         {
-            while(SerialLoRa.available())
+            while(LORA_SERIAL.available())
             {
-                char c = SerialLoRa.read();  
+                char c = LORA_SERIAL.read();  
                 buffer[i ++] = c;
             }  
         }
@@ -296,6 +308,7 @@ short LoRaConnection::ReadBuffer(char* buffer, short length, unsigned short time
         timerEnd = millis();
         if(timerEnd - timerStart > 1000 * timeout)break;
     }
+    Serial.println("Read done");
     
     return i;
 }
