@@ -22,7 +22,6 @@ float mockdata[128][547][1];
 #ifdef TARGET_PORTENTA_H7_M4
 
 int led = LEDB;
-int delay_ms = 1000;
 #endif
 
 
@@ -50,8 +49,9 @@ RPC.begin();
 void loop() {
   // nn.InputData(nullptr, nullptr, nullptr);
   // birdSensorFSM.loop();
-  delay(1000);
+  
 #ifdef TARGET_PORTENTA_H7_M7
+  delay(1000);
   Serial.println("Hello from m7");
     nn.InputData(mockdata);
     int predict = nn.ScanData();
@@ -61,16 +61,21 @@ void loop() {
 #endif
 
 #ifdef TARGET_PORTENTA_H7_M4
+  delay(100);
   Serial.println("Hello from m4");
   digitalWrite(led, HIGH);
-  delay(1000);
+  delay(100);
   digitalWrite(led, LOW);
 
 #endif
 
 #ifdef TARGET_PORTENTA_H7_M7
+  String data = "";
   while (RPC.available()) {
-    Serial.write(RPC.read());
+    data += (char)RPC.read();
+  }
+  if (data.length() > 0) {
+    Serial.println(data);
   }
 #endif
 }

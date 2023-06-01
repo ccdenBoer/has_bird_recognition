@@ -6,9 +6,9 @@
 #include <Arduino.h>
 #include <Adafruit_GPS.h>
 
-#define LIGHT_SENSOR_INPUT_PIN      0
-#define LIGHT_SENSOR_SCL_PIN        0
-#define LIGHT_SENSOR_SDA_PIN        0
+#define LIGHT_SENSOR_INPUT_PIN      26
+#define LIGHT_SENSOR_SCL_PIN        145
+#define LIGHT_SENSOR_SDA_PIN        146
 
 #define RAIN_SENSOR_ANALOG_INPUT    0
 #define RAIN_SENSOR_DIGITAL_INPUT   0
@@ -16,7 +16,7 @@
 #define GPS_TX_PIN                  0
 #define GPS_RX_PIN                  0
 
-#define GPS_SERIAL                  Serial1 //RX1 and TX1
+#define GPS_SERIAL                  Serial1 //RX1 and TX
 #define GPS_ECHO                    false
 
 #define MIN_TEMP                    -45
@@ -51,7 +51,7 @@ class SensorData {
         int     GetRainSurface();     //Method which returns the coverage of the rain on the sensor
 
         //GPS sensor
-        float*  GetGPSLocation();     //Method which returns the current location of the sensor
+        bool  GetGPSLocation(float buffer[2]);     //Method which returns the current location of the sensor
 
         //Validate measurements
         uint8_t ValidateSensorData(float lightIntensity, float temp, float hum, int rainSurface, bool raining, int percentage);
