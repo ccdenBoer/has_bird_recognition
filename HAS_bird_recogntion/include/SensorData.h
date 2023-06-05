@@ -5,13 +5,14 @@
 #include <DFRobot_AHT20.h>
 #include <Arduino.h>
 #include <Adafruit_GPS.h>
+#include <Arduino_PortentaBreakout.h>
 
-#define LIGHT_SENSOR_INPUT_PIN      26
-#define LIGHT_SENSOR_SCL_PIN        145
-#define LIGHT_SENSOR_SDA_PIN        146
+#define LIGHT_SENSOR_INPUT_PIN      27
+#define LIGHT_SENSOR_SCL_PIN        149
+#define LIGHT_SENSOR_SDA_PIN        150
 
-#define RAIN_SENSOR_ANALOG_INPUT    0
-#define RAIN_SENSOR_DIGITAL_INPUT   0
+#define RAIN_SENSOR_ANALOG_INPUT    26
+#define RAIN_SENSOR_DIGITAL_INPUT   71
 
 #define GPS_TX_PIN                  0
 #define GPS_RX_PIN                  0

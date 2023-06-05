@@ -10,10 +10,11 @@
 // m7 includes
 #include <Arduino_PortentaBreakout.h>
 #include <SDCardReaderAndWriter.h>
-#include "FirmwareLoader.h"
+#include <SensorData.h>
 
 // m7 defines
 SDCardReaderAndWriter sdcard;
+SensorData sensors;
 #endif
 
 #ifdef TARGET_PORTENTA_H7_M4
@@ -27,17 +28,16 @@ int led = LEDB;
 void setup() {
 #ifdef TARGET_PORTENTA_H7_M7
   Serial.begin(115200);
-  setupM4Firmware();
+  sensors = SensorData();
+  delay(5000);
+  sensors.InitSensors();
 
   // InitHASFSM();
   // birdSensorFSM.setup(FSM_States::STATE_INITIALIZING,
   // FSM_Events::EVENTS_STATE_EXECUTED);
   // bootM4();
-#endif
-RPC.begin();
 
-#ifdef TARGET_PORTENTA_H7_M4
-  pinMode(led, OUTPUT);
+
 #endif
 }
 
@@ -46,25 +46,24 @@ void loop() {
   // birdSensorFSM.loop();
   
 #ifdef TARGET_PORTENTA_H7_M7
-  delay(1000);
   Serial.println("Hello from m7");
-#endif
 
-#ifdef TARGET_PORTENTA_H7_M4
-  delay(100);
-  Serial.println("Hello from m4");
-  digitalWrite(led, HIGH);
-  delay(100);
-  digitalWrite(led, LOW);
-#endif
+  float buffer[2];
 
-#ifdef TARGET_PORTENTA_H7_M7
-  String data = "";
-  while (RPC.available()) {
-    data += (char)RPC.read();
-  }
-  if (data.length() > 0) {
-    Serial.println(data);
-  }
+  Serial.println(sensors.GetLightIntensity());
+  Serial.println(sensors.GetRainThreshold());
+  Serial.println(sensors.GetRainSurface());
+  Serial.println(sensors.GetTemperature());
+  Serial.println(sensors.GetHumidity());
+
+  while (!sensors.GetGPSLocation(buffer));
+
+  Serial.print("Location: ");
+  Serial.print(buffer[0]);
+  Serial.print(", ");
+  Serial.println(buffer[1]);
+
+  delay(1000);
+  
 #endif
 }
