@@ -10,6 +10,8 @@ class NeuralNetwork {
         tflite::MicroInterpreter*   interpreter;
         TfLiteTensor*               input;
         tflite::ErrorReporter*      error_reporter;
+        tflite::MicroErrorReporter  micro_error_reporter;
+        tflite::AllOpsResolver      resolver;
     public:
         NeuralNetwork(uint8_t* model_data);
         ~NeuralNetwork();

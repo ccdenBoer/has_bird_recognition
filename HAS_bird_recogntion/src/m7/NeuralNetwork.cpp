@@ -8,6 +8,7 @@
 NeuralNetwork::NeuralNetwork(uint8_t* model_data) {
 
     Serial.print("Starting NN init");
+
     this->error_reporter = &this->micro_error_reporter;
     Serial.print("error repotrer initialized");
     this->model = tflite::GetModel(model_data);
@@ -51,6 +52,7 @@ NeuralNetwork::NeuralNetwork(uint8_t* model_data) {
     tflite::MicroInterpreter interpreter(model, resolver, tensor_arena, size, error_reporter);
     Serial.println("NeuralNetwork: Interpreter constructor done");
     interpreter.AllocateTensors();
+    this->interpreter = &interpreter;
     Serial.println("NeuralNetwork: AllocateTensors done");
 }
 
