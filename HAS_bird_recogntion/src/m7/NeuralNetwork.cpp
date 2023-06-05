@@ -3,15 +3,14 @@
 
 //#include "mounttest.h"
 
-NeuralNetwork::NeuralNetwork() {
+NeuralNetwork::NeuralNetwork(uint8_t* model_data) {
 
     Serial.print("Starting NN init");
     tflite::MicroErrorReporter micro_error_reporter;
     tflite::ErrorReporter* error_reporter = &micro_error_reporter;
     this->error_reporter = error_reporter;
     Serial.print("error repotrer initialized");
-    unsigned char mounttest_tflite[] = {0x00};
-    this->model = tflite::GetModel(mounttest_tflite);
+    this->model = tflite::GetModel(model_data);
     if (this->model->version() != TFLITE_SCHEMA_VERSION) {
         TF_LITE_REPORT_ERROR(error_reporter,
         "Model provided is schema version %d not equal "
