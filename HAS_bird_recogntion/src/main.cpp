@@ -21,6 +21,7 @@ tfLiteModel_t model;
 void setup()
 {
   Serial.begin(115200);
+
   while (!Serial);
   Serial.println("M7 booted");
 

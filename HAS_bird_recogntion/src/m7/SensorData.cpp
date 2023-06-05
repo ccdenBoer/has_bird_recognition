@@ -10,10 +10,11 @@ float* location = nullptr;
 #define GPSECHO false
 
 void SensorData::InitSensors() {
+  Serial.println("Light init");
     //Init light sensor
     //lightSensor.begin();
 
-    /*
+    Serial.println("AHT init");
     //Init AHT20
     uint8_t status;
     while((status = tempAndHumiditySensor.begin()) != 0){
@@ -21,11 +22,13 @@ void SensorData::InitSensors() {
         Serial.println(status);
         delay(1000);
     }
+    
+    Serial.println("AHT inited");
 
+    Serial.println("Rain init");
     //Init of rain sensor
     pinMode(RAIN_SENSOR_ANALOG_INPUT,   INPUT);
     pinMode(RAIN_SENSOR_DIGITAL_INPUT,  INPUT);
-    */
 
     Serial.println("Start GPS...");
 
@@ -46,10 +49,12 @@ float SensorData::GetLightIntensity() {
 }
 
 float SensorData::GetTemperature() {
+    while (!tempAndHumiditySensor.startMeasurementReady(true));
     return tempAndHumiditySensor.getTemperature_C();
 }
 
 float SensorData::GetHumidity() {
+    while (!tempAndHumiditySensor.startMeasurementReady(true));
     return tempAndHumiditySensor.getHumidity_RH();
 }
 
