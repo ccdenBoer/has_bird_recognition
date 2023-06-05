@@ -2,68 +2,53 @@
 #include "RPC.h"
 #include <Arduino.h>
 
-#ifdef TARGET_PORTENTA_H7_M4
-#define Serial RPC
-#endif
-
-#ifdef TARGET_PORTENTA_H7_M7
 // m7 includes
 #include <Arduino_PortentaBreakout.h>
 #include <SDCardReaderAndWriter.h>
-#include <SensorData.h>
+
+#include <SDRAM.h>
+#include <NeuralNetwork.h>
+#include "FirmwareLoader.h"
+NeuralNetwork *nn = nullptr;
 
 // m7 defines
 SDCardReaderAndWriter sdcard;
-SensorData sensors;
-#endif
 
-#ifdef TARGET_PORTENTA_H7_M4
-// #include <NeuralNetwork.h>
-// NeuralNetwork nn = NeuralNetwork();
 
 int led = LEDB;
-#endif
+tfLiteModel_t model;
 
-
-void setup() {
-#ifdef TARGET_PORTENTA_H7_M7
+void setup()
+{
   Serial.begin(115200);
-  sensors = SensorData();
-  delay(5000);
-  sensors.InitSensors();
 
-  // InitHASFSM();
-  // birdSensorFSM.setup(FSM_States::STATE_INITIALIZING,
-  // FSM_Events::EVENTS_STATE_EXECUTED);
-  // bootM4();
+  while (!Serial);
+  Serial.println("M7 booted");
 
+  pinMode(led, OUTPUT);
+  model = loadTfliteModel();
 
-#endif
+  char buffer[64];
+  auto len = sprintf(buffer, "The address of ptr is %x on the M7", (unsigned int)model.data);
+  Serial.write(buffer, len);
+  Serial.println();
+  for (int i = model.size - 50; i < model.size; i++)
+  {
+    Serial.print(model.data[i], HEX);
+    Serial.print(",");
+  }
+  Serial.println();
+
+  nn = new NeuralNetwork(model.data);
 }
 
-void loop() {
-  // nn.InputData(nullptr, nullptr, nullptr);
-  // birdSensorFSM.loop();
-  
-#ifdef TARGET_PORTENTA_H7_M7
+void loop()
+{
+  delay(1000);
   Serial.println("Hello from m7");
 
-  float buffer[2];
-
-  Serial.println(sensors.GetLightIntensity());
-  Serial.println(sensors.GetRainThreshold());
-  Serial.println(sensors.GetRainSurface());
-  Serial.println(sensors.GetTemperature());
-  Serial.println(sensors.GetHumidity());
-
-  while (!sensors.GetGPSLocation(buffer));
-
-  Serial.print("Location: ");
-  Serial.print(buffer[0]);
-  Serial.print(", ");
-  Serial.println(buffer[1]);
-
-  delay(1000);
-  
-#endif
+  delay(100);
+  digitalWrite(led, HIGH);
+  delay(100);
+  digitalWrite(led, LOW);
 }

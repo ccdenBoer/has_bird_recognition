@@ -14,7 +14,7 @@ class NeuralNetwork {
         TfLiteTensor*               tensor;
         uint8_t                     tensor_arena[2048];
     public:
-        NeuralNetwork(/* args */);
+        NeuralNetwork(uint8_t* model_data);
         ~NeuralNetwork();
 
         void    InputData(float width[128], float height[2188], float channels[3]);
