@@ -4,10 +4,7 @@
 
 #ifdef TARGET_PORTENTA_H7_M4
 #define Serial RPC
-#include <NeuralNetwork.h>
 
-NeuralNetwork nn;
-float **mockdata;
 #endif
 
 #ifdef TARGET_PORTENTA_H7_M7
@@ -15,9 +12,12 @@ float **mockdata;
 #include <Arduino_PortentaBreakout.h>
 #include <SDCardReaderAndWriter.h>
 #include "FirmwareLoader.h"
+#include <NeuralNetwork.h>
 
 // m7 defines
 SDCardReaderAndWriter sdcard;
+NeuralNetwork* nn = nullptr;
+float **mockdata;
 #endif
 
 #ifdef TARGET_PORTENTA_H7_M4
@@ -29,7 +29,10 @@ int led = LEDB;
 void setup() {
 #ifdef TARGET_PORTENTA_H7_M7
   Serial.begin(115200);
-  setupM4Firmware();
+  Serial.print("init nn");
+  //auto temp = NeuralNetwork();
+  // nn = &temp;
+  //setupM4Firmware();
   // InitHASFSM();
   // birdSensorFSM.setup(FSM_States::STATE_INITIALIZING,
   // FSM_Events::EVENTS_STATE_EXECUTED);
@@ -37,17 +40,17 @@ void setup() {
 RPC.begin();
 
 #ifdef TARGET_PORTENTA_H7_M4
-  nn = NeuralNetwork();
+
   pinMode(led, OUTPUT);
-  mockdata = new float*[128];
-  for(int i = 0; i<128; i++){
-    mockdata[i] = new float[547];
-  }
-  for(int x; x < 128; x++){
-    for(int y; y < 547; y++){
-        mockdata[x][y] = 1;
-      }
-   }
+  // mockdata = new float*[128];
+  // for(int i = 0; i<128; i++){
+  //   mockdata[i] = new float[547];
+  // }
+  // for(int x; x < 128; x++){
+  //   for(int y; y < 547; y++){
+  //       mockdata[x][y] = 1;
+  //     }
+  //  }
 #endif
 }
 
@@ -66,11 +69,11 @@ void loop() {
   digitalWrite(led, HIGH);
   delay(100);
   digitalWrite(led, LOW);
-  nn.InputData(mockdata);
-  int predict = nn.ScanData();
-  char buffer[100];
-  sprintf(buffer, "Predicted %d \n", predict);
-  Serial.println(buffer);
+  // nn.InputData(mockdata);
+  // int predict = nn.Predict();
+  // char buffer[100];
+  // sprintf(buffer, "Predicted %d \n", predict);
+  // Serial.println(buffer);
 
 #endif
 

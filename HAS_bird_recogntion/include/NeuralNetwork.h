@@ -6,19 +6,15 @@
 
 class NeuralNetwork {
     private:
-        tflite::MicroErrorReporter  micro_error_reporter;
-        tflite::ErrorReporter*      error_reporter;
         const tflite::Model*        model;
-        tflite::AllOpsResolver      resolver;
         tflite::MicroInterpreter*   interpreter;
         TfLiteTensor*               input;
-        TfLiteTensor*               tensor;
-        uint8_t                     tensor_arena[2048];
+        tflite::ErrorReporter*      error_reporter;
     public:
         NeuralNetwork(/* args */);
         ~NeuralNetwork();
 
         void    InputData(float **data);
 
-        int     ScanData();
+        int     Predict();
 };

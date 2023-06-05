@@ -1,16 +1,19 @@
 #include <NeuralNetwork.h>
 #include <RPC.h>
 
-#include "mounttest.h"
+//#include "mounttest.h"
 
 NeuralNetwork::NeuralNetwork() {
 
     Serial.print("Starting NN init");
-    this->error_reporter = &this->micro_error_reporter;
+    tflite::MicroErrorReporter micro_error_reporter;
+    tflite::ErrorReporter* error_reporter = &micro_error_reporter;
+    this->error_reporter = error_reporter;
     Serial.print("error repotrer initialized");
+    unsigned char mounttest_tflite[] = {0x00};
     this->model = tflite::GetModel(mounttest_tflite);
     if (this->model->version() != TFLITE_SCHEMA_VERSION) {
-        TF_LITE_REPORT_ERROR(this->error_reporter,
+        TF_LITE_REPORT_ERROR(error_reporter,
         "Model provided is schema version %d not equal "
         "to supported version %d.\n",
         this->model->version(), TFLITE_SCHEMA_VERSION);
@@ -25,7 +28,7 @@ NeuralNetwork::NeuralNetwork() {
     resolver.AddRelu();
     resolver.AddTanh();
 
-    const int tensor_arena_size = 128 * 547 * sizeof(float[128]);
+    const int tensor_arena_size = 128 * 547 * sizeof(float);
     uint8_t tensor_arena[tensor_arena_size];
     Serial.print("initialized tensor arena");
 
@@ -35,9 +38,8 @@ NeuralNetwork::NeuralNetwork() {
     Serial.print("Allocated tensor arena");
 
     // Obtain a pointer to the model's input tensor
-    input = interpreter.input(0);
+    //TfLiteTensor* input = interpreter.input(0);
     Serial.print("Finished nn init");
-    delete &interpreter;
 }
 
 NeuralNetwork::~NeuralNetwork()
@@ -51,7 +53,7 @@ void NeuralNetwork::InputData(float** data) {
             (128 * 547 * 1 * sizeof(float)));
 }
 
-int NeuralNetwork::ScanData() {
+int NeuralNetwork::Predict() {
     
     tflite::MicroInterpreter interpreter = *this->interpreter;
     TfLiteStatus invoke_status = interpreter.Invoke();
