@@ -1,5 +1,7 @@
 #include <NeuralNetwork.h>
 #include <RPC.h>
+#include <SDRAM.h>
+#include <stdlib.h>
 
 // #include "model.h"
 
@@ -22,16 +24,36 @@ NeuralNetwork::NeuralNetwork(uint8_t* model_data) {
     Serial.print(this->model->version());
     Serial.println();
 
-    auto size = 128*547*4;
-    alignas(16) uint8_t tensor_arena[size];
+    resolver.AddFullyConnected();
+    resolver.AddConv2D();
+    resolver.AddMaxPool2D();
+    resolver.AddSoftmax();
+    resolver.AddRelu();
+    resolver.AddTanh();
+
+    std::size_t size = 1024 * 1024 * 4;
+    std::size_t malloc_size = size + 15;
+    // auto size = 1378784;
+    // /alignas(16) uint8_t tensor_arena[size];
+
+    auto unaligned_tensor_arena = SDRAM.malloc(malloc_size);
+
+    // allign to 16
+    auto tensor_arena = (uint8_t*) std::align(16,size,unaligned_tensor_arena,malloc_size);
+
+
+    if (tensor_arena == nullptr)
+    {
+        Serial.println("NeuralNetwork: Tensor alignment failed");
+    }
+
+
+
+    Serial.println("NeuralNetwork: created tensor Arena");
     tflite::MicroInterpreter interpreter(model, resolver, tensor_arena, size, error_reporter);
     Serial.println("NeuralNetwork: Interpreter constructor done");
     interpreter.AllocateTensors();
     Serial.println("NeuralNetwork: AllocateTensors done");
-    
-
-    // Obtain a pointer to the model's input tensor
-    input = interpreter.input(0);
 }
 
 NeuralNetwork::~NeuralNetwork()
