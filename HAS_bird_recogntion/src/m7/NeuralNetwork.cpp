@@ -1,14 +1,14 @@
 #include <NeuralNetwork.h>
 #include <RPC.h>
+#include <SDRAM.h>
+#include <stdlib.h>
 
 //#include "mounttest.h"
 
 NeuralNetwork::NeuralNetwork(uint8_t* model_data) {
 
     Serial.print("Starting NN init");
-    tflite::MicroErrorReporter micro_error_reporter;
-    tflite::ErrorReporter* error_reporter = &micro_error_reporter;
-    this->error_reporter = error_reporter;
+    this->error_reporter = &this->micro_error_reporter;
     Serial.print("error repotrer initialized");
     this->model = tflite::GetModel(model_data);
     if (this->model->version() != TFLITE_SCHEMA_VERSION) {
@@ -17,9 +17,11 @@ NeuralNetwork::NeuralNetwork(uint8_t* model_data) {
         "to supported version %d.\n",
         this->model->version(), TFLITE_SCHEMA_VERSION);
     }
-    Serial.print("Model loaded");
-    
-    static tflite::MicroMutableOpResolver<1> resolver;
+    //print version
+    Serial.print("Model provided is schema version: ");
+    Serial.print(this->model->version());
+    Serial.println();
+
     resolver.AddFullyConnected();
     resolver.AddConv2D();
     resolver.AddMaxPool2D();
@@ -27,18 +29,29 @@ NeuralNetwork::NeuralNetwork(uint8_t* model_data) {
     resolver.AddRelu();
     resolver.AddTanh();
 
-    const int tensor_arena_size = 128 * 547 * sizeof(float);
-    uint8_t tensor_arena[tensor_arena_size];
-    Serial.print("initialized tensor arena");
+    std::size_t size = 1024 * 1024 * 4;
+    std::size_t malloc_size = size + 15;
+    // auto size = 1378784;
+    // /alignas(16) uint8_t tensor_arena[size];
 
-    tflite::MicroInterpreter interpreter(model, resolver, tensor_arena, tensor_arena_size, error_reporter);
-    this->interpreter = &interpreter;
+    auto unaligned_tensor_arena = SDRAM.malloc(malloc_size);
+
+    // allign to 16
+    auto tensor_arena = (uint8_t*) std::align(16,size,unaligned_tensor_arena,malloc_size);
+
+
+    if (tensor_arena == nullptr)
+    {
+        Serial.println("NeuralNetwork: Tensor alignment failed");
+    }
+
+
+
+    Serial.println("NeuralNetwork: created tensor Arena");
+    tflite::MicroInterpreter interpreter(model, resolver, tensor_arena, size, error_reporter);
+    Serial.println("NeuralNetwork: Interpreter constructor done");
     interpreter.AllocateTensors();
-    Serial.print("Allocated tensor arena");
-
-    // Obtain a pointer to the model's input tensor
-    //TfLiteTensor* input = interpreter.input(0);
-    Serial.print("Finished nn init");
+    Serial.println("NeuralNetwork: AllocateTensors done");
 }
 
 NeuralNetwork::~NeuralNetwork()
