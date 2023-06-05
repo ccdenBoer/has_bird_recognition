@@ -11,7 +11,7 @@ class NeuralNetwork {
         TfLiteTensor*               input;
         tflite::ErrorReporter*      error_reporter;
     public:
-        NeuralNetwork(/* args */);
+        NeuralNetwork(uint8_t* model_data);
         ~NeuralNetwork();
 
         void    InputData(float **data);

@@ -1,4 +1,10 @@
 #pragma once
+#include <Arduino.h>
 
-void setupM4Firmware();
 
+struct tfLiteModel_t {
+  uint8_t *data;
+  uint32_t size;
+};
+
+tfLiteModel_t loadTfliteModel();

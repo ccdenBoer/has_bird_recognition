@@ -1,23 +1,34 @@
 #include <NeuralNetwork.h>
 #include <RPC.h>
 
-#include "model.h"
+// #include "model.h"
 
-NeuralNetwork::NeuralNetwork() {
+NeuralNetwork::NeuralNetwork(uint8_t* model_data) {
+    Serial.println("NeuralNetwork: constructor");
     this->error_reporter = &this->micro_error_reporter;
-
+    
     this->model = tflite::GetModel(model_data);
+    Serial.println("NeuralNetwork: GetModel done");
+    
+
     if (this->model->version() != TFLITE_SCHEMA_VERSION) {
         TF_LITE_REPORT_ERROR(this->error_reporter,
-        "Model provided is schema version %d not equal "
+        "Model provided is schema version %d not equal"
         "to supported version %d.\n",
         this->model->version(), TFLITE_SCHEMA_VERSION);
     }
+    //print version
+    Serial.print("Model provided is schema version: ");
+    Serial.print(this->model->version());
+    Serial.println();
 
-    uint8_t tensor_arena[2048];
-
-    tflite::MicroInterpreter interpreter(model, resolver, tensor_arena, 2048, error_reporter);
+    auto size = 128*547*4;
+    alignas(16) uint8_t tensor_arena[size];
+    tflite::MicroInterpreter interpreter(model, resolver, tensor_arena, size, error_reporter);
+    Serial.println("NeuralNetwork: Interpreter constructor done");
     interpreter.AllocateTensors();
+    Serial.println("NeuralNetwork: AllocateTensors done");
+    
 
     // Obtain a pointer to the model's input tensor
     input = interpreter.input(0);

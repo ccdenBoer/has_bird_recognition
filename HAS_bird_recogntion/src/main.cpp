@@ -2,44 +2,27 @@
 #include "RPC.h"
 #include <Arduino.h>
 
-#ifdef TARGET_PORTENTA_H7_M4
-#define Serial RPC
-
-#endif
-
-#ifdef TARGET_PORTENTA_H7_M7
 // m7 includes
 #include <Arduino_PortentaBreakout.h>
 #include <SDCardReaderAndWriter.h>
-#include "FirmwareLoader.h"
+
+#include <SDRAM.h>
 #include <NeuralNetwork.h>
+#include "FirmwareLoader.h"
+NeuralNetwork *nn = nullptr;
 
 // m7 defines
 SDCardReaderAndWriter sdcard;
-NeuralNetwork* nn = nullptr;
-float **mockdata;
-#endif
 
-#ifdef TARGET_PORTENTA_H7_M4
 
 int led = LEDB;
-#endif
+tfLiteModel_t model;
 
-
-void setup() {
-#ifdef TARGET_PORTENTA_H7_M7
+void setup()
+{
   Serial.begin(115200);
-  Serial.print("init nn");
-  //auto temp = NeuralNetwork();
-  // nn = &temp;
-  //setupM4Firmware();
-  // InitHASFSM();
-  // birdSensorFSM.setup(FSM_States::STATE_INITIALIZING,
-  // FSM_Events::EVENTS_STATE_EXECUTED);
-#endif
-RPC.begin();
-
-#ifdef TARGET_PORTENTA_H7_M4
+  while (!Serial);
+  Serial.println("M7 booted");
 
   pinMode(led, OUTPUT);
   // mockdata = new float*[128];
@@ -51,39 +34,30 @@ RPC.begin();
   //       mockdata[x][y] = 1;
   //     }
   //  }
-#endif
+  model = loadTfliteModel();
+
+  char buffer[64];
+  auto len = sprintf(buffer, "The address of ptr is %x on the M7", (unsigned int)model.data);
+  Serial.write(buffer, len);
+  Serial.println();
+  for (int i = model.size - 50; i < model.size; i++)
+  {
+    Serial.print(model.data[i], HEX);
+    Serial.print(",");
+  }
+  Serial.println();
+
+  nn = new NeuralNetwork(model.data);
 }
 
-void loop() {
-  // nn.InputData(nullptr, nullptr, nullptr);
-  // birdSensorFSM.loop();
-  
-#ifdef TARGET_PORTENTA_H7_M7
+void loop()
+{
   delay(1000);
   Serial.println("Hello from m7");
-#endif
 
-#ifdef TARGET_PORTENTA_H7_M4
   delay(100);
-  Serial.println("Hello from m4");
   digitalWrite(led, HIGH);
   delay(100);
   digitalWrite(led, LOW);
-  // nn.InputData(mockdata);
-  // int predict = nn.Predict();
-  // char buffer[100];
-  // sprintf(buffer, "Predicted %d \n", predict);
-  // Serial.println(buffer);
 
-#endif
-
-#ifdef TARGET_PORTENTA_H7_M7
-  String data = "";
-  while (RPC.available()) {
-    data += (char)RPC.read();
-  }
-  if (data.length() > 0) {
-    Serial.println(data);
-  }
-#endif
 }
