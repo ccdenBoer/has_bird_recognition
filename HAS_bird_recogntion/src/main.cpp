@@ -10,6 +10,7 @@
 #include <NeuralNetwork.h>
 #include "FirmwareLoader.h"
 NeuralNetwork *nn = nullptr;
+float** mockdata;
 
 // m7 defines
 SDCardReaderAndWriter sdcard;
@@ -26,15 +27,15 @@ void setup()
   Serial.println("M7 booted");
 
   pinMode(led, OUTPUT);
-  // mockdata = new float*[128];
-  // for(int i = 0; i<128; i++){
-  //   mockdata[i] = new float[547];
-  // }
-  // for(int x; x < 128; x++){
-  //   for(int y; y < 547; y++){
-  //       mockdata[x][y] = 1;
-  //     }
-  //  }
+  mockdata = new float*[128];
+  for(int i = 0; i<128; i++){
+    mockdata[i] = new float[547];
+  }
+  for(int x; x < 128; x++){
+    for(int y; y < 547; y++){
+        mockdata[x][y] = 1;
+      }
+   }
   model = loadTfliteModel();
 
   char buffer[64];
@@ -49,16 +50,18 @@ void setup()
   Serial.println();
 
   nn = new NeuralNetwork(model.data);
+  nn->InputData(mockdata);
 }
 
 void loop()
 {
   delay(1000);
   Serial.println("Hello from m7");
-
   delay(100);
   digitalWrite(led, HIGH);
   delay(100);
   digitalWrite(led, LOW);
+  auto prediction = nn->Predict();
+
 
 }
