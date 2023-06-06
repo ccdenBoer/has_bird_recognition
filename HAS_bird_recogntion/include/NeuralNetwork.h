@@ -12,11 +12,21 @@ class NeuralNetwork {
         tflite::ErrorReporter*      error_reporter;
         tflite::MicroErrorReporter  micro_error_reporter;
         tflite::AllOpsResolver      resolver;
+        std::size_t                 tensor_arena_size;
+        int                         numberOfClasses;
+        int*                        input_shape; //size 3: [HEIGHT, WIDTH, CHANNELS]
+        const char*                       class_names;
     public:
-        NeuralNetwork(uint8_t* model_data);
+        struct result_t{
+            int predicted_class;
+            float confidence;
+            const char* class_name;
+        };
+
+        NeuralNetwork(uint8_t* model_data, int tensor_arena_size, int numberOfClasses, int input_shape[3]);
         ~NeuralNetwork();
 
-        void    InputData(float **data);
+        void InputData(float data[128][547][1]);
 
-        int     Predict();
+        result_t Predict();
 };
