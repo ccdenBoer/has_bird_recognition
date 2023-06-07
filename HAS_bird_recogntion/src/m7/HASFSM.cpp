@@ -142,6 +142,7 @@ void Sending() {
 
                 //TODO: Send data
                 
+                //TODO: Remove data
             }
         }
 
@@ -150,7 +151,18 @@ void Sending() {
 }
 
 void NotConnected() {
+    int currentAttempst = 0;
+    while (currentAttempst < MAX_RECONNECT_ATTEMPTS) {
+        if (!connection.SetOTAAJoin(JOIN, 10)) {
+            Serial.println("Trying to reconnect...");
+            currentAttempst++;
+            delay(1000);
+        } else {
+            birdSensorFSM.raiseEvent(JOIN_SUCCESFULL);
+        }
+    }
 
+    birdSensorFSM.raiseEvent(CONNECTION_TIMEOUT);
 }
 
 void InitHASFSM() {

@@ -4,9 +4,10 @@
 #include <Arduino.h>
 #include <iostream>
 
-#define LORA_SERIAL         Serial2 //RX2 and TX2
-#define LORA_TIMEOUT        100     //MS
-#define MAX_BUFFER_LENGTH   256
+#define LORA_SERIAL             Serial2 //RX2 and TX2
+#define LORA_TIMEOUT            100     //MS
+#define MAX_BUFFER_LENGTH       256
+#define MAX_RECONNECT_ATTEMPTS  20
 
 enum device_mode { 
     LWABP = 0, 
