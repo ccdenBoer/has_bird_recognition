@@ -1,15 +1,22 @@
 #include <HASFSM.h>
 #include <SensorData.h>
+#include <NeuralNetwork.h>
+#include <FirmwareLoader.h>
 
 FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
 
 SensorData              sensorData;
 LoRaConnection          connection;
 SDCardReaderAndWriter   sd;
+NeuralNetwork           *nn = nullptr;
+tfLiteModel_t           model;
 
 uint32_t            lastTimeSent;
+uint32_t            lastTimeGSPGathered;
+int                 input_shape[3]      = {128,547,1};
+int                 tensor_arena_size   = 1024*1024*5;
 
-Available_Birds   lastRecognizedBird;
+int               lastRecognizedBird;
 float             recognitionAccuracy;
 float             lightIntensity;
 float             temperature;
@@ -17,8 +24,7 @@ float             humidity;
 bool              raining;
 float             rainCoverage;
 float             batteryPercentage;
-float             lattitude;
-float             longtitude;
+float             location[2];      
 
 void Start() {
 
@@ -30,6 +36,12 @@ void Initializing() {
 
     sensorData.InitSensors();
     connection.InitConnection();
+
+    nn = new NeuralNetwork(model.data, tensor_arena_size, 11, input_shape);
+    model = loadTfliteModel();
+
+    while(!sensorData.GetGPSLocation(location));
+    lastTimeGSPGathered = millis();
 
     //TODO: Check if mic is working
     bool micIsOkey = true;
@@ -53,11 +65,14 @@ void Listening() {
         //TODO: Take audio fragment
     }
 
-    //TODO: Check for bird
-    bool birdFound = true;
-    //TODO: Update bird variable and accuracy
+    //TODO: Input mic data
+    //nn->InputData(/*data*/);
+    NeuralNetwork::result_t prediction = nn->Predict();
 
-    //Update state if a bird was found
+    bool birdFound          = (prediction.class_name != "No bird");
+    lastRecognizedBird      = prediction.predicted_class;
+    recognitionAccuracy     = prediction.confidence;
+
     if (birdFound) {
         birdSensorFSM.raiseEvent(BIRD_FOUND);
     }
@@ -71,6 +86,17 @@ void GatheringData() {
     raining         = sensorData.GetRainThreshold();
     rainCoverage    = sensorData.GetRainSurface();
 
+    if ((millis() - lastTimeGSPGathered) > 86400000) {
+        int gpsAttempts = 0;
+        while (!sensorData.GetGPSLocation(location)) {
+            gpsAttempts++;
+
+            if (gpsAttempts > 50) {
+                break;
+            }
+        }
+    }
+
     //TODO: Get battery percentage
     batteryPercentage = 20; //TEMP VALUE
 
@@ -78,7 +104,7 @@ void GatheringData() {
     uint8_t correctMeasurements = sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
 
     //Sent measurements to SDCard
-    sd.WriteToSDCard(lastRecognizedBird, recognitionAccuracy, lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage, lattitude, longtitude, correctMeasurements);
+    sd.WriteToSDCard(lastRecognizedBird, recognitionAccuracy, lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage, location[0], location[1], correctMeasurements);
 
     //Check send interval
     if ((millis() - lastTimeSent) >= (SEND_INTERVAL * 60 * 1000)) {
