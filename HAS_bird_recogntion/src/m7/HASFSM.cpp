@@ -31,15 +31,18 @@ void Start() {
 }
 
 void Initializing() {
+    //Init sensors and lora connection
     sensorData = SensorData();
     connection = LoRaConnection();
 
     sensorData.InitSensors();
     connection.InitConnection();
 
+    //Init neural network
     nn = new NeuralNetwork(model.data, tensor_arena_size, 11, input_shape);
     model = loadTfliteModel();
 
+    //Gather initial GPS location
     while(!sensorData.GetGPSLocation(location));
     lastTimeGSPGathered = millis();
 
@@ -61,6 +64,7 @@ void InitializingFailed() {
 void Listening() {
     int startListeningTime = millis();
 
+    //Gather audio
     while ((millis() - startListeningTime) < (LISTEN_TIME * 1000)) {
         //TODO: Take audio fragment
     }
@@ -69,10 +73,12 @@ void Listening() {
     //nn->InputData(/*data*/);
     NeuralNetwork::result_t prediction = nn->Predict();
 
+    //Check for bird and update AI data
     bool birdFound          = (prediction.class_name != "No bird");
     lastRecognizedBird      = prediction.predicted_class;
     recognitionAccuracy     = prediction.confidence;
 
+    //Raise new event if a bird was found
     if (birdFound) {
         birdSensorFSM.raiseEvent(BIRD_FOUND);
     }
@@ -86,6 +92,7 @@ void GatheringData() {
     raining         = sensorData.GetRainThreshold();
     rainCoverage    = sensorData.GetRainSurface();
 
+    //Check if day has passed to gather GPS data
     if ((millis() - lastTimeGSPGathered) > 86400000) {
         int gpsAttempts = 0;
         while (!sensorData.GetGPSLocation(location)) {
