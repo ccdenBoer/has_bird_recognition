@@ -160,7 +160,9 @@ void Sending() {
                 correctMeasurements     = doc["validation"];
 
                 //TODO: Send data
-                
+                char buffer[11] = {lastRecognizedBird, recognitionAccuracy, lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage, location[0], location[1], correctMeasurements};
+                connection.SendPacket(buffer, 1);
+
                 //Remove data
                 remove(filePath);
             }
