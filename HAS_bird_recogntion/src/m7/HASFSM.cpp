@@ -124,25 +124,28 @@ void GatheringData() {
 }
 
 void Sending() {
+    //Check if TTN can be joined
     if (!connection.SetOTAAJoin(JOIN, 10)) {
         birdSensorFSM.raiseEvent(JOIN_FAILED);
     } else {
         connection.SetOTAAJoin(JOIN, 10);
 
-        //TODO: Read data from SD-Card
+        //Read data from SD-Card
         DIR *dp = nullptr;
         struct dirent *entry = nullptr;
 
+        //Loop through every file in the directory
         dp = opendir("sd-card/.");
         if (dp != nullptr) {
             while ((entry = readdir(dp))) {
+                //Open and read file content
                 char* filePath = strcat("sd-card/", entry->d_name);
-
                 char* bufferString = sd.ReadFileData(filePath);
 
                 //TODO: Send data
                 
-                //TODO: Remove data
+                //Remove data
+                remove(filePath);
             }
         }
 
