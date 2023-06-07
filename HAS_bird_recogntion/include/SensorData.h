@@ -5,7 +5,6 @@
 #include <DFRobot_AHT20.h>
 #include <Arduino.h>
 #include <Adafruit_GPS.h>
-#include <Arduino_PortentaBreakout.h>
 
 #define LIGHT_SENSOR_INPUT_PIN      27
 #define LIGHT_SENSOR_SCL_PIN        149
