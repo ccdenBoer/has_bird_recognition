@@ -71,7 +71,7 @@ void Listening() {
         //TODO: Take audio fragment
     }
 
-    //TODO: Input mic data
+    //TODO: Convert data and input to NN
     //nn->InputData(/*data*/);
     NeuralNetwork::result_t prediction = nn->Predict();
 
