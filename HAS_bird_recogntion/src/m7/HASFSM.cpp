@@ -123,7 +123,17 @@ void GatheringData() {
 }
 
 void Sending() {
+    if (!connection.SetOTAAJoin(JOIN, 10)) {
+        birdSensorFSM.raiseEvent(JOIN_FAILED);
+    } else {
+        connection.SetOTAAJoin(JOIN, 10);
 
+        //TODO: Read data from SD-Card
+
+        //TODO: Send data from SD-Card
+
+        //TODO: Remove data from SD-Card
+    }
 }
 
 void NotConnected() {

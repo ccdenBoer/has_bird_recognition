@@ -36,6 +36,11 @@ enum power_mode {
     HIGH_POWER = 2
 };
 
+enum otaa_join { 
+    JOIN = 0, 
+    FORCE 
+};
+
 class LoRaConnection
 {
     private:
@@ -63,6 +68,8 @@ class LoRaConnection
         void SetClassType(class_type type);
 
         void SetPort(unsigned char port);
+
+        bool SetOTAAJoin(otaa_join command, unsigned char timeout);
 
         void SetReceiveWindow(unsigned int window, unsigned char channel, float frequency);
         void SetReceiveWindow(unsigned int window, float frequency, data_rate dataRate);
