@@ -25,7 +25,8 @@ float             humidity;
 bool              raining;
 float             rainCoverage;
 float             batteryPercentage;
-float             location[2];      
+float             location[2];
+uint8_t           correctMeasurements;
 
 void Start() {
 
@@ -109,7 +110,7 @@ void GatheringData() {
     batteryPercentage = 20; //TEMP VALUE
 
     //Validate
-    uint8_t correctMeasurements = sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
+    correctMeasurements = sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
 
     //Sent measurements to SDCard
     sd.WriteToSDCard(lastRecognizedBird, recognitionAccuracy, lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage, location[0], location[1], correctMeasurements);
@@ -141,6 +142,22 @@ void Sending() {
                 //Open and read file content
                 char* filePath = strcat("sd-card/", entry->d_name);
                 char* bufferString = sd.ReadFileData(filePath);
+
+                //Convert data
+                DynamicJsonDocument doc(1024);
+                deserializeJson(doc, bufferString);
+
+                lastRecognizedBird      = doc["birdType"];
+                recognitionAccuracy     = doc["birdAccuracy"];
+                lightIntensity          = doc["lightIntensity"];
+                temperature             = doc["temperature"];
+                humidity                = doc["humidity"];
+                rainCoverage            = doc["rainCoverage"];
+                raining                 = doc["raining"];
+                batteryPercentage       = doc["batteryPercentage"];
+                location[0]             = doc["lattitude"];
+                location[1]             = doc["longtitude"];
+                correctMeasurements     = doc["validation"];
 
                 //TODO: Send data
                 
