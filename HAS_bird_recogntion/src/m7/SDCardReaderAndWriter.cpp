@@ -1,7 +1,7 @@
 #include <SDCardReaderAndWriter.h>
 
 SDMMCBlockDevice blockDevice;
-mbed::FATFileSystem fs("fs");
+mbed::FATFileSystem fs("sd-card");
 
 bool SDCardReaderAndWriter::InitSDCardReaderAndWriter() {
     int err =  fs.mount(&blockDevice);

@@ -2,6 +2,7 @@
 #include <SensorData.h>
 #include <NeuralNetwork.h>
 #include <FirmwareLoader.h>
+#include <SDCardReaderAndWriter.h>
 
 FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
 
@@ -129,10 +130,22 @@ void Sending() {
         connection.SetOTAAJoin(JOIN, 10);
 
         //TODO: Read data from SD-Card
+        DIR *dp = nullptr;
+        struct dirent *entry = nullptr;
 
-        //TODO: Send data from SD-Card
+        dp = opendir("sd-card/.");
+        if (dp != nullptr) {
+            while ((entry = readdir(dp))) {
+                char* filePath = strcat("sd-card/", entry->d_name);
 
-        //TODO: Remove data from SD-Card
+                char* bufferString = sd.ReadFileData(filePath);
+
+                //TODO: Send data
+                
+            }
+        }
+
+        closedir(dp);
     }
 }
 

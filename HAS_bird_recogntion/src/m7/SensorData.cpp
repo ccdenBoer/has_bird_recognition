@@ -5,7 +5,7 @@
 #define GPSSerial Serial1
 
 Adafruit_GPS GPS(&GPSSerial);
-float* location = nullptr;
+//float* location = nullptr;
 
 #define GPSECHO false
 
