@@ -55,7 +55,6 @@ void waitForCorrectQspi() {
 
 
 tfLiteModel_t tfliteToSdram() {
-  SDRAM.begin(SDRAM_START_ADDRESS);
   //  MPU_Config();
   // Copy M4 firmware to SDRAM
   FILE *fw = fopen("/qspi/model.tflite", "r");

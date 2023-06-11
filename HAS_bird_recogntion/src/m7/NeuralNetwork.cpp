@@ -11,7 +11,7 @@ NeuralNetwork::NeuralNetwork(uint8_t* model_data, int tensor_arena_size, int num
     this->numberOfClasses = numberOfClasses; 
     this->input_shape = input_shape;
     this->error_reporter = &this->micro_error_reporter;
-    Serial.print("error repotrer initialized");
+    Serial.print("error reporter initialized");
     this->model = tflite::GetModel(model_data);
     if (this->model->version() != TFLITE_SCHEMA_VERSION) {
         TF_LITE_REPORT_ERROR(error_reporter,
@@ -37,15 +37,12 @@ NeuralNetwork::NeuralNetwork(uint8_t* model_data, int tensor_arena_size, int num
     auto unaligned_tensor_arena = SDRAM.malloc(malloc_size);
 
     // align to 16
-    auto tensor_arena = (uint8_t*) std::align(16,size,unaligned_tensor_arena,malloc_size);
-
+    tensor_arena = (uint8_t*) std::align(16,size,unaligned_tensor_arena,malloc_size);
 
     if (tensor_arena == nullptr)
     {
         Serial.println("NeuralNetwork: Tensor alignment failed");
     }
-
-
 
     Serial.println("NeuralNetwork: created tensor Arena");
     this->interpreter = new tflite::MicroInterpreter(model, resolver, tensor_arena, size, error_reporter);
@@ -58,16 +55,14 @@ NeuralNetwork::~NeuralNetwork()
 {
     delete this->interpreter;
     delete this->model;
+	SDRAM.free(this->tensor_arena);
 }
 
 void NeuralNetwork::InputData(float data[128][547][1]) {
     Serial.println("NeuralNetwork: Start loading data");
-    tflite::MicroInterpreter* interpreter = this->interpreter;
-    Serial.println("NeuralNetwork: Loaded interpreter");
     float* inputLayer = interpreter->typed_input_tensor<float>(0);
     //auto input = interpreter.input(0);
     Serial.println("NeuralNetwork: fetched input layer");
-    int* input_shape = this->input_shape; 
     // for(int i = 0; i < input_shape[0]; i++){
     //     for(int j = 0; j < input_shape[1]; j++){
     //         for(int k = 0; k < input_shape[2]; k++){
@@ -76,8 +71,7 @@ void NeuralNetwork::InputData(float data[128][547][1]) {
     //         }
     //     }
     // }
-    memcpy(inputLayer, data,
-            (input_shape[0] * input_shape[1] * input_shape[2] * sizeof(float)));
+    memcpy(inputLayer, data, (input_shape[0] * input_shape[1] * input_shape[2] * sizeof(float)));
     Serial.println("NeuralNetwork: Input data done");
     free(*data);
 }
@@ -85,11 +79,9 @@ void NeuralNetwork::InputData(float data[128][547][1]) {
 NeuralNetwork::result_t NeuralNetwork::Predict() {
 
     NeuralNetwork::result_t result = NeuralNetwork::result_t();
-    char* class_names[11] = {"Bird 1", "Bird 2", "Bird 3", "Bird 4", "Bird 5", "Bird 6", "Bird 7", "Bird 8", "Bird 9", "Bird 10", "No bird"};
+    const char* class_names[11] = {"Bird 1", "Bird 2", "Bird 3", "Bird 4", "Bird 5", "Bird 6", "Bird 7", "Bird 8", "Bird 9", "Bird 10", "No bird"};
 
     Serial.println("NeuralNetwork: Started prediction");
-    tflite::MicroInterpreter* interpreter = this->interpreter;
-    Serial.println("NeuralNetwork: Loaded interpreter");
     TfLiteStatus invoke_status = interpreter->Invoke();
     if (invoke_status != kTfLiteOk) {
         TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed\n");

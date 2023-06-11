@@ -242,11 +242,11 @@ public:
   /// \param      norm          ortho-normal dct basis
   /// \param      type          dct type. currently only supports 'type-II'
   /// \return     mfcc matrix
-  static std::vector<std::vector<float>> mfcc(std::vector<float> &x, int sr,
+  static std::vector<std::vector<float>> mfcc(float *data,int size, int sr,
                                               int n_fft, int n_hop, const std::string &win, bool center, const std::string &mode,
                                               float power, int n_mels, int fmin, int fmax,
                                               int n_mfcc, bool norm, int type) {
-    Vectorf map_x = Eigen::Map<Vectorf>(x.data(), x.size());
+    Vectorf map_x = Eigen::Map<Vectorf>(data, size);
     Matrixf mel = internal::melspectrogram(map_x, sr, n_fft, n_hop, win, center, mode, power, n_mels, fmin, fmax).transpose();
     Matrixf mel_db = internal::power2db(mel);
     Matrixf dct = internal::dct(mel_db, norm, type).leftCols(n_mfcc);
