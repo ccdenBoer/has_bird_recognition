@@ -36,6 +36,8 @@ void setup()
   loraConnection = LoRaConnection();
   sensor = SensorData();
 
+  loraConnection.InitConnection();
+
   // InitHASFSM();
   // birdSensorFSM.setup(FSM_States::STATE_INITIALIZING,
   // FSM_Events::EVENTS_STATE_EXECUTED);
@@ -50,44 +52,15 @@ void setup()
 
 void loop()
 {
-  // nn.InputData(nullptr, nullptr, nullptr);
-  // birdSensorFSM.loop();
+  Serial.println("Start connection");
+  if (loraConnection.SetOTAAJoin(JOIN, 10)) {
+    loraConnection.SetOTAAJoin(JOIN, 10);
 
-#ifdef TARGET_PORTENTA_H7_M7
-  /*
-  delay(1000);
-  Serial.println("Hello from m7");
-  */
- float buffer[2];
+    Serial.println("Connection succeeded");
 
-  Serial.println("Setup start");
-  sensor.GetGPSLocation(buffer);
-  //loraConnection.InitialSetup();
-  Serial.println("Setup done");
-  delay(5000);
-#endif
-
-#ifdef TARGET_PORTENTA_H7_M4
-/*
-  delay(100);
-  Serial.println("Hello from m4");
-  digitalWrite(led, HIGH);
-  delay(100);
-  digitalWrite(led, LOW);
-  */
-#endif
-
-#ifdef TARGET_PORTENTA_H7_M7
-/*
-  String data = "";
-  while (RPC.available())
-  {
-    data += (char)RPC.read();
+    Serial.println("Sending package");
+    Serial.println(loraConnection.SendPacket("Test", 10));
   }
-  if (data.length() > 0)
-  {
-    Serial.println(data);
-  }
-  */
-#endif
+
+  delay(10000);
 }

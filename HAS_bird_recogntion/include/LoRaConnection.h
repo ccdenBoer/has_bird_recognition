@@ -34,6 +34,11 @@ enum power_mode {
     HIGH_POWER = 2
 };
 
+enum join_cmd { 
+    JOIN = 0, 
+    FORCE =1
+};
+
 class LoRaConnection
 {
     private:
@@ -70,6 +75,8 @@ class LoRaConnection
 
         void SetPowerMode(power_mode powerMode);
         void SetPowerMode(short power);
+
+        bool SetOTAAJoin(join_cmd command, unsigned char timeout);
 
         bool SendPacket(char* buffer, unsigned char timeout);
         bool SendPacketCayenne(unsigned char *buffer, unsigned char length, unsigned char timeout);
