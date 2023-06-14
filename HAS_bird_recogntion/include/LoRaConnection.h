@@ -3,8 +3,11 @@
 
 #include <iostream>
 
-#define LORA_TIMEOUT        100     //MS
-#define MAX_BUFFER_LENGTH   256
+#define LORA_SERIAL             Serial2 //RX2 and TX2
+#define LORA_TIMEOUT            100     //MS
+#define MAX_BUFFER_LENGTH       256
+#define MAX_RECONNECT_ATTEMPTS  20
+
 
 enum device_mode { 
     LWABP = 0, 
@@ -66,6 +69,8 @@ class LoRaConnection
         void SetClassType(class_type type);
 
         void SetPort(unsigned char port);
+
+        bool SetOTAAJoin(otaa_join command, unsigned char timeout);
 
         void SetReceiveWindow(unsigned int window, unsigned char channel, float frequency);
         void SetReceiveWindow(unsigned int window, float frequency, data_rate dataRate);

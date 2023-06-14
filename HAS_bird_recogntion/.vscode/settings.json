@@ -64,7 +64,9 @@
         "thread": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp",
-        "mstd_iterator": "cpp"
+        "mstd_iterator": "cpp",
+        "mstd_memory": "cpp",
+        "*.x": "cpp"
     },
     "editor.renderWhitespace": "all",
     "cmake.configureOnOpen": false

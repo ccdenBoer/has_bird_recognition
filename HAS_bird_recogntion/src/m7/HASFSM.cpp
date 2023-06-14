@@ -1,15 +1,23 @@
 #include <HASFSM.h>
 #include <SensorData.h>
+#include <NeuralNetwork.h>
+#include <FirmwareLoader.h>
+#include <SDCardReaderAndWriter.h>
 
 FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
 
 SensorData              sensorData;
 LoRaConnection          connection;
 SDCardReaderAndWriter   sd;
+NeuralNetwork           *nn = nullptr;
+tfLiteModel_t           model;
 
 uint32_t            lastTimeSent;
+uint32_t            lastTimeGSPGathered;
+int                 input_shape[3]      = {128,547,1};
+int                 tensor_arena_size   = 1024*1024*5;
 
-Available_Birds   lastRecognizedBird;
+int               lastRecognizedBird;
 float             recognitionAccuracy;
 float             lightIntensity;
 float             temperature;
@@ -17,19 +25,28 @@ float             humidity;
 bool              raining;
 float             rainCoverage;
 float             batteryPercentage;
-float             lattitude;
-float             longtitude;
+float             location[2];
+uint8_t           correctMeasurements;
 
 void Start() {
 
 }
 
 void Initializing() {
+    //Init sensors and lora connection
     sensorData = SensorData();
     connection = LoRaConnection();
 
     sensorData.InitSensors();
     connection.InitConnection();
+
+    //Init neural network
+    nn = new NeuralNetwork(model.data, tensor_arena_size, 11, input_shape);
+    model = loadTfliteModel();
+
+    //Gather initial GPS location
+    while(!sensorData.GetGPSLocation(location));
+    lastTimeGSPGathered = millis();
 
     //TODO: Check if mic is working
     bool micIsOkey = true;
@@ -49,15 +66,21 @@ void InitializingFailed() {
 void Listening() {
     int startListeningTime = millis();
 
+    //Gather audio
     while ((millis() - startListeningTime) < (LISTEN_TIME * 1000)) {
         //TODO: Take audio fragment
     }
 
-    //TODO: Check for bird
-    bool birdFound = true;
-    //TODO: Update bird variable and accuracy
+    //TODO: Convert data and input to NN
+    //nn->InputData(/*data*/);
+    NeuralNetwork::result_t prediction = nn->Predict();
 
-    //Update state if a bird was found
+    //Check for bird and update AI data
+    bool birdFound          = (prediction.class_name != "No bird");
+    lastRecognizedBird      = prediction.predicted_class;
+    recognitionAccuracy     = prediction.confidence;
+
+    //Raise new event if a bird was found
     if (birdFound) {
         birdSensorFSM.raiseEvent(BIRD_FOUND);
     }
@@ -71,14 +94,26 @@ void GatheringData() {
     raining         = sensorData.GetRainThreshold();
     rainCoverage    = sensorData.GetRainSurface();
 
+    //Check if day has passed to gather GPS data
+    if ((millis() - lastTimeGSPGathered) > 86400000) {
+        int gpsAttempts = 0;
+        while (!sensorData.GetGPSLocation(location)) {
+            gpsAttempts++;
+
+            if (gpsAttempts > 50) {
+                break;
+            }
+        }
+    }
+
     //TODO: Get battery percentage
     batteryPercentage = 20; //TEMP VALUE
 
     //Validate
-    uint8_t correctMeasurements = sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
+    correctMeasurements = sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
 
     //Sent measurements to SDCard
-    sd.WriteToSDCard(lastRecognizedBird, recognitionAccuracy, lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage, lattitude, longtitude, correctMeasurements);
+    sd.WriteToSDCard(lastRecognizedBird, recognitionAccuracy, lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage, location[0], location[1], correctMeasurements);
 
     //Check send interval
     if ((millis() - lastTimeSent) >= (SEND_INTERVAL * 60 * 1000)) {
@@ -90,11 +125,66 @@ void GatheringData() {
 }
 
 void Sending() {
+    //Check if TTN can be joined
+    if (!connection.SetOTAAJoin(JOIN, 10)) {
+        birdSensorFSM.raiseEvent(JOIN_FAILED);
+    } else {
+        connection.SetOTAAJoin(JOIN, 10);
 
+        //Read data from SD-Card
+        DIR *dp = nullptr;
+        struct dirent *entry = nullptr;
+
+        //Loop through every file in the directory
+        dp = opendir("sd-card/.");
+        if (dp != nullptr) {
+            while ((entry = readdir(dp))) {
+                //Open and read file content
+                char* filePath = strcat("sd-card/", entry->d_name);
+                char* bufferString = sd.ReadFileData(filePath);
+
+                //Convert data
+                DynamicJsonDocument doc(1024);
+                deserializeJson(doc, bufferString);
+
+                lastRecognizedBird      = doc["birdType"];
+                recognitionAccuracy     = doc["birdAccuracy"];
+                lightIntensity          = doc["lightIntensity"];
+                temperature             = doc["temperature"];
+                humidity                = doc["humidity"];
+                rainCoverage            = doc["rainCoverage"];
+                raining                 = doc["raining"];
+                batteryPercentage       = doc["batteryPercentage"];
+                location[0]             = doc["lattitude"];
+                location[1]             = doc["longtitude"];
+                correctMeasurements     = doc["validation"];
+
+                //TODO: Send data
+                char buffer[11] = {lastRecognizedBird, recognitionAccuracy, lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage, location[0], location[1], correctMeasurements};
+                connection.SendPacket(buffer, 1);
+
+                //Remove data
+                remove(filePath);
+            }
+        }
+
+        closedir(dp);
+    }
 }
 
 void NotConnected() {
+    int currentAttempst = 0;
+    while (currentAttempst < MAX_RECONNECT_ATTEMPTS) {
+        if (!connection.SetOTAAJoin(JOIN, 10)) {
+            Serial.println("Trying to reconnect...");
+            currentAttempst++;
+            delay(1000);
+        } else {
+            birdSensorFSM.raiseEvent(JOIN_SUCCESFULL);
+        }
+    }
 
+    birdSensorFSM.raiseEvent(CONNECTION_TIMEOUT);
 }
 
 void InitHASFSM() {

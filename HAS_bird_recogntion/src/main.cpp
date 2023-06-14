@@ -27,7 +27,6 @@ void setup()
   sensor = SensorData();
 
   loraConnection.InitConnection();
-
   // InitHASFSM();
   // birdSensorFSM.setup(FSM_States::STATE_INITIALIZING,
   // FSM_Events::EVENTS_STATE_EXECUTED);
