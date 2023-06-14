@@ -1,13 +1,13 @@
 #ifndef LORA_CONNECTION_H
 #define LORA_CONNECTION_H
 
-#include <Arduino.h>
 #include <iostream>
 
 #define LORA_SERIAL             Serial2 //RX2 and TX2
 #define LORA_TIMEOUT            100     //MS
 #define MAX_BUFFER_LENGTH       256
 #define MAX_RECONNECT_ATTEMPTS  20
+
 
 enum device_mode { 
     LWABP = 0, 
@@ -37,9 +37,9 @@ enum power_mode {
     HIGH_POWER = 2
 };
 
-enum otaa_join { 
+enum join_cmd { 
     JOIN = 0, 
-    FORCE 
+    FORCE =1
 };
 
 class LoRaConnection
@@ -51,8 +51,8 @@ class LoRaConnection
         short ReadBuffer(char* buffer, short length, unsigned short timeout);
 
     public:
-        LoRaConnection();
-        ~LoRaConnection(){};
+        LoRaConnection() {}
+        ~LoRaConnection(){}
 
         void InitConnection();
 
@@ -80,6 +80,8 @@ class LoRaConnection
 
         void SetPowerMode(power_mode powerMode);
         void SetPowerMode(short power);
+
+        bool SetOTAAJoin(join_cmd command, unsigned char timeout);
 
         bool SendPacket(char* buffer, unsigned char timeout);
         bool SendPacketCayenne(unsigned char *buffer, unsigned char length, unsigned char timeout);
