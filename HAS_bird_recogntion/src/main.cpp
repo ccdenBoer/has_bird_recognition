@@ -12,12 +12,14 @@
 #include <SDCardReaderAndWriter.h>
 #include <LoRaConnection.h>
 #include <SensorData.h>
+#include <CayenneLPP.h>
 // #include "FirmwareLoader.h"
 
 // m7 defines
 SDCardReaderAndWriter sdcard;
 LoRaConnection loraConnection;
 SensorData sensor;
+CayenneLPP cayenne(51);
 #endif
 
 #ifdef TARGET_PORTENTA_H7_M4
@@ -54,12 +56,17 @@ void loop()
 {
   Serial.println("Start connection");
   if (loraConnection.SetOTAAJoin(JOIN, 10)) {
-    loraConnection.SetOTAAJoin(JOIN, 10);
 
     Serial.println("Connection succeeded");
 
+    cayenne.reset();
+    cayenne.addAnalogInput(1, 1);
+    cayenne.addAnalogInput(2, 2);
+    cayenne.addAnalogInput(3, 3);
+    cayenne.addAnalogInput(4, 4);
+
     Serial.println("Sending package");
-    Serial.println(loraConnection.SendPacket("Test", 10));
+    Serial.println(loraConnection.SendPacketCayenne(cayenne.getBuffer(), cayenne.getSize(), 10));
   }
 
   delay(10000);
