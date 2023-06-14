@@ -365,29 +365,6 @@ bool LoRaConnection::SetOTAAJoin(join_cmd command, unsigned char timeout)
     return true;
 }
 
-bool LoRaConnection::SetOTAAJoin(otaa_join command, unsigned char timeout)
-{
-    char *ptr;
-    
-    if(command == JOIN) {
-        this->SendCommand("AT+JOIN\r\n");
-    } else if(command == FORCE) {
-        this->SendCommand("AT+JOIN=FORCE\r\n"); 
-    }
- 
-    delay(LORA_TIMEOUT);
-    
-    memset(loraBuffer, 0, MAX_BUFFER_LENGTH);
-    this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, timeout); 
-
-    ptr = strstr(loraBuffer, "+JOIN: Join failed");
-    if(ptr)return false;
-    ptr = strstr(loraBuffer, "+JOIN: LoRaWAN modem is busy");
-    if(ptr)return false;
-    
-    return true;
-}
-
 /*
  * Private methods declaration
  */

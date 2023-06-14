@@ -70,8 +70,6 @@ class LoRaConnection
 
         void SetPort(unsigned char port);
 
-        bool SetOTAAJoin(otaa_join command, unsigned char timeout);
-
         void SetReceiveWindow(unsigned int window, unsigned char channel, float frequency);
         void SetReceiveWindow(unsigned int window, float frequency, data_rate dataRate);
 
