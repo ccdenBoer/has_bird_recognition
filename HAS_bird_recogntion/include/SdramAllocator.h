@@ -44,15 +44,21 @@ T* SDRAMAllocator<T>::allocate(const size_t n) const
   {
 	throw std::bad_array_new_length();
   }
-  void* const pv = SDRAM.malloc(n * sizeof(T));
-  if (!pv) { throw std::bad_alloc(); }
-  return static_cast<T*>(pv);
+
+  static int alignment = 16;
+  void *original = SDRAM.malloc((n * sizeof(T))+alignment);
+  if (!original) { throw std::bad_alloc(); }
+
+  void *aligned = reinterpret_cast<void*>((reinterpret_cast<std::size_t>(original) & ~(std::size_t(alignment-1))) + alignment);
+  *(reinterpret_cast<void**>(aligned) - 1) = original;
+
+  return static_cast<T*>(aligned);
 }
 
 template<class T>
 void SDRAMAllocator<T>::deallocate(T * const p, size_t) const noexcept
 {
-  SDRAM.free(p);
+  SDRAM.free(*(reinterpret_cast<void**>(p) - 1));
 }
 
 #endif //HAS_BIRD_RECOGNTION_INCLUDE_SDRAMALLOCATOR_H_

@@ -4,6 +4,18 @@
 #include <FirmwareLoader.h>
 #include <SDCardReaderAndWriter.h>
 #include <Mic.h>
+#include <arm_math.h>
+
+#define L_size 1600
+#define L_sr 16000
+#define L_n_fft 1024
+#define L_n_hop  512
+#define L_n_mel 128
+#define L_n_mels L_n_mel
+#define L_n_mfcc 128
+#define L_fmin 0.0
+#define L_fmax (L_sr / 2.0)
+#include <librosa.h>
 
 FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
 
@@ -34,6 +46,8 @@ void Start() {
 
 }
 
+
+
 void Initializing() {
     //Init sensors and lora connection
   	printf("Initializing sensors\n");
@@ -42,6 +56,7 @@ void Initializing() {
     connection = LoRaConnection();
 	printf("Initializing mic\n");
 	mic = Mic();
+
 
     sensorData.InitSensors();
     connection.InitConnection();
@@ -85,6 +100,17 @@ void Listening() {
 	{
 	  printf("Sample[%d] %f\n",i, audioBuffer.data[i]);
 	}
+
+	std::vector<float> audioBufferVector(audioBuffer.size);
+	printf("audioBuffer.size %ld\n", audioBuffer.size);
+	for (uint32_t i = 0; i < audioBuffer.size; i++)
+	{
+	  audioBufferVector[i] = audioBuffer.data[i];
+	}
+	printf("audioBufferVector.size %d\n", audioBufferVector.size());
+
+
+  	std::vector<std::vector<float>> mels = librosa::Feature::mfcc(audioBufferVector, "hann", true, "reflect", 2.f, true, 2);
 
     //TODO: Convert data and input to NN
 //    nn->InputData();

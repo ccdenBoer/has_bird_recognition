@@ -7,8 +7,8 @@
 #include "scheduler.h"
 
 #define SAMPLE_RATE 16000
-#define SAMPLE_TIME 1
-#define BUFFER_SIZE (SAMPLE_RATE * SAMPLE_TIME)
+#define SAMPLE_TIME 0.1
+#define BUFFER_SIZE ((uint32_t)(SAMPLE_RATE * SAMPLE_TIME))
 
 Mic::Mic() {
   __HAL_RCC_HSEM_CLK_ENABLE();
