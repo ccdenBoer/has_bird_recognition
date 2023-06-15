@@ -1,7 +1,6 @@
 #include <NeuralNetwork.h>
-#include <RPC.h>
 #include <SDRAM.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 NeuralNetwork::NeuralNetwork(uint8_t* model_data, int tensor_arena_size, int numberOfClasses, int input_shape[3]) {
 

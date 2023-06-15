@@ -19,7 +19,7 @@ public:
   bool begin();
   audio_buffer_t audioBufferGet();
   bool audioBufferReady();
-  bool clearBuffer();
+  bool audioBufferClear();
 
 private:
   std::vector<float, SDRAMAllocator<float> > buffer;

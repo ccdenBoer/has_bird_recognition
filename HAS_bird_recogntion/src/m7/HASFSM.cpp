@@ -3,9 +3,11 @@
 #include <NeuralNetwork.h>
 #include <FirmwareLoader.h>
 #include <SDCardReaderAndWriter.h>
+#include <Mic.h>
 
 FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
 
+Mic                     mic;
 SensorData              sensorData;
 LoRaConnection          connection;
 SDCardReaderAndWriter   sd;
@@ -34,25 +36,33 @@ void Start() {
 
 void Initializing() {
     //Init sensors and lora connection
+  	printf("Initializing sensors\n");
     sensorData = SensorData();
+	printf("Initializing lora connection\n");
     connection = LoRaConnection();
+	printf("Initializing mic\n");
+	mic = Mic();
 
     sensorData.InitSensors();
     connection.InitConnection();
 
     //Init neural network
-    nn = new NeuralNetwork(model.data, tensor_arena_size, 11, input_shape);
+    printf("Loading tflite model\n");
     model = loadTfliteModel();
+	printf("Initializing neural network\n");
+    nn = new NeuralNetwork(model.data, tensor_arena_size, 11, input_shape);
+
 
     //Gather initial GPS location
-    while(!sensorData.GetGPSLocation(location));
-    lastTimeGSPGathered = millis();
+	printf("Gathering initial GPS location\n");
+//    while(!sensorData.GetGPSLocation(location));
+//    lastTimeGSPGathered = millis();
 
     //TODO: Check if mic is working
     bool micIsOkey = true;
-    
+
     //Raise new event after checking mic
-    if(micIsOkey) {
+    if(mic.begin()) {
         birdSensorFSM.raiseEvent(SENSORS_INITIALIZED);
     } else {
         birdSensorFSM.raiseEvent(INITIALIZING_FAILED);
@@ -64,15 +74,20 @@ void InitializingFailed() {
 }
 
 void Listening() {
-    int startListeningTime = millis();
-
-    //Gather audio
-    while ((millis() - startListeningTime) < (LISTEN_TIME * 1000)) {
-        //TODO: Take audio fragment
-    }
+  Serial.println("Listening");
+    while(!mic.audioBufferReady())
+	{
+	  delay(100);
+	}
+	auto audioBuffer = mic.audioBufferGet();
+	// print the first 100 samples
+	for (int i = 0; i < 100; i++)
+	{
+	  printf("Sample[%d] %f\n",i, audioBuffer.data[i]);
+	}
 
     //TODO: Convert data and input to NN
-    //nn->InputData(/*data*/);
+//    nn->InputData();
     NeuralNetwork::result_t prediction = nn->Predict();
 
     //Check for bird and update AI data
@@ -84,6 +99,7 @@ void Listening() {
     if (birdFound) {
         birdSensorFSM.raiseEvent(BIRD_FOUND);
     }
+	mic.audioBufferClear();
 }
 
 void GatheringData() {
@@ -114,12 +130,14 @@ void GatheringData() {
 
     //Sent measurements to SDCard
     sd.WriteToSDCard(lastRecognizedBird, recognitionAccuracy, lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage, location[0], location[1], correctMeasurements);
+	Serial.println("Data written to SD card");
 
     //Check send interval
     if ((millis() - lastTimeSent) >= (SEND_INTERVAL * 60 * 1000)) {
         birdSensorFSM.raiseEvent(SEND_INTERVAL_REACHED);
         lastTimeSent = millis();
     } else {
+	  Serial.println("Send interval not reached");
         birdSensorFSM.raiseEvent(SEND_INTERVAL_NOT_REACHED);
     }
 }

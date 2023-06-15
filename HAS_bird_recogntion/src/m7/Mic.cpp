@@ -90,7 +90,7 @@ void Mic::thread(void *arg) {
 	mic->tick();
   }
 }
-bool Mic::clearBuffer() {
+bool Mic::audioBufferClear() {
   if (currentSample >= BUFFER_SIZE) {
 	currentSample = 0;
 	return true;
