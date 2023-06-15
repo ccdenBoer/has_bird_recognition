@@ -3,22 +3,28 @@
 //
 
 #pragma once
+#include <vector>
 #include "arduino.h"
+#include "SdramAllocator.h"
+
 class Mic {
- public:
+public:
   typedef struct {
-	float *data;
+	std::vector<float, SDRAMAllocator<float> > data;
 	uint32_t size;
-  }  audio_buffer_t;
+  } audio_buffer_t;
 
   Mic();
   void tick();
   bool begin();
   audio_buffer_t audioBufferGet();
   bool audioBufferReady();
+  bool clearBuffer();
 
- private:
-  float* buffer;
+private:
+  std::vector<float, SDRAMAllocator<float> > buffer;
   uint32_t currentSample = 0;
-  static int16_t i2s24_to_pcm16_h7(uint32_t x);
+
+  static void thread(void *arg);
+
 };

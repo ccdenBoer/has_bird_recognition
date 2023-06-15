@@ -82,14 +82,11 @@ tfLiteModel_t tfliteToSdram() {
   buffer = (uint8_t *)ALIGN_PTR((uintptr_t)buffer, 32);
 
   fread(buffer, 1, file_size, fw);
-  // for (int i = 0; i < file_size; i++) {
-  //   buffer[i] = i % 256;
-  // }
 
   fclose(fw);
 
   Serial.println("Done copying M4 firmware to SDRAM");
-  tfLiteModel_t model;
+  tfLiteModel_t model{};
   model.data = buffer;
   model.size = file_size;
   

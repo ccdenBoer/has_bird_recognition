@@ -34,32 +34,33 @@
 I2S_HandleTypeDef hi2s2;
 
 /* I2S2 init function */
-void MX_I2S2_Init(void)
-{
+void MX_I2S2_Init(void) {
   hi2s2.Instance = SPI_P;
   hi2s2.Init.Mode = I2S_MODE_MASTER_RX;
   hi2s2.Init.Standard = I2S_STANDARD_PHILIPS;
   hi2s2.Init.DataFormat = I2S_DATAFORMAT_24B;
-  hi2s2.Init.MCLKOutput = I2S_MCLKOUTPUT_ENABLE;
+  hi2s2.Init.MCLKOutput = I2S_MCLKOUTPUT_DISABLE;
   hi2s2.Init.AudioFreq = I2S_AUDIOFREQ_16K;
   hi2s2.Init.CPOL = I2S_CPOL_LOW;
   hi2s2.Init.FirstBit = I2S_FIRSTBIT_MSB;
-  hi2s2.Init.Data24BitAlignment = I2S_DATA_24BIT_ALIGNMENT_RIGHT;
+  hi2s2.Init.WSInversion = I2S_WS_INVERSION_DISABLE;
+  //hi2s3.Init.IOSwap = I2S_IO_SWAP_DISABLE;
+  //hi2s2.Init.Data24BitAlignment = I2S_DATA_24BIT_ALIGNMENT_RIGHT;
+  //hi2s3.Init.FifoThreshold = I2S_FIFO_THRESHOLD_01DATA;
+  hi2s2.Init.MasterKeepIOState = I2S_MASTER_KEEP_IO_STATE_DISABLE;
+  //hi2s3.Init.SlaveExtendFREDetection = I2S_SLAVE_EXTEND_FRE_DETECTION_DISABLE;
 
 
-  if (HAL_I2S_Init(&hi2s2) != HAL_OK)
-  {
+  if (HAL_I2S_Init(&hi2s2) != HAL_OK) {
 //	Error_Handler();
   }
 
 }
 
-void HAL_I2S_MspInit(I2S_HandleTypeDef* i2sHandle)
-{
+void HAL_I2S_MspInit(I2S_HandleTypeDef *i2sHandle) {
 
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(i2sHandle->Instance==SPI_P)
-  {
+  if (i2sHandle->Instance == SPI_P) {
 	/* USER CODE BEGIN SPI2_MspInit 0 */
 
 	/* USER CODE END SPI2_MspInit 0 */
@@ -82,7 +83,7 @@ void HAL_I2S_MspInit(I2S_HandleTypeDef* i2sHandle)
 	GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
 	HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-	GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3;
+	GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3;
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -102,11 +103,9 @@ void HAL_I2S_MspInit(I2S_HandleTypeDef* i2sHandle)
   }
 }
 
-void HAL_I2S_MspDeInit(I2S_HandleTypeDef* i2sHandle)
-{
+void HAL_I2S_MspDeInit(I2S_HandleTypeDef *i2sHandle) {
 
-  if(i2sHandle->Instance==SPI_P)
-  {
+  if (i2sHandle->Instance == SPI_P) {
 	/* USER CODE BEGIN SPI2_MspDeInit 0 */
 
 	/* USER CODE END SPI2_MspDeInit 0 */
@@ -121,7 +120,7 @@ void HAL_I2S_MspDeInit(I2S_HandleTypeDef* i2sHandle)
 	*/
 	HAL_GPIO_DeInit(GPIOD, GPIO_PIN_3);
 
-	HAL_GPIO_DeInit(GPIOI, GPIO_PIN_2|GPIO_PIN_3);
+	HAL_GPIO_DeInit(GPIOI, GPIO_PIN_2 | GPIO_PIN_3);
 
 	HAL_GPIO_DeInit(GPIOB, GPIO_PIN_9);
 

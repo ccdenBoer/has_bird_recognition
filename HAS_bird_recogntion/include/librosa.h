@@ -20,10 +20,15 @@
 #define LIBROSA_H_
 
 #include "eigen.h"
-
 #include <vector>
 #include <complex>
 #include <iostream>
+#include <cmath>
+
+#include "SdramAllocator.h"
+SDRAMAllocator<void> allocator;
+
+
 
 ///
 /// \brief c++ implemention of librosa
@@ -33,6 +38,7 @@ namespace librosa{
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif // !M_PI
+
 
 typedef Eigen::Matrix<float, 1, Eigen::Dynamic, Eigen::RowMajor> Vectorf;
 typedef Eigen::Matrix<std::complex<float>, 1, Eigen::Dynamic, Eigen::RowMajor> Vectorcf;
@@ -46,58 +52,78 @@ static Vectorf pad(Vectorf &x, int left, int right, const std::string &mode, flo
   x_paded.segment(left, x.size()) = x;
 
   if (mode.compare("reflect") == 0){
-    for (int i = 0; i < left; ++i){
-      x_paded[i] = x[left-i];
-    }
-    for (int i = left; i < left+right; ++i){
-      x_paded[i+x.size()] = x[x.size()-2-i+left];
-    }
+	for (int i = 0; i < left; ++i){
+	  x_paded[i] = x[left-i];
+	}
+	for (int i = left; i < left+right; ++i){
+	  x_paded[i+x.size()] = x[x.size()-2-i+left];
+	}
   }
 
   if (mode.compare("symmetric") == 0){
-    for (int i = 0; i < left; ++i){
-      x_paded[i] = x[left-i-1];
-    }
-    for (int i = left; i < left+right; ++i){
-      x_paded[i+x.size()] = x[x.size()-1-i+left];
-    }
+	for (int i = 0; i < left; ++i){
+	  x_paded[i] = x[left-i-1];
+	}
+	for (int i = left; i < left+right; ++i){
+	  x_paded[i+x.size()] = x[x.size()-1-i+left];
+	}
   }
 
   if (mode.compare("edge") == 0){
-    for (int i = 0; i < left; ++i){
-      x_paded[i] = x[0];
-    }
-    for (int i = left; i < left+right; ++i){
-      x_paded[i+x.size()] = x[x.size()-1];
-    }
+	for (int i = 0; i < left; ++i){
+	  x_paded[i] = x[0];
+	}
+	for (int i = left; i < left+right; ++i){
+	  x_paded[i+x.size()] = x[x.size()-1];
+	}
   }
   return x_paded;
 }
 
-static Matrixcf stft(Vectorf &x, int n_fft, int n_hop, const std::string &win, bool center, const std::string &mode){
+static auto stft(Vectorf &x, int n_fft, int n_hop, const std::string &win, bool center, const std::string &mode){
   // hanning
+  printf("stft\n");
   Vectorf window = 0.5*(1.f-(Vectorf::LinSpaced(n_fft, 0.f, static_cast<float>(n_fft-1))*2.f*M_PI/n_fft).array().cos());
+  printf("window\n");
+
 
   int pad_len = center ? n_fft / 2 : 0;
+  printf("pad_len\n");
   Vectorf x_paded = pad(x, pad_len, pad_len, mode, 0.f);
+  printf("x_paded\n");
 
   int n_f = n_fft/2+1;
+  printf("n_f %d\n", n_f);
   int n_frames = 1+(x_paded.size()-n_fft) / n_hop;
-  Matrixcf X(n_frames, n_fft);
+  printf("n_frames %d\n", n_frames);
+
+  std::vector<std::complex<float>,SDRAMAllocator<std::complex<float>>> Vx(n_frames*n_fft);
+  printf("Vx\n");
+  auto X = Eigen::Map<Matrixcf>(Vx.data(), n_frames, n_fft);
+  printf("X\n");
+
+  //Matrixcf X(n_frames, n_fft);
   Eigen::FFT<float> fft;
+  printf("fft\n");
 
   for (int i = 0; i < n_frames; ++i){
-    Vectorf x_frame = window.array()*x_paded.segment(i*n_hop, n_fft).array();
-    X.row(i) = fft.fwd(x_frame);
+	Vectorf x_frame = window.array()*x_paded.segment(i*n_hop, n_fft).array();
+	printf("x_frame %d\n", i);
+	X.row(i) = fft.fwd(x_frame);
+	printf("fft.fwd %d\n",i);
   }
-  return X.leftCols(n_f);
+  printf("For\n");
+
+  auto result = X.leftCols(n_f);
+  printf("result\n");
+  return result;
 }
 
 static Matrixf spectrogram(Matrixcf &X, float power = 1.f){
   return X.cwiseAbs().array().pow(power);
 }
 
-static Matrixf melfilter(int sr, int n_fft, int n_mels, int fmin, int fmax){
+static auto melfilter(int sr, int n_fft, int n_mels, int fmin, int fmax){
   int n_f = n_fft/2+1;
   Vectorf fft_freqs = (Vectorf::LinSpaced(n_f, 0.f, static_cast<float>(n_f-1))*sr)/n_fft;
 
@@ -108,47 +134,66 @@ static Matrixf melfilter(int sr, int n_fft, int n_mels, int fmin, int fmax){
   float logstep = logf(6.4f)/27.f;
 
   auto hz_to_mel = [=](int hz, bool htk = false) -> float {
-    if (htk){
-      return 2595.0f*log10f(1.0f+hz/700.0f);
-    }
-    float mel = (hz-f_min)/f_sp;
-    if (hz >= min_log_hz){
-      mel = min_log_mel+logf(hz/min_log_hz)/logstep;
-    }
-    return mel;
+	if (htk){
+	  return 2595.0f*log10f(1.0f+hz/700.0f);
+	}
+	float mel = (hz-f_min)/f_sp;
+	if (hz >= min_log_hz){
+	  mel = min_log_mel+logf(hz/min_log_hz)/logstep;
+	}
+	return mel;
   };
   auto mel_to_hz = [=](Vectorf &mels, bool htk = false) -> Vectorf {
-    if (htk){
-      return 700.0f*(Vectorf::Constant(n_mels+2, 10.f).array().pow(mels.array()/2595.0f)-1.0f);
-    }
-    return (mels.array()>min_log_mel).select(((mels.array()-min_log_mel)*logstep).exp()*min_log_hz, (mels*f_sp).array()+f_min);
+	if (htk){
+	  return 700.0f*(Vectorf::Constant(n_mels+2, 10.f).array().pow(mels.array()/2595.0f)-1.0f);
+	}
+	return (mels.array()>min_log_mel).select(((mels.array()-min_log_mel)*logstep).exp()*min_log_hz, (mels*f_sp).array()+f_min);
   };
+
 
   float min_mel = hz_to_mel(fmin);
   float max_mel = hz_to_mel(fmax);
-  Vectorf mels = Vectorf::LinSpaced(n_mels+2, min_mel, max_mel);
-  Vectorf mel_f = mel_to_hz(mels);
-  Vectorf fdiff = mel_f.segment(1, mel_f.size() - 1) - mel_f.segment(0, mel_f.size() - 1);
-  Matrixf ramps = mel_f.replicate(n_f, 1).transpose().array() - fft_freqs.replicate(n_mels + 2, 1).array();
 
-  Matrixf lower = -ramps.topRows(n_mels).array()/fdiff.segment(0, n_mels).transpose().replicate(1, n_f).array();
-  Matrixf upper = ramps.bottomRows(n_mels).array()/fdiff.segment(1, n_mels).transpose().replicate(1, n_f).array();
-  Matrixf weights = (lower.array()<upper.array()).select(lower, upper).cwiseMax(0);
+  Vectorf mels = Vectorf::LinSpaced(n_mels+2, min_mel, max_mel);
+  printf("mels\n");
+  Vectorf mel_f = mel_to_hz(mels);
+  printf("mel_f\n");
+  Vectorf fdiff = mel_f.segment(1, mel_f.size() - 1) - mel_f.segment(0, mel_f.size() - 1);
+  printf("fdiff\n");
+  auto ramps = mel_f.replicate(n_f, 1).transpose().array() - fft_freqs.replicate(n_mels + 2, 1).array();
+  printf("ramps\n");
+
+  auto lower = -ramps.topRows(n_mels).array()/fdiff.segment(0, n_mels).transpose().replicate(1, n_f).array();
+  printf("lower\n");
+  auto upper = ramps.bottomRows(n_mels).array()/fdiff.segment(1, n_mels).transpose().replicate(1, n_f).array();
+  printf("upper\n");
+  auto weights = (lower.array()<upper.array()).select(lower, upper).cwiseMax(0);
 
   auto enorm = (2.0/(mel_f.segment(2, n_mels)-mel_f.segment(0, n_mels)).array()).transpose().replicate(1, n_f);
-  weights = weights.array()*enorm;
+  printf("enorm\n");
+  auto weights2 = weights.array()*enorm;
+  printf("weights2\n");
+  auto weights3 = weights2.matrix();
 
-  return weights;
+  std::vector<float,SDRAMAllocator<float>> Vweights3(weights3.size());
+  printf("Vweights3\n");
+  return Eigen::Map<Matrixf>(Vweights3.data(), weights3.rows(), weights3.cols());
 }
 
 static Matrixf melspectrogram(Vectorf &x, int sr, int n_fft, int n_hop,
-                        const std::string &win, bool center,
-                        const std::string &mode, float power,
-                        int n_mels, int fmin, int fmax){
-  Matrixcf X = stft(x, n_fft, n_hop, win, center, mode);
-  Matrixf mel_basis = melfilter(sr, n_fft, n_mels, fmin, fmax);
-  Matrixf sp = spectrogram(X, power);
-  Matrixf mel = mel_basis*sp.transpose();
+							  const std::string &win, bool center,
+							  const std::string &mode, float power,
+							  int n_mels, int fmin, int fmax){
+  printf("melspectrogram\n");
+  auto X = stft(x, n_fft, n_hop, win, center, mode);
+  printf("stft\n");
+  auto mel_basis = melfilter(sr, n_fft, n_mels, fmin, fmax);
+
+  auto sp = X.cwiseAbs().array().pow(power);
+  sp.transposeInPlace();
+  printf("sp\n");
+  auto mel = mel_basis*sp;
+  printf("mel\n");
   return mel;
 }
 
@@ -166,9 +211,9 @@ static Matrixf dct(Matrixf& x, bool norm, int type) {
   Matrixf dct = x*coeff.transpose();
   // ortho
   if (norm) {
-    Vectorf ortho = Vectorf::Constant(N, sqrtf(0.5f/N));
-    ortho[0] = sqrtf(0.25f/N);
-    dct = dct*ortho.asDiagonal();
+	Vectorf ortho = Vectorf::Constant(N, sqrtf(0.5f/(float)N));
+	ortho[0] = sqrtf(0.25f/(float)N);
+	dct = dct*ortho.asDiagonal();
   }
   return dct;
 }
@@ -187,17 +232,17 @@ public:
   /// \param      mode          pad mode. support "reflect","symmetric","edge"
   /// \return     complex-valued matrix of short-time fourier transform coefficients.
   static std::vector<std::vector<std::complex<float>>> stft(std::vector<float> &x,
-                                                            int n_fft, int n_hop,
-                                                            const std::string &win, bool center,
-                                                            const std::string &mode){
-    Vectorf map_x = Eigen::Map<Vectorf>(x.data(), x.size());
-    Matrixcf X = internal::stft(map_x, n_fft, n_hop, win, center, mode);
-    std::vector<std::vector<std::complex<float>>> X_vector(X.rows(), std::vector<std::complex<float>>(X.cols(), 0));
-    for (int i = 0; i < X.rows(); ++i){
-      auto &row = X_vector[i];
-      Eigen::Map<Vectorcf>(row.data(), row.size()) = X.row(i);
-    }
-    return X_vector;
+															int n_fft, int n_hop,
+															const std::string &win, bool center,
+															const std::string &mode){
+	Vectorf map_x = Eigen::Map<Vectorf>(x.data(), x.size());
+	Matrixcf X = internal::stft(map_x, n_fft, n_hop, win, center, mode);
+	std::vector<std::vector<std::complex<float>>> X_vector(X.rows(), std::vector<std::complex<float>>(X.cols(), 0));
+	for (int i = 0; i < X.rows(); ++i){
+	  auto &row = X_vector[i];
+	  Eigen::Map<Vectorcf>(row.data(), row.size()) = X.row(i);
+	}
+	return X_vector;
   }
 
   /// \brief      compute mel spectrogram similar with librosa.feature.melspectrogram
@@ -213,17 +258,17 @@ public:
   /// \param      f_min         lowest frequency (in Hz)
   /// \param      f_max         highest frequency (in Hz)
   /// \return     mel spectrogram matrix
-  static std::vector<std::vector<float>> melspectrogram(std::vector<float> &x, int sr, 
-                                                        int n_fft, int n_hop, const std::string &win, bool center, const std::string &mode,
-                                                        float power, int n_mels, int fmin, int fmax){
-    Vectorf map_x = Eigen::Map<Vectorf>(x.data(), x.size());
-    Matrixf mel = internal::melspectrogram(map_x, sr, n_fft, n_hop, win, center, mode, power, n_mels, fmin, fmax).transpose();
-    std::vector<std::vector<float>> mel_vector(mel.rows(), std::vector<float>(mel.cols(), 0.f));
-    for (int i = 0; i < mel.rows(); ++i){
-      auto &row = mel_vector[i];
-      Eigen::Map<Vectorf>(row.data(), row.size()) = mel.row(i);
-    }
-    return mel_vector;
+  static std::vector<std::vector<float>> melspectrogram(std::vector<float> &x, int sr,
+														int n_fft, int n_hop, const std::string &win, bool center, const std::string &mode,
+														float power, int n_mels, int fmin, int fmax){
+	Vectorf map_x = Eigen::Map<Vectorf>(x.data(), x.size());
+	Matrixf mel = internal::melspectrogram(map_x, sr, n_fft, n_hop, win, center, mode, power, n_mels, fmin, fmax).transpose();
+	std::vector<std::vector<float>> mel_vector(mel.rows(), std::vector<float>(mel.cols(), 0.f));
+	for (int i = 0; i < mel.rows(); ++i){
+	  auto &row = mel_vector[i];
+	  Eigen::Map<Vectorf>(row.data(), row.size()) = mel.row(i);
+	}
+	return mel_vector;
   }
 
   /// \brief      compute mfcc similar with librosa.feature.mfcc
@@ -242,20 +287,27 @@ public:
   /// \param      norm          ortho-normal dct basis
   /// \param      type          dct type. currently only supports 'type-II'
   /// \return     mfcc matrix
-  static std::vector<std::vector<float>> mfcc(float *data,int size, int sr,
-                                              int n_fft, int n_hop, const std::string &win, bool center, const std::string &mode,
-                                              float power, int n_mels, int fmin, int fmax,
-                                              int n_mfcc, bool norm, int type) {
-    Vectorf map_x = Eigen::Map<Vectorf>(data, size);
-    Matrixf mel = internal::melspectrogram(map_x, sr, n_fft, n_hop, win, center, mode, power, n_mels, fmin, fmax).transpose();
-    Matrixf mel_db = internal::power2db(mel);
-    Matrixf dct = internal::dct(mel_db, norm, type).leftCols(n_mfcc);
-    std::vector<std::vector<float>> mfcc_vector(dct.rows(), std::vector<float>(dct.cols(), 0.f));
-    for (int i = 0; i < dct.rows(); ++i) {
-      auto &row = mfcc_vector[i];
-      Eigen::Map<Vectorf>(row.data(), row.size()) = dct.row(i);
-    }
-    return mfcc_vector;
+  static std::vector<std::vector<float>> mfcc(std::vector<float,SDRAMAllocator<float>> &x, int sr,
+											  int n_fft, int n_hop, const std::string &win, bool center, const std::string &mode,
+											  float power, int n_mels, int fmin, int fmax,
+											  int n_mfcc, bool norm, int type) {
+	printf("mfcc start\n");
+	Vectorf map_x = Eigen::Map<Vectorf>(x.data(), x.size());
+	printf("max_x success\n");
+	auto mel = internal::melspectrogram((map_x), sr, n_fft, n_hop, win, center, mode, power, n_mels, fmin, fmax);
+	printf("mel success\n");
+	mel.transposeInPlace();
+	printf("transpose success\n");
+	Matrixf mel_db = internal::power2db(mel);
+	printf("power2db success\n");
+	Matrixf dct = internal::dct(mel_db, norm, type).leftCols(n_mfcc);
+	printf("dct success\n");
+	std::vector<std::vector<float>> mfcc_vector(dct.rows(), std::vector<float>(dct.cols(), 0.f));
+	for (int i = 0; i < dct.rows(); ++i) {
+	  auto &row = mfcc_vector[i];
+	  Eigen::Map<Vectorf>(row.data(), row.size()) = dct.row(i);
+	}
+	return mfcc_vector;
   }
 };
 

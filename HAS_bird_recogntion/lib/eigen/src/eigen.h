@@ -30,7 +30,10 @@
 #define EIGEN_MPL2_ONLY
 
 /* Disable asserts to speed up runtime */
-#define EIGEN_NO_DEBUG 1
+//#define EIGEN_NO_DEBUG 1
+#define EIGEN_INTERNAL_DEBUGGING 1
+
+
 
 /* Include core header */
 #include "Eigen/Core"
