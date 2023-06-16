@@ -93,7 +93,7 @@ typedef int64_t q63_t;
 #endif
 
 #else
-#include "third_party/cmsis/CMSIS/Core/Include/cmsis_compiler.h"
+#include "cmsis_compiler.h"
 #endif
 
 /* evaluate ARM DSP feature */

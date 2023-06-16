@@ -47,3 +47,4 @@ void loop() {
 //    Serial.println(loraConnection.SendPacketCayenne(cayenne.getBuffer(), cayenne.getSize(), 10));
 //  }
 }
+

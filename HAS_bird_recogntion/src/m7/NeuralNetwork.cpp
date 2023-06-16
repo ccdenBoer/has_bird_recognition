@@ -1,9 +1,10 @@
 #include <NeuralNetwork.h>
 #include <SDRAM.h>
 #include <cstdlib>
+#include "tensorflow/lite/micro/system_setup.h"
 
 NeuralNetwork::NeuralNetwork(uint8_t* model_data, int tensor_arena_size, int numberOfClasses, int input_shape[3]) {
-
+    tflite::InitializeTarget();
     Serial.print("Starting NN init");
 
     this->tensor_arena_size = tensor_arena_size;
@@ -23,12 +24,12 @@ NeuralNetwork::NeuralNetwork(uint8_t* model_data, int tensor_arena_size, int num
     Serial.print(this->model->version());
     Serial.println();
 
-    resolver.AddFullyConnected();
-    resolver.AddConv2D();
-    resolver.AddMaxPool2D();
-    resolver.AddSoftmax();
-    resolver.AddRelu();
-    resolver.AddTanh();
+//    resolver.AddFullyConnected();
+//    resolver.AddConv2D();
+//    resolver.AddMaxPool2D();
+//    resolver.AddSoftmax();
+//    resolver.AddRelu();
+//    resolver.AddTanh();
 
     std::size_t size = this->tensor_arena_size;
     std::size_t malloc_size = size + 15;
@@ -48,6 +49,12 @@ NeuralNetwork::NeuralNetwork(uint8_t* model_data, int tensor_arena_size, int num
     Serial.println("NeuralNetwork: Interpreter constructor done");
     this->interpreter->AllocateTensors();
     Serial.println("NeuralNetwork: AllocateTensors done");
+
+	this->input = interpreter->input(0);
+
+	memset(input->data.raw, 0, this->input->bytes);
+	Serial.println("NeuralNetwork: Input zeroed out");
+
 }
 
 NeuralNetwork::~NeuralNetwork()

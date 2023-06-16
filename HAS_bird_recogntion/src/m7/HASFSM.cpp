@@ -113,8 +113,16 @@ void Listening() {
 
 
     //TODO: Convert data and input to NN
-//    nn->InputData();
+	//nn->InputData();
+	auto start = millis();
     NeuralNetwork::result_t prediction = nn->Predict();
+	auto finish = millis();
+	printf("Prediction took %ld ms\n", finish - start);
+	//also print in seconds
+	printf("Prediction took %f s\n", (finish - start) / 1000.0);
+
+
+
 
     //Check for bird and update AI data
     bool birdFound          = (prediction.class_name != "No bird");

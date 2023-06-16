@@ -19,10 +19,10 @@ limitations under the License.
 
 #include "tensorflow/lite/micro/debug_log.h"
 
-#if defined(ARDUINO) && !defined(ARDUINO_ARDUINO_NANO33BLE)
-#define ARDUINO_EXCLUDE_CODE
-#endif  // defined(ARDUINO) && !defined(ARDUINO_ARDUINO_NANO33BLE)
-
+//#if defined(ARDUINO) && !defined(ARDUINO_ARDUINO_NANO33BLE)
+//#define ARDUINO_EXCLUDE_CODE
+//#endif  // defined(ARDUINO) && !defined(ARDUINO_ARDUINO_NANO33BLE)
+//
 #ifndef ARDUINO_EXCLUDE_CODE
 
 #include "Arduino.h"
@@ -36,14 +36,12 @@ limitations under the License.
 #define DEBUG_SERIAL_OBJECT (Serial)
 #endif
 
-extern "C" void DebugLog(const char* s) { DEBUG_SERIAL_OBJECT.print(s); }
-
 namespace tflite {
 
 constexpr ulong kSerialMaxInitWait = 4000;  // milliseconds
 
 void InitializeTarget() {
-  DEBUG_SERIAL_OBJECT.begin(9600);
+  DEBUG_SERIAL_OBJECT.begin(115200);
   ulong start_time = millis();
   while (!DEBUG_SERIAL_OBJECT) {
     // allow for Arduino IDE Serial Monitor synchronization
