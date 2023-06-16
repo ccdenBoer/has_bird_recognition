@@ -1,10 +1,13 @@
 #include <HASFSM.h>
 #include <SensorData.h>
-#include <NeuralNetwork.h>
 #include <FirmwareLoader.h>
 #include <SDCardReaderAndWriter.h>
 #include <Mic.h>
+#include <NeuralNetwork.h>
 #include <arm_math.h>
+#include "dsp/transform_functions.h"
+
+arm_mfcc_instance_f32 mfcc;
 
 #define L_size 1600
 #define L_sr 16000
@@ -15,7 +18,6 @@
 #define L_n_mfcc 128
 #define L_fmin 0.0
 #define L_fmax (L_sr / 2.0)
-#include <librosa.h>
 
 FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
 
@@ -110,8 +112,6 @@ void Listening() {
 	printf("audioBufferVector.size %d\n", audioBufferVector.size());
 
 
-  	std::vector<std::vector<float>> mels = librosa::Feature::mfcc(audioBufferVector, "hann", true, "reflect", 2.f, true, 2);
-
     //TODO: Convert data and input to NN
 //    nn->InputData();
     NeuralNetwork::result_t prediction = nn->Predict();
@@ -184,7 +184,9 @@ void Sending() {
         if (dp != nullptr) {
             while ((entry = readdir(dp))) {
                 //Open and read file content
-                char* filePath = strcat("sd-card/", entry->d_name);
+                char filePath[264];
+				sprintf(filePath, "sd-card/%s", entry->d_name);
+
                 char* bufferString = sd.ReadFileData(filePath);
 
                 //Convert data

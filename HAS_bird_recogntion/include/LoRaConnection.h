@@ -45,14 +45,14 @@ enum join_cmd {
 class LoRaConnection
 {
     private:
-        char loraBuffer[256];
+        char loraBuffer[256]{};
 
         void SendCommand(char* commandToSend);
         short ReadBuffer(char* buffer, short length, unsigned short timeout);
 
     public:
-        LoRaConnection() {}
-        ~LoRaConnection(){}
+        LoRaConnection() = default;
+        ~LoRaConnection()= default;
 
         void InitConnection();
 

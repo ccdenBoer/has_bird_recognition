@@ -1,8 +1,17 @@
-#include "tensorflow/lite/micro/all_ops_resolver.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
+#ifdef abs
+#define NEED_ABS_RESTORED abs
+#undef abs
+#endif
+
+#include "tensorflow/lite/micro/kernels/micro_ops.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/schema/schema_generated.h"
-#include "tensorflow/lite/version.h"
+#include "tensorflow/lite/micro/all_ops_resolver.h"
+
+#ifdef NEED_ABS_RESTORED
+#define abs NEED_ABS_RESTORED
+#undef NEED_ABS_RESTORED
+#endif
 
 class NeuralNetwork {
     private:
@@ -11,7 +20,7 @@ class NeuralNetwork {
         uint8_t*                    tensor_arena;
         TfLiteTensor*               input;
         tflite::ErrorReporter*      error_reporter;
-        tflite::MicroErrorReporter  micro_error_reporter;
+//        tflite::MicroErrorReporter  micro_error_reporter;
         tflite::AllOpsResolver      resolver;
         std::size_t                 tensor_arena_size;
         int                         numberOfClasses;

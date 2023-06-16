@@ -9,7 +9,7 @@ NeuralNetwork::NeuralNetwork(uint8_t* model_data, int tensor_arena_size, int num
     this->tensor_arena_size = tensor_arena_size;
     this->numberOfClasses = numberOfClasses; 
     this->input_shape = input_shape;
-    this->error_reporter = &this->micro_error_reporter;
+//    this->error_reporter = &this->micro_error_reporter;
     Serial.print("error reporter initialized");
     this->model = tflite::GetModel(model_data);
     if (this->model->version() != TFLITE_SCHEMA_VERSION) {
@@ -44,7 +44,7 @@ NeuralNetwork::NeuralNetwork(uint8_t* model_data, int tensor_arena_size, int num
     }
 
     Serial.println("NeuralNetwork: created tensor Arena");
-    this->interpreter = new tflite::MicroInterpreter(model, resolver, tensor_arena, size, error_reporter);
+    this->interpreter = new tflite::MicroInterpreter(model, resolver, tensor_arena, size);
     Serial.println("NeuralNetwork: Interpreter constructor done");
     this->interpreter->AllocateTensors();
     Serial.println("NeuralNetwork: AllocateTensors done");
@@ -106,7 +106,7 @@ NeuralNetwork::result_t NeuralNetwork::Predict() {
             index = i;
         }
     }
-    interpreter->ResetVariableTensors();
+//    interpreter->Reset();
     result.confidence = max_confidence;
     result.predicted_class = index;
     result.class_name = class_names[index];

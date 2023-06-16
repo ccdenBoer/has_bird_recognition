@@ -1,0 +1,13 @@
+{
+  "name": "CMSIS-DSP",
+    "version": "0.0.1",
+    "description": "CMSIS-DSP",
+    "keywords": [
+        "CMSIS-DSP"
+    ],
+  "includes": "arm_math.h",
+  "author": "Ewout Baars",
+  "build": {
+    "flags": "-Ofast"
+  }
+}
