@@ -4,24 +4,12 @@
 #include <SDCardReaderAndWriter.h>
 #include <Mic.h>
 #include <NeuralNetwork.h>
-#include <arm_math.h>
-#include "dsp/transform_functions.h"
-
-arm_mfcc_instance_f32 mfcc;
-
-#define L_size 1600
-#define L_sr 16000
-#define L_n_fft 1024
-#define L_n_hop  512
-#define L_n_mel 128
-#define L_n_mels L_n_mel
-#define L_n_mfcc 128
-#define L_fmin 0.0
-#define L_fmax (L_sr / 2.0)
+#include <MFCC.h>
 
 FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
 
 Mic                     mic;
+MFCC                    mfcc;
 SensorData              sensorData;
 LoRaConnection          connection;
 SDCardReaderAndWriter   sd;
@@ -58,6 +46,8 @@ void Initializing() {
     connection = LoRaConnection();
 	printf("Initializing mic\n");
 	mic = Mic();
+	printf("Initializing mfcc\n");
+    mfcc.begin();
 
 
     sensorData.InitSensors();
@@ -103,13 +93,8 @@ void Listening() {
 	  printf("Sample[%d] %f\n",i, audioBuffer.data[i]);
 	}
 
-	std::vector<float> audioBufferVector(audioBuffer.size);
-	printf("audioBuffer.size %ld\n", audioBuffer.size);
-	for (uint32_t i = 0; i < audioBuffer.size; i++)
-	{
-	  audioBufferVector[i] = audioBuffer.data[i];
-	}
-	printf("audioBufferVector.size %d\n", audioBufferVector.size());
+
+//	auto mfcc_buffer = mfcc.process_audio(audioBuffer.data);
 
 
     //TODO: Convert data and input to NN

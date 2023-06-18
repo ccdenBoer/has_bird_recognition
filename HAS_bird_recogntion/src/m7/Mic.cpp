@@ -4,7 +4,7 @@
 #include "Mic.h"
 #include "SDRAM.h"
 #include "i2s.h"
-#include "scheduler.h"
+#include "Scheduler.h"
 
 #define SAMPLE_RATE 16000
 #define SAMPLE_TIME 0.1

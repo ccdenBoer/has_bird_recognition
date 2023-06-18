@@ -4,7 +4,7 @@
 
 #pragma once
 #include <vector>
-#include "arduino.h"
+#include "Arduino.h"
 #include "SdramAllocator.h"
 
 class Mic {
