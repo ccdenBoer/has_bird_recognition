@@ -1,33 +1,31 @@
 // global includes
-#include "RPC.h"
 #include <Arduino.h>
-
-// m7 includes
-#include <Arduino_PortentaBreakout.h>
-#include <LoRaConnection.h>
-#include <CayenneLPP.h>
+REDIRECT_STDOUT_TO(SerialUSB)
+  
+#include <HASFSM.h>
 #include <SDRAM.h>
-#include <NeuralNetwork.h>
 
-// m7 defines
-LoRaConnection loraConnection;
-//CayenneLPP cayenne(51);
-
-void setup()
-{
+HASFSM* hasFSM;
+void setup() {
   Serial.begin(115200);
-  // setupM4Firmware();
+  SDRAM.begin(SDRAM_START_ADDRESS);
+  while (!Serial)
+  {
+	delay(100);
+  }
 
-  loraConnection = LoRaConnection();
+  delay(100);
 
-  loraConnection.InitConnection();
-  // InitHASFSM();
-  // birdSensorFSM.setup(FSM_States::STATE_INITIALIZING,
-  // FSM_Events::EVENTS_STATE_EXECUTED);
-  // bootM4();
+  hasFSM = new HASFSM();
+  hasFSM->InitHASFSM();
+  printf("Init done\n");
+  hasFSM->birdSensorFSM.setup(FSM_States::STATE_INITIALIZING,
+					  FSM_Events::EVENTS_STATE_EXECUTED);
+  printf("Setup done\n");
 }
 
-void loop()
-{
-
+void loop() {
+  printf("Looping\n");
+  hasFSM->birdSensorFSM.loop();
 }
+

@@ -1,0 +1,10 @@
+{
+  "name": "Arduino_TensorFlowLite",
+  "version": "2.4.0-ALPHA",
+  "description": "Allows you to run machine learning models locally on your device.",
+  "keywords": "arduino, tensorflow, machine learning, neural network, deep learning, microcontroller, embedded",
+  "homepage": "https://www.tensorflow.org/lite/microcontrollers/overview",
+  "build": {
+    "flags": "-Ofast"
+  }
+}

@@ -18,12 +18,15 @@ bool SDCardReaderAndWriter::InitSDCardReaderAndWriter() {
 }
 
 void SDCardReaderAndWriter::WriteToSDCard(int birdType, float birdAccuracy, float lightIntensity, float temp, float hum, int rainSurface, bool raining, int batteryPercentage, float lat, float lon, uint8_t validation) {
-    //TODO: Generate name with timestamp
-    char* fileName = "/fs/test20.txt";
-
+    	//TODO: Generate name with timestamp
         //Open file or create new file if file doesn't exist
-        FILE *filePointer = fopen("/fs/test20.txt", "w");
+		static unsigned int fileIndex = 0;
+		char fileName[22];
+		sprintf(fileName, "/sd-card/test%d.txt\n", fileIndex);
 
+        FILE *filePointer = fopen(fileName, "w");
+
+  		fileIndex++;
         if (filePointer == nullptr) {
             Serial.println("File not created");
             return;
@@ -53,7 +56,7 @@ void SDCardReaderAndWriter::WriteToSDCard(int birdType, float birdAccuracy, floa
         Serial.println(output);
 
         //Write JSON object to file
-        fprintf(filePointer, output);
+        fprintf(filePointer, "%s", output);
 
         //Close file
         fclose(filePointer);
@@ -66,7 +69,7 @@ char* SDCardReaderAndWriter::ReadFileData(char* fileName) {
 
     int end = fseek(filePointer, 0, SEEK_END);
     char buffer[end];
-    
+
     /* Seek to the beginning of the file */
     fseek(filePointer, 0, SEEK_SET);
 

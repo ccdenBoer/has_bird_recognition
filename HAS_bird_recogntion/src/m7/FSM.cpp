@@ -1,5 +1,7 @@
 #include <FSM.h>
-#include <iostream>
+#include <utility>
+#include <Arduino.h>
+
 
 FSM::FSM(int totalStates, int totalEvents) {
     this->totalStates = totalStates;
@@ -10,61 +12,62 @@ FSM::FSM(int totalStates, int totalEvents) {
 
 void FSM::addState(int state, std::function<void(void)> loopMethod) {
     if ( state < this->totalStates ) {
-        std::cout << "Added new state: " + String(state);
-        this->states[state] = loopMethod;
+		printf("Added new state: %d\n", state);
+	  	this->states[state] = std::move(loopMethod);
     }
 }
 
 void FSM::addTransition(int state, int event, int nextState) {
     if ( state < this->totalStates && event < this->totalEvents ) {
-        std::cout << "Added transition for state " + String(state) + " and event " + String(event) + ": " + String(nextState);
+		printf("Added transition for state %d and event %d: %d\n", state, event, nextState);
         this->transitions[state][event] = nextState;
     }
 }
 
 void FSM::raiseEvent(int event) {
-    std::cout << "Event raised: " + String(event);
+   	printf("Event raised: %d\n", event);
 
     if ( this->currentState != -1 &&  event < this->totalEvents ) {
-        std::cout << "Current state is invalid, might be larger than the max state size or negative";
-
         if ( this->transitions[currentState].find(event) != this->transitions[currentState].end() ) { // Check if event exists for the current state!
             int newState = this->transitions[this->currentState][event]; // get the new state from the transition map
-            std::cout << "Found a new state for the current event, which is: " + String(newState);
+			printf("Found a new state for the current event, which is: %d\n", newState);
 
             this->states[newState]();// Entering new state
 
             this->currentState = newState;
-            std::cout << "switched to new state, which is: " + String(this->currentState);
+			printf("switched to new state, which is: %d\n", this->currentState);
         } else {
-            std::cout << "This event doesn't belong to this state. Currently in the previous event, which is: " + String(this->currentState);
+		  printf("This event doesn't belong to this state. Currently in the previous event, which is: %d\n", this->currentState);
         }
-    }
+    }else{
+	  printf("Current state is invalid, might be larger than the max state size or negative");
+	}
 }
 
 void FSM::setup(int state, int eventStateExecuted) {
+  	printf("Setup FSM\n");
     if ( this->currentState == -1 || state < this->totalStates ) { // Only set start state if not set yet!
         this->currentState  = state;
         this->lastEvent     = eventStateExecuted;
         this->states[state](); // Call the pre function!
     }
-
+	printf("Setup done\n");
     this->loopTiming = millis();
 }
 
 void FSM::loop() {
     this->totalLoopTiming = millis() - this->loopTiming;
-    std::cout << "Loop time: " + String(this->totalLoopTiming) + "ms";
+	printf("Loop time: %ld ms\n", this->totalLoopTiming);
     this->loopTiming = millis(); // Restart timing calculation
 
-    std::cout << "Current state: " + String(this->currentState);
+    printf("Current state: %d\n", this->currentState);
 
     if ( this->currentState != -1 &&  this->currentState < this->totalStates ) {
         this->states[this->currentState]();
         this->raiseEvent(this->lastEvent);
 
     } else {
-        std::cout << "Error in FSM loop, deadlock";
+        printf("Error in FSM loop, deadlock");
     }
 }
 

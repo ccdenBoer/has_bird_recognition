@@ -1,6 +1,6 @@
 #include "FirmwareLoader.h"
 #include <RPC.h>
-#include <SDRAM.h>
+#include <SdramAllocator.h>
 #include <QSPIFBlockDevice.h>
 #include <MBRBlockDevice.h>
 #include <FATFileSystem.h>
@@ -10,12 +10,15 @@ QSPIFBlockDevice root;
 mbed::MBRBlockDevice ota_data(&root, 2);
 mbed::FATFileSystem ota_data_fs("qspi");
 
-// void USBMSD::begin()
-// {
-// }
+//#define ENABLE_MASS_STORAGE
 
-// USBMSD MassStorage(&root);
+#ifdef ENABLE_MASS_STORAGE
+ void USBMSD::begin()
+ {
+ }
 
+ USBMSD MassStorage(&root);
+#endif
 
 #ifdef TARGET_PORTENTA_H7_M4
 #define Serial RPC
@@ -55,7 +58,6 @@ void waitForCorrectQspi() {
 
 
 tfLiteModel_t tfliteToSdram() {
-  SDRAM.begin(SDRAM_START_ADDRESS);
   //  MPU_Config();
   // Copy M4 firmware to SDRAM
   FILE *fw = fopen("/qspi/model.tflite", "r");
@@ -64,7 +66,7 @@ tfLiteModel_t tfliteToSdram() {
 		"Please copy a tfLite model onto the PORTENTA mass storage");
 	Serial.println(
 		"When done, please unmount the mass storage and reset the board");
-	  // MassStorage.begin();
+//	   MassStorage.begin();
 	while (1) {
 	  delay(10000);
 	}
@@ -75,22 +77,14 @@ tfLiteModel_t tfliteToSdram() {
   Serial.print("Size of the file: ");
   Serial.println(file_size);
 
-  auto buffer = (uint8_t *)SDRAM.malloc(file_size + 32);
-
-  if (buffer == nullptr) {
-	Serial.println("Error allocating memory");
-  }
-  buffer = (uint8_t *)ALIGN_PTR((uintptr_t)buffer, 32);
+  auto buffer = Uint8Allocator.allocate(file_size);
 
   fread(buffer, 1, file_size, fw);
-  // for (int i = 0; i < file_size; i++) {
-  //   buffer[i] = i % 256;
-  // }
 
   fclose(fw);
 
   Serial.println("Done copying M4 firmware to SDRAM");
-  tfLiteModel_t model;
+  tfLiteModel_t model{};
   model.data = buffer;
   model.size = file_size;
   

@@ -3,7 +3,6 @@
 
 #include <iostream>
 
-#define LORA_SERIAL             Serial2 //RX2 and TX2
 #define LORA_TIMEOUT            100     //MS
 #define MAX_BUFFER_LENGTH       256
 #define MAX_RECONNECT_ATTEMPTS  20
@@ -45,14 +44,14 @@ enum join_cmd {
 class LoRaConnection
 {
     private:
-        char loraBuffer[256];
+        char loraBuffer[256]{};
 
         void SendCommand(char* commandToSend);
         short ReadBuffer(char* buffer, short length, unsigned short timeout);
 
     public:
-        LoRaConnection() {}
-        ~LoRaConnection(){}
+        LoRaConnection() = default;
+        ~LoRaConnection()= default;
 
         void InitConnection();
 
