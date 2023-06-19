@@ -1,3 +1,4 @@
+#pragma once
 #ifdef abs
 #define NEED_ABS_RESTORED abs
 #undef abs

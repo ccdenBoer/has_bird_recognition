@@ -5,7 +5,6 @@
 #include <vector>
 #include <functional>
 
-#include <Arduino.h>
 class FSM {
     private:
         std::map<int, std::map<int, int>> transitions;

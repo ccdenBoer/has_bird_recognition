@@ -2,15 +2,18 @@
 #define HAS_FSM_H
 
 #include <FSM.h>
-#include <LoRaConnection.h>
+#include <Mic.h>
 #include <SensorData.h>
+#include <LoRaConnection.h>
 #include <SDCardReaderAndWriter.h>
+#include <NeuralNetwork.h>
+#include "FirmwareLoader.h"
+#include <MFCC.h>
+#include <CayenneLPP.h>
 
 #define SEND_INTERVAL 15 //Minutes
-#define LISTEN_TIME   20 //Seconds
 
 enum FSM_States {
-  STATE_START,
   STATE_INITIALIZING,
   STATE_INITIALIZING_FAILED,
   STATE_LISTENING,
@@ -21,7 +24,6 @@ enum FSM_States {
 };
 
 enum FSM_Events {
-  EVENT_START,
   INITIALIZING_FAILED,
   SENSORS_INITIALIZED,
   BIRD_FOUND,
@@ -36,21 +38,28 @@ enum FSM_Events {
   EVENTS_TOTAL
 };
 
-enum Available_Birds {
-  ANAS_PLATYRHYNCHOS_LINNAEUS,
-  COLUMBA_PALUMBUS_LINNAEUS,
-  FRINGILLA_COELEBS_LINNAEUS,
-  PARUS_MAJOR_LINNAEUS,
-  PASSER_DOMESTICUS,
-  PHYLLOSCOPUS_COLLYBITA,
-  PHYLLOSCOPUS_TROCHILUS,
-  STURNUS_VULGARIS_LINNAEUS,
-  TROGLODYTES_TROGLODTYES,
-  TURDUS_MERULA_LINNAEUS
+class HASFSM {
+public:
+  HASFSM();
+  void InitHASFSM();
+  FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
+
+private:
+  void Initializing();
+  void Listening();
+  void GatheringData();
+  void Sending();
+  void NotConnected();
+  void InitializingFailed();
+
+  Mic						mic;
+  SensorData              	sensorData;
+  LoRaConnection          	connection;
+  SDCardReaderAndWriter   	sd;
+  NeuralNetwork           	*nn = nullptr;
+  tfLiteModel_t           	model;
+  MFCC 						mfcc;
+  CayenneLPP 				cayenne = CayenneLPP(51);
 };
-
-extern FSM birdSensorFSM;
-
-void InitHASFSM();
 
 #endif

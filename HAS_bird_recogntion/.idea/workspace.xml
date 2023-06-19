@@ -22,15 +22,13 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="47dd7fce-4cc6-4107-aba1-5c13bc2c2492" name="Changes" comment="Mfcc gen works, mic output seems to be broken.">
+    <list default="true" id="47dd7fce-4cc6-4107-aba1-5c13bc2c2492" name="Changes" comment="Mfcc creation works correct. prediction get done, might be wrong.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/LoRaConnection.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/LoRaConnection.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/MFCC.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/MFCC.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/tfmicro/src/tensorflow/lite/micro/debug_log.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/lib/tfmicro/src/tensorflow/lite/micro/debug_log.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/m7/FirmwareLoader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/FirmwareLoader.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/FSM.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/FSM.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/HASFSM.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/HASFSM.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/NeuralNetwork.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/NeuralNetwork.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/m7/FSM.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/FSM.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/m7/HASFSM.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/HASFSM.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/m7/MFCC.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/MFCC.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/m7/NeuralNetwork.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/NeuralNetwork.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -100,6 +98,11 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="PlatformIO Debug" type="platformio" factoryName="PlatformIO Debug" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="HAS_bird_recogntion" TARGET_NAME="Debug" CONFIG_NAME="portenta_h7_m7" RUN_TARGET_PROJECT_NAME="HAS_bird_recogntion" RUN_TARGET_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -150,6 +153,7 @@
       <workItem from="1687094313808" duration="5180000" />
       <workItem from="1687127557041" duration="6805000" />
       <workItem from="1687162246661" duration="9971000" />
+      <workItem from="1687177117810" duration="7611000" />
     </task>
     <task id="LOCAL-00001" summary="git commit failure">
       <created>1686860230870</created>
