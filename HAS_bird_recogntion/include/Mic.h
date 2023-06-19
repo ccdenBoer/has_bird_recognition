@@ -13,7 +13,7 @@
 class Mic {
 public:
   typedef struct {
-	std::vector<float, SdramAllocator<float> > data;
+	float* data;
 	uint32_t size;
   } audio_buffer_t;
 
@@ -21,12 +21,12 @@ public:
   void tick();
   bool begin();
   audio_buffer_t audioBufferGet();
-  bool audioBufferReady();
+  bool audioBufferReady() const;
   bool audioBufferClear();
 
 private:
-  std::vector<float, SdramAllocator<float> > buffer;
-  uint32_t currentSample = 0;
+  float* buffer;
+  volatile uint32_t currentSample = 0;
 
   static void thread(void *arg);
 

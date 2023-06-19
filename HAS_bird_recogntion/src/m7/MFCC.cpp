@@ -48,13 +48,6 @@ float *MFCC::process_audio(float *input) {
 	process(inputCopy, &output[i * NUM_DCT_OUTPUTS]);
   }
 
-  //loop over all values if value is  -0.0 set to 0.0, with precision of 0.00001
-  for (size_t i = 0; i < outputRowsCount * NUM_DCT_OUTPUTS; i++) {
-	if (output[i] < 0.00001f && output[i] > -0.00001f) {
-	  output[i] = 0.00001f;
-	}
-  }
-
   //print last 32 values
   for (size_t i = outputRowsCount - NUM_DCT_OUTPUTS; i < outputRowsCount; i++) {
 	printf("%.16f ", output[outputRowsCount * NUM_DCT_OUTPUTS - NUM_DCT_OUTPUTS + i]);

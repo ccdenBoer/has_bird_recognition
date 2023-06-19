@@ -40,7 +40,7 @@ enum FSM_Events {
 
 class HASFSM {
 public:
-  HASFSM();
+  explicit HASFSM();
   void InitHASFSM();
   FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
 
@@ -50,16 +50,23 @@ private:
   void GatheringData();
   void Sending();
   void NotConnected();
-  void InitializingFailed();
+  static void InitializingFailed();
 
   Mic						mic;
   SensorData              	sensorData;
   LoRaConnection          	connection;
   SDCardReaderAndWriter   	sd;
-  NeuralNetwork           	*nn = nullptr;
+  NeuralNetwork 			*neuralNetwork;
   tfLiteModel_t           	model;
   MFCC 						mfcc;
   CayenneLPP 				cayenne = CayenneLPP(51);
+
+  int 						lastRecognizedBird;
+  float 					recognitionAccuracy;
+  uint8_t 					correctMeasurements;
+  int 						batteryPercentage;
+  uint32_t 					lastTimeSent;
+  uint32_t 					lastTimeGSPGathered;
 };
 
 #endif

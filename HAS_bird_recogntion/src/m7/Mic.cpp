@@ -18,7 +18,7 @@ Mic::Mic() {
 }
 
 bool Mic::begin() {
-  buffer = std::vector<float, SdramAllocator<float>>(BUFFER_SIZE);
+  buffer = FloatAllocator.allocate(BUFFER_SIZE);
 
   auto state = HAL_I2S_GetState(&hi2s2);
   Serial.println("HAL_I2S_GetState returned\t" + String(state));
@@ -26,7 +26,7 @@ bool Mic::begin() {
 	return false;
 
   //start arduino thread
-  Scheduler.start(thread, this);
+  Scheduler.start(thread, this,4096);
 
   return true;
 }
@@ -36,7 +36,7 @@ Mic::audio_buffer_t Mic::audioBufferGet() {
 }
 
 
-bool Mic::audioBufferReady() {
+bool Mic::audioBufferReady() const {
   return currentSample >= BUFFER_SIZE;
 }
 
@@ -51,7 +51,7 @@ void Mic::tick() {
 
   auto result = HAL_I2S_Receive(&hi2s2, reinterpret_cast<uint16_t *>(i2sBuffer), I2S_BUFFER_SIZE, 1000);
   if (result != HAL_OK) {
-	Serial.println("HAL_I2S_Receive failed");
+	printf("HAL_I2S_Receive failed\n");
   }
 
   for (int i = 0; i < I2S_BUFFER_SIZE; i++) {
@@ -63,33 +63,19 @@ void Mic::tick() {
 	float max = 1 << 17;
 	auto f = static_cast<float>(converted);
 
-
 	//convert 32bit signed to float
 	buffer[currentSample++] = (f / max);
 	if (currentSample >= BUFFER_SIZE) {
 	  break;
 	}
-
-
-
   }
-
-//	pcm16 = (int16_t)(i2sBuffer[i] >> 8);
-//	if (pcm16 == 0)
-//	  continue;
-//	if (currentSample >= BUFF_SIZE) {
-//	  break;
-//	}
-//	auto pcmFloat = ((float)pcm16 / (1 << 15));
-//	buffer[currentSample++] = pcmFloat;
-
-  printf("currentSample: %lu\n", currentSample);
 }
 
 void Mic::thread(void *arg) {
   auto mic = (Mic *)arg;
   while (true) {
 	mic->tick();
+	yield();
   }
 }
 bool Mic::audioBufferClear() {

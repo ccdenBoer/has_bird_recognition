@@ -67,6 +67,7 @@ void SdramAllocator<T>::deallocate(T * const p, size_t) const noexcept
 // static float allocator
 static SdramAllocator<float> FloatAllocator;
 static SdramAllocator<uint8_t> Uint8Allocator;
+static SdramAllocator<char> CharAllocator;
 
 
 #endif //HAS_BIRD_RECOGNTION_INCLUDE_SDRAMALLOCATOR_H_

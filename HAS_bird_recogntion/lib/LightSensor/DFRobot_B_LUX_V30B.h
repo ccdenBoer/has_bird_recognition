@@ -199,10 +199,10 @@ private:
   uint8_t iicRead(uint8_t num, uint8_t* data);
 
 private:
-  uint8_t _SDA;
-  uint8_t _SCL;
-  uint8_t _cEN;
-  uint8_t _deviceAddr;
+  uint8_t DF_SDA;
+  uint8_t DF_SCL;
+  uint8_t DF_cEN;
+  uint8_t DF_deviceAddr;
 };
 #endif
 

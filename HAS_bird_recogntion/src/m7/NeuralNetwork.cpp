@@ -2,13 +2,15 @@
 #include <SdramAllocator.h>
 #include <cstdlib>
 #include "tensorflow/lite/micro/system_setup.h"
+#include "tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h"
 
 NeuralNetwork::NeuralNetwork(uint8_t *model_data, int tensor_arena_size, int numberOfClasses) {
   tflite::InitializeTarget();
-  Serial.print("Starting NN init");
+  printf("Starting NN init\n");
 
   this->tensor_arena_size = tensor_arena_size;
   this->numberOfClasses = numberOfClasses;
+  this->error_reporter = new tflite::MicroErrorReporter();
   Serial.print("error reporter initialized");
   this->model = tflite::GetModel(model_data);
   if (this->model->version() != TFLITE_SCHEMA_VERSION) {
@@ -18,23 +20,20 @@ NeuralNetwork::NeuralNetwork(uint8_t *model_data, int tensor_arena_size, int num
 						 this->model->version(), TFLITE_SCHEMA_VERSION);
   }
   //print version
-  Serial.print("Model provided is schema version: ");
-  Serial.print(this->model->version());
-  Serial.println();
-
+  printf("Model provided is schema version:  %lu\n", this->model->version());
 
   std::size_t size = this->tensor_arena_size;
   tensor_arena = Uint8Allocator.allocate(size);
 
   if (tensor_arena == nullptr) {
-	Serial.println("NeuralNetwork: Tensor alignment failed");
+	printf("NeuralNetwork: Tensor arena allocation failed\n");
   }
 
-  Serial.println("NeuralNetwork: created tensor Arena");
+  printf("NeuralNetwork: Created tensor arena size: %d\n", size);
   this->interpreter = new tflite::MicroInterpreter(model, resolver, tensor_arena, size);
-  Serial.println("NeuralNetwork: Interpreter constructor done");
+  printf("NeuralNetwork: Interpreter created\n");
   this->interpreter->AllocateTensors();
-  Serial.println("NeuralNetwork: AllocateTensors done");
+  printf("NeuralNetwork: AllocateTensors done\n");
   this->input_data = interpreter->typed_input_tensor<float>(0);
 
   //get input shape from model
@@ -42,9 +41,7 @@ NeuralNetwork::NeuralNetwork(uint8_t *model_data, int tensor_arena_size, int num
   printf("NeuralNetwork: Input shape: %d, %d, %d\n", input_shape[0], input_shape[1], input_shape[2]);
   this->input_size = interpreter->input_tensor(0)->bytes;
   memset(this->input_data, 0, this->input_size);
-  Serial.println("NeuralNetwork: Input zeroed out");
-  //print size of input in bytes
-  printf("NeuralNetwork: Input size in bytes: %d\n", this->input_size);
+  printf("NeuralNetwork: Input of %d bytes zero initialized\n", this->input_size);
 }
 
 NeuralNetwork::~NeuralNetwork() {

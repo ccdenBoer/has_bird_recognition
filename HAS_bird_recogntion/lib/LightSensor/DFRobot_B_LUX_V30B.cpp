@@ -14,22 +14,22 @@
 
 DFRobot_B_LUX_V30B::DFRobot_B_LUX_V30B(uint8_t cEN, uint8_t scl, uint8_t sda)
 {
-  _deviceAddr = DFRobot_B_LUX_V30_IIC_Addr;
-  _SCL = scl;
-  _SDA = sda;
-  _cEN = cEN;
+  DF_deviceAddr = DFRobot_B_LUX_V30_IIC_Addr;
+  DF_SCL = scl;
+  DF_SDA = sda;
+  DF_cEN = cEN;
 }
 
 void DFRobot_B_LUX_V30B::begin()
 {
-  pinMode(_SDA,OUTPUT);
-  pinMode(_SCL,OUTPUT);
-  pinMode(_cEN,OUTPUT);
-  digitalWrite(_SCL,HIGH);
-  digitalWrite(_SDA,HIGH);
-  digitalWrite(_cEN,LOW);
+  pinMode(DF_SDA, OUTPUT);
+  pinMode(DF_SCL, OUTPUT);
+  pinMode(DF_cEN, OUTPUT);
+  digitalWrite(DF_SCL, HIGH);
+  digitalWrite(DF_SDA, HIGH);
+  digitalWrite(DF_cEN, LOW);
   delay(1000);
-  digitalWrite(_cEN,HIGH);
+  digitalWrite(DF_cEN, HIGH);
   while(lightStrengthLux()<=0);
   
 }
@@ -37,19 +37,19 @@ uint8_t DFRobot_B_LUX_V30B::readMode(void)
 {
   uint8_t mode;
   iicStartBit();
-  if(iicSend(_deviceAddr+0)){
-    digitalWrite(_SDA,LOW);
+  if(iicSend(DF_deviceAddr+0)){
+    digitalWrite(DF_SDA, LOW);
     iicStopBit();
     return 0;
     }
   if(iicSend(DFRobot_B_LUX_V30_ConfigReg)){
-    digitalWrite(_SDA,LOW);
+    digitalWrite(DF_SDA, LOW);
     iicStopBit();
     return 0;
     }
   iicStartBit();
-  if(iicSend(_deviceAddr+1)){
-    digitalWrite(_SDA,LOW);
+  if(iicSend(DF_deviceAddr+1)){
+    digitalWrite(DF_SDA, LOW);
     iicStopBit();
     return 0;
     }
@@ -65,71 +65,71 @@ uint8_t DFRobot_B_LUX_V30B::setMode(uint8_t isManualMode,uint8_t isCDR,uint8_t i
   uint8_t mode =isManualMode+isCDR+isTime;
   iicStartBit();
   
-  if(iicSend(_deviceAddr+0)){
-    digitalWrite(_SDA,LOW);
+  if(iicSend(DF_deviceAddr+0)){
+    digitalWrite(DF_SDA, LOW);
     iicStopBit();
     return 0;
     }
   if(iicSend(DFRobot_B_LUX_V30_ConfigReg)){
-    digitalWrite(_SDA,LOW);
+    digitalWrite(DF_SDA, LOW);
     iicStopBit();
     return 0;
   }
   if(iicSend(mode)){
-    digitalWrite(_SDA,LOW);
+    digitalWrite(DF_SDA, LOW);
     iicStopBit();
     return 0;
   }
-  digitalWrite(_SDA,LOW);
+  digitalWrite(DF_SDA, LOW);
   iicStopBit();
   delay(10);
   return 1;
 }
 void DFRobot_B_LUX_V30B::iicStartBit()
 {
-  digitalWrite(_SCL,HIGH);
-  digitalWrite(_SDA,HIGH);
+  digitalWrite(DF_SCL, HIGH);
+  digitalWrite(DF_SDA, HIGH);
   delayMicroseconds(5);
-  digitalWrite(_SDA,LOW);
+  digitalWrite(DF_SDA, LOW);
   delayMicroseconds(5);
-  digitalWrite(_SCL,LOW);
+  digitalWrite(DF_SCL, LOW);
   delayMicroseconds(5);
 }
 
 void DFRobot_B_LUX_V30B::iicStopBit()
 {
-  digitalWrite(_SCL,HIGH);
-  digitalWrite(_SDA,LOW);
+  digitalWrite(DF_SCL, HIGH);
+  digitalWrite(DF_SDA, LOW);
   delayMicroseconds(5);
-  digitalWrite(_SDA,HIGH);
+  digitalWrite(DF_SDA, HIGH);
   delayMicroseconds(5);
-  digitalWrite(_SCL,LOW);
+  digitalWrite(DF_SCL, LOW);
   delayMicroseconds(5);
 }
 
 void DFRobot_B_LUX_V30B::iicSendAck(uint8_t ack)
 {
-  pinMode(_SDA,OUTPUT);
+  pinMode(DF_SDA, OUTPUT);
   if(ack & 0x01 ){/*ack=0,send ACK，ack=1,send NACK*/
-    digitalWrite(_SDA,HIGH);
+    digitalWrite(DF_SDA, HIGH);
   }else{
-    digitalWrite(_SDA,LOW);
+    digitalWrite(DF_SDA, LOW);
   }
-  digitalWrite(_SCL,HIGH);
+  digitalWrite(DF_SCL, HIGH);
   delayMicroseconds(5);
-  digitalWrite(_SCL,LOW);
+  digitalWrite(DF_SCL, LOW);
   delayMicroseconds(5);
 }
 uint8_t DFRobot_B_LUX_V30B::iicRecvAck()
 {
   uint8_t cy=0;
-  pinMode(_SDA,INPUT);
-  digitalWrite(_SCL,HIGH);
+  pinMode(DF_SDA, INPUT);
+  digitalWrite(DF_SCL, HIGH);
   delayMicroseconds(5);
-  cy=digitalRead(_SDA);
-  digitalWrite(_SCL,LOW);
-  digitalWrite(_SDA,HIGH);
-  pinMode(_SDA,OUTPUT);
+  cy=digitalRead(DF_SDA);
+  digitalWrite(DF_SCL, LOW);
+  digitalWrite(DF_SDA, HIGH);
+  pinMode(DF_SDA, OUTPUT);
   delayMicroseconds(5);
   return cy;
 }
@@ -138,14 +138,14 @@ uint8_t DFRobot_B_LUX_V30B::iicSend(uint8_t data)
 {
   for(uint8_t i=0; i<8;i++){  
     if(data & (0x80)){
-      digitalWrite(_SDA,HIGH);
+      digitalWrite(DF_SDA, HIGH);
     }else{
-      digitalWrite(_SDA,LOW);
+      digitalWrite(DF_SDA, LOW);
     }
     delayMicroseconds(5); 
-    digitalWrite(_SCL,HIGH);
+    digitalWrite(DF_SCL, HIGH);
     delayMicroseconds(5); 
-    digitalWrite(_SCL,LOW);
+    digitalWrite(DF_SCL, LOW);
     delayMicroseconds(5); 
     data = data<<1;
   }
@@ -155,36 +155,36 @@ uint8_t DFRobot_B_LUX_V30B::iicSend(uint8_t data)
 uint8_t DFRobot_B_LUX_V30B::iicReadByte()
 {
   uint8_t data=0;
-  pinMode(_SDA,INPUT_PULLUP);
+  pinMode(DF_SDA, INPUT_PULLUP);
   for(uint8_t i=0; i<8; i++){
-    digitalWrite(_SCL,HIGH);   
+    digitalWrite(DF_SCL, HIGH);
     delayMicroseconds(5);
-    data |= digitalRead(_SDA);
-    digitalWrite(_SCL,LOW);
+    data |= digitalRead(DF_SDA);
+    digitalWrite(DF_SCL, LOW);
     delayMicroseconds(5);
     if(i<7) 
       data<<=1;
   }
-  pinMode(_SDA,OUTPUT);
+  pinMode(DF_SDA, OUTPUT);
   return data;
 }
 uint8_t DFRobot_B_LUX_V30B::iicRead(uint8_t num, uint8_t* data)
 {
   iicStartBit();
-  if(iicSend(_deviceAddr+0)){
-    digitalWrite(_SDA,LOW);
+  if(iicSend(DF_deviceAddr+0)){
+    digitalWrite(DF_SDA, LOW);
     iicStopBit();
     return 0;
   }
   if(iicSend(0x00)){
-    digitalWrite(_SDA,LOW);
+    digitalWrite(DF_SDA, LOW);
     iicStopBit();
     return 0;
   }
   //
   iicStartBit();
-  if(iicSend(_deviceAddr+1)){
-    digitalWrite(_SDA,LOW);
+  if(iicSend(DF_deviceAddr+1)){
+    digitalWrite(DF_SDA, LOW);
     iicStopBit();
     return 0;
     }
@@ -197,7 +197,7 @@ uint8_t DFRobot_B_LUX_V30B::iicRead(uint8_t num, uint8_t* data)
       iicSendAck(LIGHT_ACK);//send ACK
     }
   }
-  digitalWrite(_SDA,LOW);
+  digitalWrite(DF_SDA, LOW);
   iicStopBit();
   return 1;
 }

@@ -13,11 +13,11 @@ mbed::FATFileSystem ota_data_fs("qspi");
 //#define ENABLE_MASS_STORAGE
 
 #ifdef ENABLE_MASS_STORAGE
- void USBMSD::begin()
- {
- }
+void USBMSD::begin()
+{
+}
 
- USBMSD MassStorage(&root);
+USBMSD MassStorage(&root);
 #endif
 
 #ifdef TARGET_PORTENTA_H7_M4
@@ -37,17 +37,17 @@ long getFileSize(FILE *fp) {
 void waitForCorrectQspi() {
   int err = ota_data_fs.mount(&ota_data);
   if (err) {
-	Serial.println("Error mounting qspi not formatted correctly");
-	while (1) {
+	printf("Error mounting qspi not formatted correctly\n");
+	while (true) {
 	  delay(10000);
 	}
   }
-  Serial.println("QSPI correctly formatted");
+  printf("Qspi correctly formatted and has a size of %llu\n", ota_data.size());
   // write small file to QSPI too see if it works
   FILE *fp = fopen("/qspi/placeFwHere", "w");
   if (fp == nullptr) {
-	Serial.println("Error opening file");
-	while (1) {
+	printf("error opening file\n");
+	while (true) {
 	  delay(10000);
 	}
   }
@@ -55,27 +55,22 @@ void waitForCorrectQspi() {
   fclose(fp);
 }
 
-
-
 tfLiteModel_t tfliteToSdram() {
   //  MPU_Config();
   // Copy M4 firmware to SDRAM
   FILE *fw = fopen("/qspi/model.tflite", "r");
   if (fw == nullptr) {
-	Serial.println(
-		"Please copy a tfLite model onto the PORTENTA mass storage");
-	Serial.println(
-		"When done, please unmount the mass storage and reset the board");
+	printf("Please copy a tfLite model onto the PORTENTA mass storage\t");
+	printf("When done, please unmount the mass storage and reset the board\n");
 //	   MassStorage.begin();
-	while (1) {
+	while (true) {
 	  delay(10000);
 	}
   }
-  Serial.println("Copying tflite data to SDRAM");
+  printf("Copying tflite data to SDRAM\n");
   const std::size_t file_size = getFileSize(fw);
-//  print the size of the file
-  Serial.print("Size of the file: ");
-  Serial.println(file_size);
+  // print the size of the file
+  printf("File size is %d\n", file_size);
 
   auto buffer = Uint8Allocator.allocate(file_size);
 
@@ -83,11 +78,11 @@ tfLiteModel_t tfliteToSdram() {
 
   fclose(fw);
 
-  Serial.println("Done copying M4 firmware to SDRAM");
+  printf("Done copying tflite data to SDRAM\n");
   tfLiteModel_t model{};
   model.data = buffer;
   model.size = file_size;
-  
+
   return model;
 }
 
