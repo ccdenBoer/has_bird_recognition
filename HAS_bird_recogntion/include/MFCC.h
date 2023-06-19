@@ -19,18 +19,25 @@
 class MFCC {
 public:
 
-  explicit MFCC();
-  bool begin();
+  explicit MFCC() = default;
+  ~MFCC();
 
-  float* process_audio(std::vector<float,SdramAllocator<float>> &input);
+  bool begin(uint32_t sampleRate,uint32_t sampleTime);
+
+  float *process_audio(std::vector<float, SdramAllocator<float>> &input);
 
   private:
+  float* output = nullptr;
+  arm_mfcc_instance_f32 mfcc{};
+  uint32_t outputRowsCount = 0;
 #if defined(ARM_MFCC_CFFT_BASED)
   float32_t tmp[FFT_SIZE*2];
 #else
   float32_t tmp[FFT_SIZE+2]{};
 #endif
   void process(float32_t *input, float32_t *output);
+
+
 };
 
 #endif //HAS_BIRD_RECOGNTION_SRC_M7_MFCC_H

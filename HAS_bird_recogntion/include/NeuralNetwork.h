@@ -25,6 +25,8 @@ class NeuralNetwork {
         std::size_t                 tensor_arena_size;
         int                         numberOfClasses;
         int*                        input_shape; //size 3: [HEIGHT, WIDTH, CHANNELS]
+		size_t						input_size;
+		float*						input_data;
         const char*                 class_names[];
     public:
         struct result_t{
@@ -33,10 +35,10 @@ class NeuralNetwork {
             const char* class_name;
         };
 
-        NeuralNetwork(uint8_t* model_data, int tensor_arena_size, int numberOfClasses, int input_shape[3]);
+        NeuralNetwork(uint8_t* model_data, int tensor_arena_size, int numberOfClasses);
         ~NeuralNetwork();
 
-        void InputData(float data[128][547][1]);
+        void InputData(float *data);
 
         result_t Predict();
 };

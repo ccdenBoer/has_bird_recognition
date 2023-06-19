@@ -11,21 +11,21 @@
 #include <memory>
 
 template <class T>
-struct SDRAMAllocator
+struct SdramAllocator
 {
   typedef T value_type;
-  SDRAMAllocator() noexcept = default; //default ctor not required by C++ Standard Library
+  SdramAllocator() noexcept = default; //default ctor not required by C++ Standard Library
 
   // A converting copy constructor:
-  template<class U> SDRAMAllocator(const SDRAMAllocator<U>&) noexcept { // NOLINT(google-explicit-constructor)
+  template<class U> SdramAllocator(const SdramAllocator<U>&) noexcept { // NOLINT(google-explicit-constructor)
 	SDRAM.begin();
   }
 
-  template<class U> bool operator==(const SDRAMAllocator<U>&) const noexcept
+  template<class U> bool operator==(const SdramAllocator<U>&) const noexcept
   {
 	return true;
   }
-  template<class U> bool operator!=(const SDRAMAllocator<U>&) const noexcept
+  template<class U> bool operator!=(const SdramAllocator<U>&) const noexcept
   {
 	return false;
   }
@@ -34,7 +34,7 @@ struct SDRAMAllocator
 };
 
 template <class T>
-T* SDRAMAllocator<T>::allocate(const size_t n) const
+T* SdramAllocator<T>::allocate(const size_t n) const
 {
   if (n == 0)
   {
@@ -46,8 +46,11 @@ T* SDRAMAllocator<T>::allocate(const size_t n) const
   }
 
   static int alignment = 16;
-  void *original = SDRAM.malloc((n * sizeof(T))+alignment);
+  auto mallocSize = (n * sizeof(T))+alignment;
+  void *original = SDRAM.malloc(mallocSize);
   if (!original) { throw std::bad_alloc(); }
+  //memset too zero
+  memset(original, 0, mallocSize);
 
   void *aligned = reinterpret_cast<void*>((reinterpret_cast<std::size_t>(original) & ~(std::size_t(alignment-1))) + alignment);
   *(reinterpret_cast<void**>(aligned) - 1) = original;
@@ -56,9 +59,14 @@ T* SDRAMAllocator<T>::allocate(const size_t n) const
 }
 
 template<class T>
-void SDRAMAllocator<T>::deallocate(T * const p, size_t) const noexcept
+void SdramAllocator<T>::deallocate(T * const p, size_t) const noexcept
 {
   SDRAM.free(*(reinterpret_cast<void**>(p) - 1));
 }
+
+// static float allocator
+static SdramAllocator<float> FloatAllocator;
+static SdramAllocator<uint8_t> Uint8Allocator;
+
 
 #endif //HAS_BIRD_RECOGNTION_INCLUDE_SDRAMALLOCATOR_H_

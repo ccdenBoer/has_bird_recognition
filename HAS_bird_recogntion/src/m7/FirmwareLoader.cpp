@@ -1,6 +1,6 @@
 #include "FirmwareLoader.h"
 #include <RPC.h>
-#include <SDRAM.h>
+#include <SdramAllocator.h>
 #include <QSPIFBlockDevice.h>
 #include <MBRBlockDevice.h>
 #include <FATFileSystem.h>
@@ -13,7 +13,7 @@ mbed::FATFileSystem ota_data_fs("qspi");
 // void USBMSD::begin()
 // {
 // }
-
+//
 // USBMSD MassStorage(&root);
 
 
@@ -63,7 +63,7 @@ tfLiteModel_t tfliteToSdram() {
 		"Please copy a tfLite model onto the PORTENTA mass storage");
 	Serial.println(
 		"When done, please unmount the mass storage and reset the board");
-	  // MassStorage.begin();
+//	   MassStorage.begin();
 	while (1) {
 	  delay(10000);
 	}
@@ -74,12 +74,7 @@ tfLiteModel_t tfliteToSdram() {
   Serial.print("Size of the file: ");
   Serial.println(file_size);
 
-  auto buffer = (uint8_t *)SDRAM.malloc(file_size + 32);
-
-  if (buffer == nullptr) {
-	Serial.println("Error allocating memory");
-  }
-  buffer = (uint8_t *)ALIGN_PTR((uintptr_t)buffer, 32);
+  auto buffer = Uint8Allocator.allocate(file_size);
 
   fread(buffer, 1, file_size, fw);
 

@@ -9,16 +9,16 @@
 FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
 
 Mic                     mic;
-MFCC                    mfcc;
 SensorData              sensorData;
 LoRaConnection          connection;
 SDCardReaderAndWriter   sd;
 NeuralNetwork           *nn = nullptr;
 tfLiteModel_t           model;
+MFCC                    mfcc;
 
 uint32_t            lastTimeSent;
 uint32_t            lastTimeGSPGathered;
-int                 input_shape[3]      = {128,547,1};
+int                 input_shape[3]      = {310,32,1};
 int                 tensor_arena_size   = 1024*1024*5;
 
 int               lastRecognizedBird;
@@ -41,14 +41,13 @@ void Start() {
 void Initializing() {
     //Init sensors and lora connection
   	printf("Initializing sensors\n");
-    sensorData = SensorData();
+    sensorData =  SensorData();
 	printf("Initializing lora connection\n");
-    connection = LoRaConnection();
+    connection =  LoRaConnection();
 	printf("Initializing mic\n");
-	mic = Mic();
+	mic =  Mic();
 	printf("Initializing mfcc\n");
-    mfcc.begin();
-
+    mfcc.begin(SAMPLE_RATE,SAMPLE_TIME);
 
     sensorData.InitSensors();
     connection.InitConnection();
@@ -57,7 +56,7 @@ void Initializing() {
     printf("Loading tflite model\n");
     model = loadTfliteModel();
 	printf("Initializing neural network\n");
-    nn = new NeuralNetwork(model.data, tensor_arena_size, 11, input_shape);
+    nn = new NeuralNetwork(model.data, tensor_arena_size, 11);
 
 
     //Gather initial GPS location
@@ -87,18 +86,17 @@ void Listening() {
 	  delay(100);
 	}
 	auto audioBuffer = mic.audioBufferGet();
-	// print the first 100 samples
-	for (int i = 0; i < 100; i++)
+	// print the last 100 samples
+	for (uint32_t i = audioBuffer.size - 100; i < audioBuffer.size; i++)
 	{
-	  printf("Sample[%d] %f\n",i, audioBuffer.data[i]);
+	  printf("Sample[%ld] %f\n",i, audioBuffer.data[i]);
 	}
 
 
-//	auto mfcc_buffer = mfcc.process_audio(audioBuffer.data);
+	auto mfcc_buffer = mfcc.process_audio(audioBuffer.data);
 
-
-    //TODO: Convert data and input to NN
-	//nn->InputData();
+	//TODO: Convert data and input to NN
+	nn->InputData(mfcc_buffer);
 	auto start = millis();
     NeuralNetwork::result_t prediction = nn->Predict();
 	auto finish = millis();

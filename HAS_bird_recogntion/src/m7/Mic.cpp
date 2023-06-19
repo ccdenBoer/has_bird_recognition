@@ -5,9 +5,8 @@
 #include "SDRAM.h"
 #include "i2s.h"
 #include "Scheduler.h"
+#include <cfloat>
 
-#define SAMPLE_RATE 16000
-#define SAMPLE_TIME 0.1
 #define BUFFER_SIZE ((uint32_t)(SAMPLE_RATE * SAMPLE_TIME))
 
 Mic::Mic() {
@@ -19,7 +18,7 @@ Mic::Mic() {
 }
 
 bool Mic::begin() {
-  buffer = std::vector<float, SDRAMAllocator<float>>(BUFFER_SIZE);
+  buffer = std::vector<float, SdramAllocator<float>>(BUFFER_SIZE);
 
   auto state = HAL_I2S_GetState(&hi2s2);
   Serial.println("HAL_I2S_GetState returned\t" + String(state));
@@ -59,11 +58,14 @@ void Mic::tick() {
 	auto value = i2sBuffer[i];
 	if (value == 0) continue;
 	//convert 24bit with the last 6 bits being 0 to 32bit signed
-	auto converted = (int32_t)(i2sBuffer[i] << 8);
+	auto converted = static_cast<int32_t>(i2sBuffer[i] << 8);
 	converted = converted >> 14;
+	float max = 1 << 17;
+	auto f = static_cast<float>(converted);
+
 
 	//convert 32bit signed to float
-	buffer[currentSample++] = (float)converted / (1 << 17);
+	buffer[currentSample++] = (f / max);
 	if (currentSample >= BUFFER_SIZE) {
 	  break;
 	}

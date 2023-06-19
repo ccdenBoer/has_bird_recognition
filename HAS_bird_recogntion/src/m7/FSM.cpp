@@ -1,5 +1,6 @@
 #include <FSM.h>
 #include <iostream>
+#include <utility>
 
 FSM::FSM(int totalStates, int totalEvents) {
     this->totalStates = totalStates;
@@ -11,7 +12,7 @@ FSM::FSM(int totalStates, int totalEvents) {
 void FSM::addState(int state, std::function<void(void)> loopMethod) {
     if ( state < this->totalStates ) {
         std::cout << "Added new state: " + String(state);
-        this->states[state] = loopMethod;
+        this->states[state] = std::move(loopMethod);
     }
 }
 
@@ -23,21 +24,21 @@ void FSM::addTransition(int state, int event, int nextState) {
 }
 
 void FSM::raiseEvent(int event) {
-    std::cout << "Event raised: " + String(event);
+    std::cout << "Event raised: " + String(event) << std::endl;
 
     if ( this->currentState != -1 &&  event < this->totalEvents ) {
-        std::cout << "Current state is invalid, might be larger than the max state size or negative";
+        std::cout << "Current state is invalid, might be larger than the max state size or negative" << std::endl;
 
         if ( this->transitions[currentState].find(event) != this->transitions[currentState].end() ) { // Check if event exists for the current state!
             int newState = this->transitions[this->currentState][event]; // get the new state from the transition map
-            std::cout << "Found a new state for the current event, which is: " + String(newState);
+            std::cout << "Found a new state for the current event, which is: " + String(newState) << std::endl;
 
             this->states[newState]();// Entering new state
 
             this->currentState = newState;
-            std::cout << "switched to new state, which is: " + String(this->currentState);
+            std::cout << "switched to new state, which is: " + String(this->currentState) << std::endl;
         } else {
-            std::cout << "This event doesn't belong to this state. Currently in the previous event, which is: " + String(this->currentState);
+            std::cout << "This event doesn't belong to this state. Currently in the previous event, which is: " + String(this->currentState) << std::endl;
         }
     }
 }
