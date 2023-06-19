@@ -5,6 +5,7 @@
 #include <Mic.h>
 #include <NeuralNetwork.h>
 #include <MFCC.h>
+#include <CayenneLPP.h>
 
 FSM birdSensorFSM = FSM(STATE_TOTAL, EVENTS_TOTAL);
 
@@ -14,7 +15,9 @@ LoRaConnection          connection;
 SDCardReaderAndWriter   sd;
 NeuralNetwork           *nn = nullptr;
 tfLiteModel_t           model;
+
 MFCC                    mfcc;
+CayenneLPP              cayenne(51);
 
 uint32_t            lastTimeSent;
 uint32_t            lastTimeGSPGathered;
@@ -55,7 +58,7 @@ void Initializing() {
     //Init neural network
     printf("Loading tflite model\n");
     model = loadTfliteModel();
-	printf("Initializing neural network\n");
+	  printf("Initializing neural network\n");
     nn = new NeuralNetwork(model.data, tensor_arena_size, 11);
 
 
@@ -182,21 +185,21 @@ void Sending() {
                 DynamicJsonDocument doc(1024);
                 deserializeJson(doc, bufferString);
 
-                lastRecognizedBird      = doc["birdType"];
-                recognitionAccuracy     = doc["birdAccuracy"];
-                lightIntensity          = doc["lightIntensity"];
-                temperature             = doc["temperature"];
-                humidity                = doc["humidity"];
-                rainCoverage            = doc["rainCoverage"];
-                raining                 = doc["raining"];
-                batteryPercentage       = doc["batteryPercentage"];
-                location[0]             = doc["lattitude"];
-                location[1]             = doc["longtitude"];
-                correctMeasurements     = doc["validation"];
+                cayenne.reset();
+                cayenne.addAnalogInput(1, doc["birdType"]);
+                cayenne.addAnalogInput(2, doc["birdAccuracy"]);
+                cayenne.addAnalogInput(3, doc["lightIntensity"]);
+                cayenne.addAnalogInput(4, doc["temperature"]);
+                cayenne.addAnalogInput(5, doc["humidity"]);
+                cayenne.addAnalogInput(6, doc["rainCoverage"]);
+                cayenne.addAnalogInput(7, doc["raining"]);
+                cayenne.addAnalogInput(8, doc["batteryPercentage"]);
+                cayenne.addAnalogInput(9, doc["lattitude"]);
+                cayenne.addAnalogInput(10, doc["longtitude"]);
+                cayenne.addAnalogInput(11, doc["validation"]);
 
-                //TODO: Send data
-                char buffer[11] = {lastRecognizedBird, recognitionAccuracy, lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage, location[0], location[1], correctMeasurements};
-                connection.SendPacket(buffer, 1);
+                //Send data
+                connection.SendPacketCayenne(cayenne.getBuffer(), cayenne.getSize(), 10);
 
                 //Remove data
                 remove(filePath);
