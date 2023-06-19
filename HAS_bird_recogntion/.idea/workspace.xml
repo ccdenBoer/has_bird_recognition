@@ -22,22 +22,16 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="47dd7fce-4cc6-4107-aba1-5c13bc2c2492" name="Changes" comment="faster predictions. converted too using cmsis">
-      <change afterPath="$PROJECT_DIR$/include/mfccdata.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/tfmicro/src/library.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/m7/mfccdata.c" afterDir="false" />
+    <list default="true" id="47dd7fce-4cc6-4107-aba1-5c13bc2c2492" name="Changes" comment="Mfcc gen works, mic output seems to be broken.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/LoRaConnection.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/LoRaConnection.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/MFCC.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/MFCC.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/Mic.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/Mic.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/NeuralNetwork.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/NeuralNetwork.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/SdramAllocator.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/SdramAllocator.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/tfmicro/library.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/m7/FSM.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/FSM.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/tfmicro/src/tensorflow/lite/micro/debug_log.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/lib/tfmicro/src/tensorflow/lite/micro/debug_log.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/m7/FirmwareLoader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/FirmwareLoader.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/m7/HASFSM.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/HASFSM.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/m7/MFCC.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/MFCC.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/m7/Mic.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/Mic.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/m7/NeuralNetwork.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/NeuralNetwork.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -155,7 +149,7 @@
       <workItem from="1686953134122" duration="2045000" />
       <workItem from="1687094313808" duration="5180000" />
       <workItem from="1687127557041" duration="6805000" />
-      <workItem from="1687162246661" duration="3000" />
+      <workItem from="1687162246661" duration="9971000" />
     </task>
     <task id="LOCAL-00001" summary="git commit failure">
       <created>1686860230870</created>
@@ -178,7 +172,14 @@
       <option name="project" value="LOCAL" />
       <updated>1686924280904</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Mfcc gen works, mic output seems to be broken.">
+      <created>1687162371737</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1687162371737</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -205,7 +206,8 @@
     <MESSAGE value="git commit failure" />
     <MESSAGE value="try one failed" />
     <MESSAGE value="faster predictions. converted too using cmsis" />
-    <option name="LAST_COMMIT_MESSAGE" value="faster predictions. converted too using cmsis" />
+    <MESSAGE value="Mfcc gen works, mic output seems to be broken." />
+    <option name="LAST_COMMIT_MESSAGE" value="Mfcc gen works, mic output seems to be broken." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

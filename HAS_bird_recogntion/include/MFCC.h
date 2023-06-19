@@ -24,10 +24,11 @@ public:
 
   bool begin(uint32_t sampleRate,uint32_t sampleTime);
 
-  float *process_audio(std::vector<float, SdramAllocator<float>> &input);
+  float *process_audio(float* input);
 
   private:
   float* output = nullptr;
+  float32_t* inputCopy = nullptr;
   arm_mfcc_instance_f32 mfcc{};
   uint32_t outputRowsCount = 0;
 #if defined(ARM_MFCC_CFFT_BASED)

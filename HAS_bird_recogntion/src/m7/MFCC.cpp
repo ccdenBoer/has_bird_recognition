@@ -6,23 +6,22 @@
 #include "mfccdata.h"
 #include <cstdio>
 
-
 void MFCC::process(float32_t *input, float32_t *outputSlice) {
   arm_mfcc_f32(&mfcc, input, outputSlice, tmp);
 }
 
-bool MFCC::begin(uint32_t sampleRate,uint32_t sampleTime) {
-    auto status = arm_mfcc_init_1024_f32(&mfcc, NUM_MEL_FILTERS, NUM_DCT_OUTPUTS,
-                                         mfcc_dct_coefs_config1_f32,
-                                         mfcc_filter_pos_config1_f32, mfcc_filter_len_config1_f32,
-                                         mfcc_filter_coefs_config1_f32,
-                                         mfcc_window_coefs_config1_f32);
+bool MFCC::begin(uint32_t sampleRate, uint32_t sampleTime) {
+  auto status = arm_mfcc_init_1024_f32(&mfcc, NUM_MEL_FILTERS, NUM_DCT_OUTPUTS,
+									   mfcc_dct_coefs_config1_f32,
+									   mfcc_filter_pos_config1_f32, mfcc_filter_len_config1_f32,
+									   mfcc_filter_coefs_config1_f32,
+									   mfcc_window_coefs_config1_f32);
 
-    if (status != ARM_MATH_SUCCESS) {
-        printf("MFCC init failed\n");
-        return false;
-    }
-    printf("MFCC init success\n");
+  if (status != ARM_MATH_SUCCESS) {
+	printf("MFCC init failed\n");
+	return false;
+  }
+  printf("MFCC init success\n");
   auto samplesCount = sampleRate * sampleTime;
   this->outputRowsCount = (samplesCount - FFT_SIZE) / NUM_HOP;
   size_t size = outputRowsCount * NUM_DCT_OUTPUTS;
@@ -34,27 +33,45 @@ bool MFCC::begin(uint32_t sampleRate,uint32_t sampleTime) {
   //print size of output in bytes
   printf("MFCC output allocation success: %d\n", size * sizeof(float));
 
+  inputCopy = FloatAllocator.allocate(FFT_SIZE);
+  if (inputCopy == nullptr) {
+	printf("MFCC inputCopy allocation failed\n");
+  }
+
   return true;
 }
 
-
-float *MFCC::process_audio(std::vector<float, SdramAllocator<float>> &input) {
-  float* inputPtr = input.data();
+float *MFCC::process_audio(float *input) {
+  //copy input to inputCopy
   for (size_t i = 0; i < outputRowsCount; i++) {
-	process(&inputPtr[i * NUM_HOP], &output[i * NUM_DCT_OUTPUTS]);
+	memcpy(inputCopy, &input[i * NUM_HOP], FFT_SIZE * sizeof(float));
+	process(inputCopy, &output[i * NUM_DCT_OUTPUTS]);
+  }
+
+  //loop over all values if value is  -0.0 set to 0.0, with precision of 0.00001
+  for (size_t i = 0; i < outputRowsCount * NUM_DCT_OUTPUTS; i++) {
+	if (output[i] < 0.00001f && output[i] > -0.00001f) {
+	  output[i] = 0.00001f;
+	}
   }
 
   //print last 32 values
   for (size_t i = outputRowsCount - NUM_DCT_OUTPUTS; i < outputRowsCount; i++) {
-	printf("%f ", output[outputRowsCount * NUM_DCT_OUTPUTS - NUM_DCT_OUTPUTS + i]);
+	printf("%.16f ", output[outputRowsCount * NUM_DCT_OUTPUTS - NUM_DCT_OUTPUTS + i]);
   }
   printf("\n");
+
+
+
   return output;
 }
 
 MFCC::~MFCC() {
   if (output != nullptr) {
 	FloatAllocator.deallocate(output, outputRowsCount * NUM_DCT_OUTPUTS);
+  }
+  if (inputCopy != nullptr) {
+	FloatAllocator.deallocate(inputCopy, FFT_SIZE);
   }
 }
 

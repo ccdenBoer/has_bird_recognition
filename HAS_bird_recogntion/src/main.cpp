@@ -3,27 +3,27 @@
 REDIRECT_STDOUT_TO(SerialUSB)
 
 // m7 includes
-#include <LoRaConnection.h>
-#include <CayenneLPP.h>
+//#include <LoRaConnection.h>
+//#include <CayenneLPP.h>
 #include <HASFSM.h>
 #include <SDRAM.h>
 
 // m7 defines
-LoRaConnection loraConnection;
-CayenneLPP cayenne(51);
+//LoRaConnection loraConnection;
+//CayenneLPP cayenne(51);
 
 void setup() {
   Serial.begin(115200);
   SDRAM.begin(SDRAM_START_ADDRESS);
-  while (!Serial) {
-	delay(10);
-  }
+//  while (!Serial) {
+//	delay(10);
+//  }
   delay(100);
   // setupM4Firmware();
 
-  loraConnection = LoRaConnection();
-
-  loraConnection.InitConnection();
+//  loraConnection = LoRaConnection();
+//
+//  loraConnection.InitConnection();
   InitHASFSM();
   birdSensorFSM.setup(FSM_States::STATE_INITIALIZING,
 					  FSM_Events::EVENTS_STATE_EXECUTED);

@@ -92,10 +92,8 @@ void Listening() {
 	  printf("Sample[%ld] %f\n",i, audioBuffer.data[i]);
 	}
 
+	auto mfcc_buffer = mfcc.process_audio(audioBuffer.data.data());
 
-	auto mfcc_buffer = mfcc.process_audio(audioBuffer.data);
-
-	//TODO: Convert data and input to NN
 	nn->InputData(mfcc_buffer);
 	auto start = millis();
     NeuralNetwork::result_t prediction = nn->Predict();

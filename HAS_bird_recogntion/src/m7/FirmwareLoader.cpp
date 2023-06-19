@@ -10,12 +10,15 @@ QSPIFBlockDevice root;
 mbed::MBRBlockDevice ota_data(&root, 2);
 mbed::FATFileSystem ota_data_fs("qspi");
 
-// void USBMSD::begin()
-// {
-// }
-//
-// USBMSD MassStorage(&root);
+//#define ENABLE_MASS_STORAGE
 
+#ifdef ENABLE_MASS_STORAGE
+ void USBMSD::begin()
+ {
+ }
+
+ USBMSD MassStorage(&root);
+#endif
 
 #ifdef TARGET_PORTENTA_H7_M4
 #define Serial RPC

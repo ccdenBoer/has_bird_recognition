@@ -37,6 +37,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/debug_log.h"
 
 // extern "C" void DebugLog(const char* s) { fprintf(stderr, "%s", s); }
-#include <stdio.h>
+//#include <cstdio>
+#include <Arduino.h>
 
-extern "C" void DebugLog(const char* s) { printf(s); }
+extern "C" void DebugLog(const char* s) { Serial.print(s); }
