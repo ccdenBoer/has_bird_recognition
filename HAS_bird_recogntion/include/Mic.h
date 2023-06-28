@@ -25,9 +25,9 @@ public:
   bool audioBufferClear();
 
 private:
-  float* buffer;
+  float* buffer = nullptr;
   volatile uint32_t currentSample = 0;
 
-  static void thread(void *arg);
+  [[noreturn]] static void thread(void *arg);
 
 };

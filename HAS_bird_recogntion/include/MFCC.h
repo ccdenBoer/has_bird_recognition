@@ -11,10 +11,10 @@
 
 
 //these variables are not changeable
-#define FFT_SIZE 1024
+#define FFT_SIZE 512
 #define NUM_MEL_FILTERS 48
 #define NUM_DCT_OUTPUTS 32
-#define NUM_HOP 512
+#define NUM_HOP (FFT_SIZE/2)
 
 class MFCC {
 public:
@@ -36,9 +36,8 @@ public:
 #else
   float32_t tmp[FFT_SIZE+2]{};
 #endif
-  void process(float32_t *input, float32_t *output);
-
-
+  inline void process(float32_t *input, float32_t *output);
 };
+
 
 #endif //HAS_BIRD_RECOGNTION_SRC_M7_MFCC_H

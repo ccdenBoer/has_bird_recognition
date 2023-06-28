@@ -47,20 +47,25 @@ void HASFSM::InitializingFailed() {
 }
 
 void HASFSM::Listening() {
-  printf("Listening\n");
+  //printf("Listening\n");
 
   while (!mic.audioBufferReady()) {
-	delay(100);
+	yield();
+	return;
   }
 
   auto audioBuffer = mic.audioBufferGet();
 
+  //Start timer
+  auto start = millis();
   auto mfcc_buffer = mfcc.process_audio(audioBuffer.data);
+  auto finish = millis();
+  printf("MFCC took %ld ms\n", finish - start);
 
   neuralNetwork->InputData(mfcc_buffer);
-  auto start = millis();
+  start = millis();
   NeuralNetwork::result_t prediction = neuralNetwork->Predict();
-  auto finish = millis();
+  finish = millis();
   printf("Prediction took %ld ms\n", finish - start);
   //also print in seconds
   printf("Prediction took %f s\n", (finish - start) / 1000.0);
@@ -115,7 +120,7 @@ void HASFSM::GatheringData() {
 
   //Sent measurements to SDCard
   sd.WriteToSDCard(fileName,
-	  				lastRecognizedBird,
+				   lastRecognizedBird,
 				   recognitionAccuracy,
 				   lightIntensity,
 				   temperature,

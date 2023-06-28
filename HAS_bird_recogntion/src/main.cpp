@@ -21,10 +21,10 @@ void setup() {
   pinMode(LEDB, OUTPUT);
   Scheduler.startLoop(toggleLed, 1000);
 
-  while (!Serial)
-  {
-	delay(100);
-  }
+//  while (!Serial)
+//  {
+//	delay(100);
+//  }
 
   delay(100);
 

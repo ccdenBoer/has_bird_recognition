@@ -54,14 +54,13 @@ void FSM::setup(state_t state) {
 
 void FSM::loop() {
     this->totalLoopTiming = millis() - this->loopTiming;
-	printf("Loop time: %ld ms\n", this->totalLoopTiming);
-    this->loopTiming = millis(); // Restart timing calculation
-
-    printf("Current state: %d\n", this->currentState);
+	//printf("Loop time: %ld ms\n", this->totalLoopTiming);
+    this->loopTiming = millis(); //Restart timing calculation
+	//printf("Current state: %d\n", this->currentState);
 
     if ( this->currentState != -1 &&  this->currentState < this->totalStates ) {
         this->states[this->currentState]();
-//        this->raiseEvent(this->lastEvent);
+		//this->raiseEvent(this->lastEvent);
     } else {
         printf("Error in FSM loop, deadlock");
     }

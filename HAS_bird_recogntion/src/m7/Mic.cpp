@@ -2,10 +2,8 @@
 // Created by Ewout on 8-6-2023.
 //
 #include "Mic.h"
-#include "SDRAM.h"
 #include "i2s.h"
 #include "Scheduler.h"
-#include <cfloat>
 
 #define BUFFER_SIZE ((uint32_t)(SAMPLE_RATE * SAMPLE_TIME))
 
@@ -54,11 +52,11 @@ void Mic::tick() {
 	printf("HAL_I2S_Receive failed\n");
   }
 
-  for (int i = 0; i < I2S_BUFFER_SIZE; i++) {
-	auto value = i2sBuffer[i];
+  for (unsigned long i : i2sBuffer) {
+	auto value = i;
 	if (value == 0) continue;
 	//convert 24bit with the last 6 bits being 0 to 32bit signed
-	auto converted = static_cast<int32_t>(i2sBuffer[i] << 8);
+	auto converted = static_cast<int32_t>(i << 8);
 	converted = converted >> 14;
 	float max = 1 << 17;
 	auto f = static_cast<float>(converted);
@@ -71,7 +69,7 @@ void Mic::tick() {
   }
 }
 
-void Mic::thread(void *arg) {
+[[noreturn]] void Mic::thread(void *arg) {
   auto mic = (Mic *)arg;
   while (true) {
 	mic->tick();

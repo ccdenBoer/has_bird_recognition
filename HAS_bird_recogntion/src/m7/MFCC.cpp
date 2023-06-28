@@ -6,12 +6,12 @@
 #include "mfccdata.h"
 #include <cstdio>
 
-void MFCC::process(float32_t *input, float32_t *outputSlice) {
+inline void MFCC::process(float32_t *input, float32_t *outputSlice) {
   arm_mfcc_f32(&mfcc, input, outputSlice, tmp);
 }
 
 bool MFCC::begin(uint32_t sampleRate, uint32_t sampleTime) {
-  auto status = arm_mfcc_init_1024_f32(&mfcc, NUM_MEL_FILTERS, NUM_DCT_OUTPUTS,
+  auto status = arm_mfcc_init_512_f32(&mfcc, NUM_MEL_FILTERS, NUM_DCT_OUTPUTS,
 									   mfcc_dct_coefs_config1_f32,
 									   mfcc_filter_pos_config1_f32, mfcc_filter_len_config1_f32,
 									   mfcc_filter_coefs_config1_f32,
