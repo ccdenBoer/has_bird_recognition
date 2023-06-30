@@ -9,7 +9,6 @@
 #include <NeuralNetwork.h>
 #include "FirmwareLoader.h"
 #include <MFCC.h>
-#include <CayenneLPP.h>
 
 #define SEND_INTERVAL 15 //Minutes
 
@@ -78,7 +77,7 @@ private:
   NeuralNetwork 			*neuralNetwork;
   tfLiteModel_t           	model;
   MFCC 						mfcc;
-  CayenneLPP 				cayenne = CayenneLPP(51);
+
 
   int 						lastRecognizedBird;
   float 					recognitionAccuracy;

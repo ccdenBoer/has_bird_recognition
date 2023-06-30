@@ -4,44 +4,49 @@
 SDMMCBlockDevice blockDevice;
 mbed::FATFileSystem fs("sd-card");
 
-bool SDCardReaderAndWriter::InitSDCardReaderAndWriter() {
+bool SDCardReaderAndWriter::InitSDCardReaderAndWriter()
+{
   int err = fs.mount(&blockDevice);
-  if (err) {
-	// Reformat if we can't mount the filesystem
-	// this should only happen on the first boot
-	printf("No filesystem found, formatting... ");
-	err = fs.reformat(&blockDevice);  // seriously don't want to format your good data
+  if (err)
+  {
+    // Reformat if we can't mount the filesystem
+    // this should only happen on the first boot
+    printf("No filesystem found, formatting... ");
+    err = fs.reformat(&blockDevice); // seriously don't want to format your good data
   }
-  if (err) {
-	printf("Error formatting SDCARD: %d\n", err);
-	return false;
+  if (err)
+  {
+    printf("Error formatting SDCARD: %d\n", err);
+    return false;
   }
   return true;
 }
 
 void SDCardReaderAndWriter::WriteToSDCard(const char *fileName,
-										  int birdType,
-										  float birdAccuracy,
-										  float lightIntensity,
-										  float temp,
-										  float hum,
-										  int rainSurface,
-										  bool raining,
-										  int batteryPercentage,
-										  float lat,
-										  float lon,
-										  uint8_t validation) {
-  //TODO: Generate name with timestamp
-  //Open file or create new file if file doesn't exist
+                                          int birdType,
+                                          float birdAccuracy,
+                                          float lightIntensity,
+                                          float temp,
+                                          float hum,
+                                          int rainSurface,
+                                          bool raining,
+                                          int batteryPercentage,
+                                          float lat,
+                                          float lon,
+                                          uint8_t validation)
+{
+  // TODO: Generate name with timestamp
+  // Open file or create new file if file doesn't exist
 
   FILE *filePointer = fopen(fileName, "w");
-  if (filePointer == nullptr) {
-	Serial.println("File not created");
-	return;
+  if (filePointer == nullptr)
+  {
+    Serial.println("File not created");
+    return;
   }
   printf("File created");
 
-  //Create JSON object
+  // Create JSON object
   StaticJsonDocument<AMOUNT_OF_ITEMS_TO_WRITE> doc;
   doc["birdType"] = birdType;
   doc["birdAccuracy"] = birdAccuracy;
@@ -62,16 +67,16 @@ void SDCardReaderAndWriter::WriteToSDCard(const char *fileName,
 
   printf("written data is: %s\n", output);
 
-  //Write JSON object to file
+  // Write JSON object to file
   fprintf(filePointer, "%s", output);
 
-  //Close file
+  // Close file
   fclose(filePointer);
   Serial.println("File closed");
-
 }
 
-long getFileSize2(FILE *fp) {
+long getFileSize2(FILE *fp)
+{
   fseek(fp, 0, SEEK_END);
   int size = ftell(fp);
   fseek(fp, 0, SEEK_SET);
@@ -79,8 +84,9 @@ long getFileSize2(FILE *fp) {
   return size;
 }
 
-char buffer[1024*10];
-char *SDCardReaderAndWriter::ReadFileData(char *fileName) {
+char buffer[1024 * 10];
+char *SDCardReaderAndWriter::ReadFileData(char *fileName)
+{
   FILE *filePointer = fopen(fileName, "r");
   int end = getFileSize2(filePointer);
 
@@ -89,4 +95,24 @@ char *SDCardReaderAndWriter::ReadFileData(char *fileName) {
   fclose(filePointer);
 
   return buffer;
+}
+
+int SDCardReaderAndWriter::GetAmountOfFiles(DIR *dp)
+{
+  int count = 0;
+  struct dirent *entry = nullptr;
+
+  while ((entry = readdir(dp)) != NULL)
+  {
+    if (entry->d_type == DT_REG)
+    {
+      count++;
+    }
+  }
+
+  rewinddir(dp);
+
+  printf("Amount of files: %d\n", count);
+
+  return count;
 }
