@@ -171,59 +171,58 @@ void HASFSM::Sending()
     }
     else
     {
-    }
+        // Read data from SD-Card
+        DIR *dp = nullptr;
+        struct dirent *entry = nullptr;
 
-    // Read data from SD-Card
-    DIR *dp = nullptr;
-    struct dirent *entry = nullptr;
+        // Loop through every file in the directory
+        dp = opendir("sd-card/.");
 
-    // Loop through every file in the directory
-    dp = opendir("sd-card/.");
-
-    if (dp == nullptr)
-    {
-        printf("Fuck\n");
-        birdSensorFSM.raiseEvent(SEND_SUCCEEDED); //TODO: Change to Send failed
-    }
-    else
-    {
-        int count = sd.GetAmountOfFiles(dp);
-        std::vector<message_t, SdramAllocator<message_t>> messages;
-        int index = 0;
-
-        while ((entry = readdir(dp)))
+        if (dp == nullptr)
         {
-            if (strstr(entry->d_name, ".json"))
+            printf("Fuck\n");
+            birdSensorFSM.raiseEvent(SEND_SUCCEEDED); // TODO: Change to Send failed
+        }
+        else
+        {
+            int count = sd.GetAmountOfFiles(dp);
+            std::vector<message_t, SdramAllocator<message_t>> messages;
+            int index = 0;
+
+            while ((entry = readdir(dp)))
             {
-                printf("%s\n", entry->d_name);
+                if (strstr(entry->d_name, ".json"))
+                {
+                    printf("%s\n", entry->d_name);
 
-                // Open and read file content
-                char filePath[512];
-                sprintf(filePath, "sd-card/%s", entry->d_name);
+                    // Open and read file content
+                    char filePath[512];
+                    sprintf(filePath, "sd-card/%s", entry->d_name);
 
-                char *bufferString = sd.ReadFileData(filePath);
+                    char *bufferString = sd.ReadFileData(filePath);
 
-                messages.push_back(formatter.convertStringToMessage(bufferString));
-                index++;
+                    messages.push_back(formatter.convertStringToMessage(bufferString));
+                    index++;
 
-                // Send data
-                // connection.SendPacketCayenne(cayenne.getBuffer(), cayenne.getSize(), 10);
+                    // Send data
+                    // connection.SendPacketCayenne(cayenne.getBuffer(), cayenne.getSize(), 10);
 
-                // Remove data
-                // remove(filePath);
+                    // Remove data
+                    // remove(filePath);
+                }
             }
+
+            payload_t ttnPayload;
+            ttnPayload.messageCount = messages.size();
+            ttnPayload.messages = messages.data();
+
+            printf("message %d birdtype: %d\n", count, ttnPayload.messages[count - 1].birdType);
+
+            closedir(dp);
         }
 
-        payload_t ttnPayload;
-        ttnPayload.messageCount = messages.size();
-        ttnPayload.messages = messages.data();
-
-        printf("message %d birdtype: %d\n", count, ttnPayload.messages[count - 1].birdType);
-
-        closedir(dp);
+        birdSensorFSM.raiseEvent(SEND_SUCCEEDED);
     }
-
-    birdSensorFSM.raiseEvent(SEND_SUCCEEDED);
 }
 
 void HASFSM::NotConnected()
