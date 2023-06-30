@@ -91,7 +91,7 @@ char *SDCardReaderAndWriter::ReadFileData(char *fileName)
   int end = getFileSize2(filePointer);
 
   fread(buffer, end + 1, 1, filePointer);
-  printf("read data is: %s\n", buffer);
+  //printf("read data is: %s\n", buffer);
   fclose(filePointer);
 
   return buffer;

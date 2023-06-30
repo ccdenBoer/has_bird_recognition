@@ -12,33 +12,33 @@ void LoRaConnection::InitConnection()
     memset(loraBuffer, 0, 256);
     LORA_SERIAL.begin(9600); // Start the LoRa serial at a BaudRate of 9600
 
-    Serial.println("Send key");
+    printf("Send key\n");
     this->SendKey((char *)"2B7E151628AED2A6ABF7158809CF4F3C", (char *)"2B7E151628AED2A6ABF7158809CF4F3C", (char *)"2B7E151628AED2A6ABF7158809CF4F3C");
 
-    Serial.println("Set mode");
+  	printf("Set mode\n");
     this->SetDeviceMode(LWOTAA);
     this->SetDataRate(DR0, EU868);
 
-    Serial.println("Set channels");
+	printf("Set channel\n");
     this->SetChannel(0, 868.1);
     this->SetChannel(1, 868.3);
     this->SetChannel(2, 868.5);
 
-    Serial.println("Set class type");
+    printf("Set class type\n");
     this->SetClassType(CLASS_A);
 
-    Serial.println("Set port");
+    printf("Set port\n");
     this->SetPort(8);
 
-    Serial.println("Set windows");
+    printf("Set receive window\n");
     this->SetReceiveWindow(1, 0, 868.1);
     this->SetReceiveWindow(2, 869.5, DR3);
 
-    Serial.println("Set duty cycle");
+    printf("Set duty cycle\n");
     this->EnableDutyCycle(false);
     this->EnableDutyCycleJoin(false);
 
-    Serial.println("Set power");
+    printf("Set power mode\n");
     this->SetPowerMode(HIGH_POWER);
 }
 
@@ -122,7 +122,7 @@ void LoRaConnection::SetDeviceMode(device_mode mode)
         this->SendCommand((char *)"AT+MODE=LWOTAA\r\n");
         break;
     default:
-        Serial.println("Device mode not found");
+        printf("Device mode not found\n");
         break;
     }
 }
@@ -140,7 +140,7 @@ void LoRaConnection::SetDataRate(data_rate dataRate, physical_type physicalType)
         this->SendCommand((char *)"AT+DR=EU868\r\n");
         break;
     default:
-        Serial.println("Physical type not found");
+        printf("Physical type not found\n");
     }
 
     delay(LORA_TIMEOUT);
@@ -174,7 +174,8 @@ void LoRaConnection::SetClassType(class_type type)
         this->SendCommand((char *)"AT+CLASS=C\r\n");
         break;
     default:
-        Serial.println("Class type not found");
+		printf("Class type not found\n");
+		break;
     }
 
     delay(LORA_TIMEOUT);
@@ -255,7 +256,7 @@ void LoRaConnection::SetPowerMode(power_mode powerMode)
         this->SendCommand((char *)"AT+POWER=14\r\n");
         break;
     default:
-        Serial.println("Power mode not found");
+        printf("Power mode not found\n");
         break;
     }
 }
@@ -348,7 +349,7 @@ bool LoRaConnection::SetOTAAJoin(join_cmd command, unsigned char timeout)
 
     memset(loraBuffer, 0, MAX_BUFFER_LENGTH);
     this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, timeout);
-    Serial.println(loraBuffer);
+	printf("loraBuffer: %s\n", loraBuffer);
 
     ptr = strstr(loraBuffer, "+JOIN: Join failed");
     if (ptr)
@@ -397,4 +398,10 @@ short LoRaConnection::ReadBuffer(char *buffer, short length, unsigned short time
     }
 
     return i;
+}
+bool LoRaConnection::CheckStatus() {
+  this->SendCommand((char *)"AT\r\n");
+  this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 10);
+  printf("CheckStatus LoraBuffer: %s\n", loraBuffer);
+  return strstr(loraBuffer, "+AT: OK");
 }

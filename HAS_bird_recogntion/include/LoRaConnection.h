@@ -3,8 +3,8 @@
 
 #include <iostream>
 
-#define LORA_TIMEOUT            100     //MS
-#define MAX_BUFFER_LENGTH       256
+#define LORA_TIMEOUT            1000    //MS
+#define MAX_BUFFER_LENGTH       512
 #define MAX_RECONNECT_ATTEMPTS  20
 
 
@@ -44,7 +44,7 @@ enum join_cmd {
 class LoRaConnection
 {
     private:
-        char loraBuffer[256]{};
+        char loraBuffer[MAX_BUFFER_LENGTH]{};
 
         void SendCommand(char* commandToSend);
         short ReadBuffer(char* buffer, short length, unsigned short timeout);
@@ -82,6 +82,7 @@ class LoRaConnection
 
         bool SendPacket(char* buffer, unsigned char timeout);
         bool SendPacketCayenne(unsigned char *buffer, unsigned char length, unsigned char timeout);
+		bool CheckStatus();
 };
 
 

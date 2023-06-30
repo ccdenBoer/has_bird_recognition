@@ -51,9 +51,10 @@ typedef struct {
   uint8_t validation;
 } message_t;
 
-typedef struct {
-  uint16_t messageCount;
-  message_t* messages;
+typedef struct payload{
+  uint16_t messageCount = 0;
+  uint16_t messageSize = sizeof(message_t);
+  message_t* messages = nullptr;
 } payload_t;
 
 class HASFSM {
