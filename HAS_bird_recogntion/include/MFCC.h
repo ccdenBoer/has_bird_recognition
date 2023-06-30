@@ -7,7 +7,6 @@
 
 #include <vector>
 #include "dsp/transform_functions.h"
-#include "SdramAllocator.h"
 
 
 //these variables are not changeable

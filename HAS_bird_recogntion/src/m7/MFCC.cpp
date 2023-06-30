@@ -4,6 +4,7 @@
 
 #include "MFCC.h"
 #include "mfccdata.h"
+#include "SdramAllocator.h"
 #include <cstdio>
 
 inline void MFCC::process(float32_t *input, float32_t *outputSlice) {

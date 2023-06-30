@@ -5,7 +5,6 @@
 #pragma once
 #include <vector>
 #include "Arduino.h"
-#include "SdramAllocator.h"
 
 #define SAMPLE_RATE 16000
 #define SAMPLE_TIME 10

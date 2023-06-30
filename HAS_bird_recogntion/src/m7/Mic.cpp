@@ -4,6 +4,7 @@
 #include "Mic.h"
 #include "i2s.h"
 #include "Scheduler.h"
+#include "SdramAllocator.h"
 
 #define BUFFER_SIZE ((uint32_t)(SAMPLE_RATE * SAMPLE_TIME))
 
@@ -24,7 +25,7 @@ bool Mic::begin() {
 	return false;
 
   //start arduino thread
-  Scheduler.start(thread, this,4096);
+  Scheduler.start(thread, this, 4096);
 
   return true;
 }
@@ -32,7 +33,6 @@ bool Mic::begin() {
 Mic::audio_buffer_t Mic::audioBufferGet() {
   return {buffer, BUFFER_SIZE};
 }
-
 
 bool Mic::audioBufferReady() const {
   return currentSample >= BUFFER_SIZE;
@@ -48,16 +48,16 @@ void Mic::tick() {
 	return;
   }
 
-  auto result = HAL_I2S_Receive(&hi2s2, reinterpret_cast<uint16_t *>(i2sBuffer), I2S_BUFFER_SIZE,1000);
+  auto result = HAL_I2S_Receive(&hi2s2, reinterpret_cast<uint16_t *>(i2sBuffer), I2S_BUFFER_SIZE, 1000);
   if (result != HAL_OK) {
 	printf("HAL_I2S_Receive returned\t%d\n", result);
   }
 
-  for (unsigned long i : i2sBuffer) {
-	auto value = i;
-	if (value == 0) continue;
+  for (unsigned long value : i2sBuffer) {
+	if (value == 0)
+	  continue;
 	//convert 24bit with the last 6 bits being 0 to 32bit signed
-	auto converted = static_cast<int32_t>(i << 8);
+	auto converted = static_cast<int32_t>(value << 8);
 	converted = converted >> 14;
 	float max = 1 << 17;
 	auto f = static_cast<float>(converted);

@@ -1,12 +1,10 @@
 #include "HASFSM.h"
 #include <SensorData.h>
 
-
 int tensor_arena_size = 1024 * 1024 * 5;
 float location[2];
 
-
-HASFSM::HASFSM(): model(loadTfliteModel()) {
+HASFSM::HASFSM() : model(loadTfliteModel()) {
   printf("Initializing mic\n");
   mic = Mic();
   printf("Initializing mfcc\n");
@@ -110,7 +108,8 @@ void HASFSM::GatheringData() {
   batteryPercentage = 20; //TEMP VALUE
 
   //Validate
-  correctMeasurements = sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
+  correctMeasurements =
+	  sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
 
   static unsigned int fileIndex = 0;
   char fileName[22];
@@ -132,14 +131,15 @@ void HASFSM::GatheringData() {
 				   correctMeasurements);
   printf("Data written to SD card\n");
 
-//  check written data
+  //  check written data
 
   sd.ReadFileData(fileName);
 
   // Check send interval
-  if ((millis() - lastTimeSent) >= (SEND_INTERVAL * 60 * 1000)) {
-	birdSensorFSM.raiseEvent(SEND_INTERVAL_REACHED);
+  if ((millis() - lastTimeSent) >= 20000 /*(SEND_INTERVAL * 60 * 1000)*/) {
 	lastTimeSent = millis();
+	printf("Send interval reached\n");
+	birdSensorFSM.raiseEvent(SEND_INTERVAL_REACHED);
   } else {
 	printf("Send interval not reached\n");
 	birdSensorFSM.raiseEvent(SEND_INTERVAL_NOT_REACHED);
@@ -147,53 +147,103 @@ void HASFSM::GatheringData() {
 }
 
 void HASFSM::Sending() {
-  //Check if TTN can be joined
+  // Check if TTN can be joined
+  printf("Sending...\n");
+  /*
   if (!connection.SetOTAAJoin(JOIN, 10)) {
+	printf("failed to connect");
 	birdSensorFSM.raiseEvent(JOIN_FAILED);
   } else {
-	connection.SetOTAAJoin(JOIN, 10);
+	*/
 
-	//Read data from SD-Card
-	DIR *dp = nullptr;
-	struct dirent *entry = nullptr;
+  // Read data from SD-Card
+  DIR *dp = nullptr;
+  struct dirent *entry = nullptr;
 
-	//Loop through every file in the directory
-	dp = opendir("sd-card/.");
-	if (dp != nullptr) {
-	  while ((entry = readdir(dp))) {
-		//Open and read file content
-		char filePath[264];
-		sprintf(filePath, "sd-card/%s", entry->d_name);
+  printf("Opening sd\n");
+  // Loop through every file in the directory
+  dp = opendir("sd-card/.");
 
-		char *bufferString = sd.ReadFileData(filePath);
+  if (dp == nullptr) {
+	printf("Fuck\n");
+	birdSensorFSM.raiseEvent(SEND_SUCCEEDED);
+  }
 
-		//Convert data
-		DynamicJsonDocument doc(1024);
-		deserializeJson(doc, bufferString);
-
-		cayenne.reset();
-		cayenne.addAnalogInput(1, doc["birdType"]);
-		cayenne.addAnalogInput(2, doc["birdAccuracy"]);
-		cayenne.addAnalogInput(3, doc["lightIntensity"]);
-		cayenne.addAnalogInput(4, doc["temperature"]);
-		cayenne.addAnalogInput(5, doc["humidity"]);
-		cayenne.addAnalogInput(6, doc["rainCoverage"]);
-		cayenne.addAnalogInput(7, doc["raining"]);
-		cayenne.addAnalogInput(8, doc["batteryPercentage"]);
-		cayenne.addAnalogInput(9, doc["lattitude"]);
-		cayenne.addAnalogInput(10, doc["longtitude"]);
-		cayenne.addAnalogInput(11, doc["validation"]);
-
-		//Send data
-		connection.SendPacketCayenne(cayenne.getBuffer(), cayenne.getSize(), 10);
-
-		//Remove data
-		remove(filePath);
+  if (dp != nullptr) {
+	int count = 0;
+	while ((entry = readdir(dp)) != NULL) {
+	  if (entry->d_type == DT_REG) {
+		count++;
 	  }
 	}
 
+	rewinddir(dp);
+
+	printf("Amount of files: %d\n", count);
+
+	message_t ttnMessage;
+	ttnMessage.messageCount = count;
+	payload_t payload[count];
+	ttnMessage.payloadMessages = payload;
+
+	int index = 0;
+
+	printf("Start while loop\n");
+
+	while ((entry = readdir(dp))) {
+	  if (strstr(entry->d_name, ".json")) {
+		printf("%s\n", entry->d_name);
+
+		// Open and read file content
+		char filePath[512];
+		sprintf(filePath, "sd-card/%s", entry->d_name);
+
+		printf("sprtinf used\n");
+
+		char *bufferString = sd.ReadFileData(filePath);
+
+		printf("buffer string created\n");
+
+		// Convert data
+		DynamicJsonDocument doc(1024);
+		deserializeJson(doc, bufferString);
+		printf(bufferString);
+
+		payload_t tempPayload;
+
+		printf("payload init\n");
+
+		tempPayload.birdType = doc["birdType"];
+		tempPayload.birdAccuracy = doc["birdAccuracy"] * 256;
+		tempPayload.lightIntensity = doc["lightIntensity"];
+		tempPayload.temperature = doc["temperature"];
+		tempPayload.humidity = doc["humidity"];
+		tempPayload.raincoverage = doc["rainCoverage"];
+		tempPayload.raining = doc["raining"];
+		tempPayload.batteryPercentage = doc["batteryPercentage"];
+		tempPayload.lattitude = doc["lattitude"];
+		tempPayload.longtitude = doc["longtitude"];
+		tempPayload.validation = doc["validation"];
+
+		printf("Payload created, adding to buffer...\n");
+		ttnMessage.payloadMessages[index] = tempPayload;
+		printf("Added to payload, increasing count...\n");
+		index++;
+
+		// Send data
+		//connection.SendPacketCayenne(cayenne.getBuffer(), cayenne.getSize(), 10);
+
+		// Remove data
+		//remove(filePath);
+	  }
+	}
+
+	printf("%d\n", ttnMessage.payloadMessages[20].birdType);
+
 	closedir(dp);
   }
+
+  birdSensorFSM.raiseEvent(SEND_SUCCEEDED);
 }
 
 void HASFSM::NotConnected() {
@@ -212,15 +262,15 @@ void HASFSM::NotConnected() {
 }
 
 void HASFSM::InitHASFSM() {
-  //Initializing states
-  birdSensorFSM.addState(FSM_States::STATE_INITIALIZING,[this]{Initializing();});
-  birdSensorFSM.addState(FSM_States::STATE_INITIALIZING_FAILED, [this]{InitializingFailed();} );
-  birdSensorFSM.addState(FSM_States::STATE_LISTENING,   [this]{Listening();});
-  birdSensorFSM.addState(FSM_States::STATE_GATHERING_DATA, [this]{GatheringData();} );
-  birdSensorFSM.addState(FSM_States::STATE_SENDING, [this]{Sending();});
-  birdSensorFSM.addState(FSM_States::STATE_NOT_CONNECTED,  [this]{NotConnected();});
+  // Initializing states
+  birdSensorFSM.addState(FSM_States::STATE_INITIALIZING, [this] { Initializing(); });
+  birdSensorFSM.addState(FSM_States::STATE_INITIALIZING_FAILED, [this] { InitializingFailed(); });
+  birdSensorFSM.addState(FSM_States::STATE_LISTENING, [this] { Listening(); });
+  birdSensorFSM.addState(FSM_States::STATE_GATHERING_DATA, [this] { GatheringData(); });
+  birdSensorFSM.addState(FSM_States::STATE_SENDING, [this] { Sending(); });
+  birdSensorFSM.addState(FSM_States::STATE_NOT_CONNECTED, [this] { NotConnected(); });
 
-  //Initializing transistions
+  // Initializing transistions
   birdSensorFSM
 	  .addTransition(FSM_States::STATE_INITIALIZING, FSM_Events::SENSORS_INITIALIZED, FSM_States::STATE_LISTENING);
   birdSensorFSM.addTransition(FSM_States::STATE_INITIALIZING,
@@ -228,13 +278,18 @@ void HASFSM::InitHASFSM() {
 							  FSM_States::STATE_INITIALIZING_FAILED);
 
   birdSensorFSM.addTransition(FSM_States::STATE_LISTENING, FSM_Events::BIRD_FOUND, FSM_States::STATE_GATHERING_DATA);
-  birdSensorFSM.addTransition(FSM_States::STATE_GATHERING_DATA, FSM_Events::SEND_INTERVAL_REACHED, FSM_States::STATE_SENDING);
-  birdSensorFSM.addTransition(FSM_States::STATE_GATHERING_DATA, FSM_Events::SEND_INTERVAL_NOT_REACHED, FSM_States::STATE_LISTENING);
+  birdSensorFSM
+	  .addTransition(FSM_States::STATE_GATHERING_DATA, FSM_Events::SEND_INTERVAL_REACHED, FSM_States::STATE_SENDING);
+  birdSensorFSM.addTransition(FSM_States::STATE_GATHERING_DATA,
+							  FSM_Events::SEND_INTERVAL_NOT_REACHED,
+							  FSM_States::STATE_LISTENING);
   birdSensorFSM.addTransition(FSM_States::STATE_SENDING, FSM_Events::SEND_SUCCEEDED, FSM_States::STATE_LISTENING);
   birdSensorFSM.addTransition(FSM_States::STATE_SENDING, FSM_Events::JOIN_FAILED, FSM_States::STATE_NOT_CONNECTED);
   birdSensorFSM.addTransition(FSM_States::STATE_NOT_CONNECTED, FSM_Events::JOIN_SUCCESFULL, FSM_States::STATE_SENDING);
-  birdSensorFSM.addTransition(FSM_States::STATE_NOT_CONNECTED, FSM_Events::CONNECT_FAILED, FSM_States::STATE_NOT_CONNECTED);
-  birdSensorFSM.addTransition(FSM_States::STATE_NOT_CONNECTED, FSM_Events::CONNECTION_TIMEOUT, FSM_States::STATE_LISTENING);
+  birdSensorFSM
+	  .addTransition(FSM_States::STATE_NOT_CONNECTED, FSM_Events::CONNECT_FAILED, FSM_States::STATE_NOT_CONNECTED);
+  birdSensorFSM
+	  .addTransition(FSM_States::STATE_NOT_CONNECTED, FSM_Events::CONNECTION_TIMEOUT, FSM_States::STATE_LISTENING);
 
   lastTimeSent = millis();
 }
