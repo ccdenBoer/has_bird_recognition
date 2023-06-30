@@ -10,10 +10,10 @@
 #define LIGHT_SENSOR_SCL_PIN        149
 #define LIGHT_SENSOR_SDA_PIN        150
 
-#define RAIN_SENSOR_ANALOG_INPUT    26
+#define RAIN_SENSOR_ANALOG_INPUT    PIN_A0 //A0
 #define RAIN_SENSOR_DIGITAL_INPUT   71
 
-#define BATTERY_PERCENTAGE_INPUT    77 //A2
+#define BATTERY_PERCENTAGE_INPUT    PIN_A2 //A2
 
 #define GPS_TX_PIN                  0
 #define GPS_RX_PIN                  0

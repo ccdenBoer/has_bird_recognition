@@ -15,16 +15,19 @@ void toggleLed() {
   delay(500);
 }
 
+#define USB_CONNECTED
 void setup() {
   Serial.begin(115200);
   SDRAM.begin(SDRAM_START_ADDRESS);
   pinMode(LEDB, OUTPUT);
   Scheduler.startLoop(toggleLed, 1000);
 
-//  while (!Serial)
-//  {
-//	delay(100);
-//  }
+#ifdef USB_CONNECTED
+  while (!Serial) {
+	delay(100);
+  }
+  delay(100);
+#endif
 
   delay(100);
 

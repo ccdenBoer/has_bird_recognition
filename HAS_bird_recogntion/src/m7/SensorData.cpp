@@ -14,6 +14,9 @@ void SensorData::InitSensors() {
   //Init light sensor
   lightSensor.begin();
 
+  Serial.println("Battery init");
+  pinMode(BATTERY_PERCENTAGE_INPUT, INPUT);
+
   Serial.println("AHT init");
   //Init AHT20
   uint8_t status;
@@ -22,7 +25,6 @@ void SensorData::InitSensors() {
 	Serial.println(status);
 	delay(1000);
   }
-
   Serial.println("AHT inited");
 
   Serial.println("Rain init");
@@ -31,7 +33,6 @@ void SensorData::InitSensors() {
   pinMode(RAIN_SENSOR_DIGITAL_INPUT, INPUT);
 
   Serial.println("Start GPS...");
-
   //Init GPS sensor
   GPSSerial.begin(9600);
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
@@ -70,11 +71,11 @@ int SensorData::GetRainSurface() {
 
 int SensorData::GetBatteryPercentage(){
 	//max value 1023
-	int rawRead = analogRead(BATTERY_PERCENTAGE_INPUT);
-	int percent = map(rawRead,0,1023,0,100);
-	printf("Battery level: %d %d \n", rawRead, percent);
+	auto rawRead = analogRead(BATTERY_PERCENTAGE_INPUT);
+	printf("Battery level raw: %d \n", rawRead);
+	int percent = map(rawRead,0,1024,0,100);
+	printf("Battery level: %d \n", percent);
 	return percent;
-
 }
 
 bool SensorData::GetGPSLocation(float buffer[2]) {
