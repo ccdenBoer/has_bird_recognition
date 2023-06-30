@@ -38,6 +38,25 @@ enum FSM_Events {
   EVENTS_TOTAL
 };
 
+typedef struct {
+  uint8_t birdType;
+  uint8_t birdAccuracy;
+  uint16_t lightIntensity;
+  uint8_t temperature;
+  uint8_t humidity;
+  uint8_t raincoverage;
+  uint8_t raining;
+  uint8_t batteryPercentage;
+  uint16_t lattitude;
+  uint16_t longtitude;
+  uint8_t validation;
+} message_t;
+
+typedef struct {
+  uint16_t messageCount;
+  message_t* messages;
+} payload_t;
+
 class HASFSM {
 public:
   explicit HASFSM();
