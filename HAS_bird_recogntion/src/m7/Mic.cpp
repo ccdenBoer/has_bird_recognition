@@ -43,13 +43,14 @@ uint32_t i2sBuffer[I2S_BUFFER_SIZE]{0};
 
 void Mic::tick() {
   if (currentSample >= BUFFER_SIZE) {
+	yield();
 	delay(100);
 	return;
   }
 
-  auto result = HAL_I2S_Receive(&hi2s2, reinterpret_cast<uint16_t *>(i2sBuffer), I2S_BUFFER_SIZE, 1000);
+  auto result = HAL_I2S_Receive(&hi2s2, reinterpret_cast<uint16_t *>(i2sBuffer), I2S_BUFFER_SIZE,1000);
   if (result != HAL_OK) {
-	printf("HAL_I2S_Receive failed\n");
+	printf("HAL_I2S_Receive returned\t%d\n", result);
   }
 
   for (unsigned long i : i2sBuffer) {

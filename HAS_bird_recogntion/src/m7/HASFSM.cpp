@@ -61,6 +61,7 @@ void HASFSM::Listening() {
   auto mfcc_buffer = mfcc.process_audio(audioBuffer.data);
   auto finish = millis();
   printf("MFCC took %ld ms\n", finish - start);
+  mic.audioBufferClear();
 
   neuralNetwork->InputData(mfcc_buffer);
   start = millis();
@@ -75,8 +76,6 @@ void HASFSM::Listening() {
   bool birdFound = strcmp(prediction.class_name, "Geen Vogel") != 0;
   lastRecognizedBird = prediction.predicted_class;
   recognitionAccuracy = prediction.confidence;
-
-  mic.audioBufferClear();
 
   //Raise new event if a bird was found
   if (birdFound) {

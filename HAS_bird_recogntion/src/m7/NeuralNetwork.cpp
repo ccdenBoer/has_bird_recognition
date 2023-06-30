@@ -57,6 +57,12 @@ void NeuralNetwork::InputData(float *data) {
 }
 
 NeuralNetwork::result_t NeuralNetwork::Predict() {
+//  calculate time between predictions
+  static unsigned long lastTime = 0;
+  unsigned long currentTime = millis();
+  unsigned long timeBetweenPredictions = currentTime - lastTime;
+  lastTime = currentTime;
+  printf("NeuralNetwork: Time between predictions: %lu\n", timeBetweenPredictions);
 
   NeuralNetwork::result_t result = NeuralNetwork::result_t();
   const char *class_names[11] = {"Wilde Eend", "Tjiftjaf", "Koolmees", "Houtduif", "Huismus", "Merel", "Winterkoning", "Fitis", "Vink", "Spreeuw", "Geen Vogel"};
