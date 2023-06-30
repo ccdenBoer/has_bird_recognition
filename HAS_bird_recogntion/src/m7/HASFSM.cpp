@@ -1,5 +1,6 @@
 #include "HASFSM.h"
 #include <SensorData.h>
+#include <SdramAllocator.h>
 
 int tensor_arena_size = 1024 * 1024 * 5;
 float location[2];
@@ -181,10 +182,7 @@ void HASFSM::Sending() {
 
 	printf("Amount of files: %d\n", count);
 
-	message_t ttnMessage;
-	ttnMessage.messageCount = count;
-	payload_t payload[count];
-	ttnMessage.payloadMessages = payload;
+	std::vector<message_t,SdramAllocator<message_t>> messages;
 
 	int index = 0;
 
@@ -207,14 +205,14 @@ void HASFSM::Sending() {
 		// Convert data
 		DynamicJsonDocument doc(1024);
 		deserializeJson(doc, bufferString);
-		printf(bufferString);
+		printf("%s",bufferString);
 
-		payload_t tempPayload;
+		message_t tempPayload;
 
 		printf("payload init\n");
 
 		tempPayload.birdType = doc["birdType"];
-		tempPayload.birdAccuracy = doc["birdAccuracy"] * 256;
+		tempPayload.birdAccuracy = (uint8_t)(doc["birdAccuracy"].as<float>() * 256.0f);
 		tempPayload.lightIntensity = doc["lightIntensity"];
 		tempPayload.temperature = doc["temperature"];
 		tempPayload.humidity = doc["humidity"];
@@ -226,7 +224,7 @@ void HASFSM::Sending() {
 		tempPayload.validation = doc["validation"];
 
 		printf("Payload created, adding to buffer...\n");
-		ttnMessage.payloadMessages[index] = tempPayload;
+		messages.push_back(tempPayload);
 		printf("Added to payload, increasing count...\n");
 		index++;
 
@@ -237,8 +235,11 @@ void HASFSM::Sending() {
 		//remove(filePath);
 	  }
 	}
+	payload_t ttnPayload;
+	ttnPayload.messageCount = messages.size();
+	ttnPayload.messages = messages.data();
 
-	printf("%d\n", ttnMessage.payloadMessages[20].birdType);
+	printf("message %d birdtype: %d\n", count,ttnPayload.messages[count-1].birdType);
 
 	closedir(dp);
   }

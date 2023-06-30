@@ -50,12 +50,12 @@ typedef struct {
   uint16_t lattitude;
   uint16_t longtitude;
   uint8_t validation;
-} payload_t;
+} message_t;
 
 typedef struct {
   uint16_t messageCount;
-  payload_t* payloadMessages;
-} message_t;
+  message_t* messages;
+} payload_t;
 
 class HASFSM {
 public:
