@@ -13,6 +13,8 @@
 #define RAIN_SENSOR_ANALOG_INPUT    26
 #define RAIN_SENSOR_DIGITAL_INPUT   71
 
+#define BATTERY_PERCENTAGE_INPUT    77 //A2
+
 #define GPS_TX_PIN                  0
 #define GPS_RX_PIN                  0
 
@@ -52,6 +54,9 @@ class SensorData {
 
         //GPS sensor
         bool  GetGPSLocation(float buffer[2]);     //Method which returns the current location of the sensor
+
+        //Battery Percentage
+        int GetBatteryPercentage(); //Method which returns the current percentage of the battery capacity
 
         //Validate measurements
         uint8_t ValidateSensorData(float lightIntensity, float temp, float hum, int rainSurface, bool raining, int percentage);

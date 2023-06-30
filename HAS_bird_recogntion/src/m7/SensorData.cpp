@@ -68,6 +68,15 @@ int SensorData::GetRainSurface() {
   return map(analogRead(RAIN_SENSOR_ANALOG_INPUT), 1950, 0, 0, 256);
 }
 
+int SensorData::GetBatteryPercentage(){
+	//max value 1023
+	int rawRead = analogRead(BATTERY_PERCENTAGE_INPUT);
+	int percent = map(rawRead,0,1023,0,100);
+	printf("Battery level: %d %d \n", rawRead, percent);
+	return percent;
+
+}
+
 bool SensorData::GetGPSLocation(float buffer[2]) {
   char c = GPS.read();
   // if you want to debug, this is a good time to do it!
