@@ -22,7 +22,9 @@ enum data_rate {
     DR0 = 0, 
     DR1 = 1, 
     DR2 = 2, 
-    DR3 = 3
+    DR3 = 3,
+	DR4 = 4,
+	DR5 = 5,
 };
 
 enum class_type { 

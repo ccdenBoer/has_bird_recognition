@@ -20,7 +20,6 @@ void setup() {
   Serial.begin(115200);
   SDRAM.begin(SDRAM_START_ADDRESS);
   pinMode(LEDB, OUTPUT);
-  Scheduler.startLoop(toggleLed, 1000);
 
 #ifdef USB_CONNECTED
   while (!Serial) {
@@ -36,6 +35,8 @@ void setup() {
   printf("Init done\n");
   hasFSM->birdSensorFSM.setup(FSM_States::STATE_INITIALIZING);
   printf("Setup done\n");
+
+  Scheduler.startLoop(toggleLed, 1000);
 }
 
 void loop() {

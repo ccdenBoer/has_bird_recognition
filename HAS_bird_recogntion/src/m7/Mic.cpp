@@ -20,7 +20,7 @@ bool Mic::begin() {
   buffer = FloatAllocator.allocate(BUFFER_SIZE);
 
   auto state = HAL_I2S_GetState(&hi2s2);
-  Serial.println("HAL_I2S_GetState returned\t" + String(state));
+  printf("HAL_I2S_GetState returned\t%d\n", state);
   if (state != HAL_I2S_STATE_READY)
 	return false;
 

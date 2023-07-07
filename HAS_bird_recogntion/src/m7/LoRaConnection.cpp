@@ -17,7 +17,7 @@ void LoRaConnection::InitConnection()
 
   	printf("Set mode\n");
     this->SetDeviceMode(LWOTAA);
-    this->SetDataRate(DR0, EU868);
+    this->SetDataRate(DR5, EU868);
 
 	printf("Set channel\n");
     this->SetChannel(0, 868.1);
@@ -44,19 +44,20 @@ void LoRaConnection::InitConnection()
 
 void LoRaConnection::InitialSetup()
 {
-    Serial.println("Setup start");
+    printf("Initial setup\n");
     memset(loraBuffer, 0, 256);
-    Serial.println("buffer");
+    printf("memset\n");
 
     LORA_SERIAL.begin(9600);
-    Serial.println("Serial start");
+	printf("Serial start\n");
 
     // Serial.println("LoRa Initial");
     this->SendCommand("AT\r\n");
 
     this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 10);
 
-    Serial.println(loraBuffer);
+	Serial.println(loraBuffer);
+
     Serial.println(strstr(loraBuffer, "+AT: OK"));
 
     if (strstr(loraBuffer, "+AT: OK"))

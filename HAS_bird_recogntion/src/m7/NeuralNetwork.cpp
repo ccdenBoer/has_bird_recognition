@@ -11,7 +11,7 @@ NeuralNetwork::NeuralNetwork(uint8_t *model_data, int tensor_arena_size, int num
   this->tensor_arena_size = tensor_arena_size;
   this->numberOfClasses = numberOfClasses;
   this->error_reporter = new tflite::MicroErrorReporter();
-  Serial.print("error reporter initialized");
+  printf("NeuralNetwork: Created error reporter\n");
   this->model = tflite::GetModel(model_data);
   if (this->model->version() != TFLITE_SCHEMA_VERSION) {
 	TF_LITE_REPORT_ERROR(error_reporter,
@@ -51,9 +51,9 @@ NeuralNetwork::~NeuralNetwork() {
 }
 
 void NeuralNetwork::InputData(float *data) {
-  Serial.println("NeuralNetwork: Start loading data");
+  printf("NeuralNetwork: Input data of %d bytes\n", this->input_size);
   memcpy(this->input_data, data, this->input_size);
-  Serial.println("NeuralNetwork: Input data done");
+  printf("NeuralNetwork: Input data copied\n");
 }
 
 NeuralNetwork::result_t NeuralNetwork::Predict() {

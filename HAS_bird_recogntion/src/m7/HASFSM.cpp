@@ -18,6 +18,8 @@ HASFSM::HASFSM() : model(loadTfliteModel()) {
   printf("Initializing lora connection\n");
   connection = LoRaConnection();
   sd = SDCardReaderAndWriter();
+  lastTimeSent = 0;
+  sensorData.GetGPSLocation(location);
 }
 
 void HASFSM::Initializing() {
@@ -27,11 +29,6 @@ void HASFSM::Initializing() {
   connection.InitConnection();
 
   sd.InitSDCardReaderAndWriter();
-
-  // Gather initial GPS location
-  printf("Gathering initial GPS location\n");
-  //    while(!sensorData.GetGPSLocation(location));
-  //    lastTimeGSPGathered = millis();
 
   // Raise new event after checking mic
   if (mic.begin()) {
@@ -89,23 +86,30 @@ void HASFSM::GatheringData() {
   auto humidity = sensorData.GetHumidity();
 
   auto raining = sensorData.GetRainThreshold();
+
+  // TODO:
+  //  Fix rain coverage analog read
   //  auto rainCoverage = sensorData.GetRainSurface();
   auto rainCoverage = 0;
 
-  // Check if day has passed to gather GPS data
-  //  if ((millis() - lastTimeGSPGathered) > 86400000) {
-  //	int gpsAttempts = 0;
-  //	while (!sensorData.GetGPSLocation(location)) {
-  //	  gpsAttempts++;
-  //
-  //	  if (gpsAttempts > 50) {
-  //		break;
-  //	  }
-  //	}
-  //  }
+  // TODO:
+  //  Fix battery percentage analog read
+  //  batteryPercentage = sensorData.GetBatteryPercentage();
 
-  // TODO: Get battery percentage
-  batteryPercentage = 20; // TEMP VALUE
+
+  // Check if day has passed to gather GPS data
+  if ((millis() - lastTimeGSPGathered) > 86400000) {
+	int gpsAttempts = 0;
+	while (!sensorData.GetGPSLocation(location)) {
+	  gpsAttempts++;
+	  if (gpsAttempts > 10) {
+		break;
+	  }
+	}
+	lastTimeGSPGathered = millis();
+  }
+
+
 
   // Validate
   correctMeasurements =
@@ -136,12 +140,15 @@ void HASFSM::GatheringData() {
   sd.ReadFileData(fileName);
 
   // Check send interval
-  if ((millis() - lastTimeSent) >= 20000 /*(SEND_INTERVAL * 60 * 1000)*/) {
+  if (((millis() - lastTimeSent) >=  (SEND_INTERVAL * 60 * 1000)) || (lastTimeSent == 0)) {
 	lastTimeSent = millis();
 	printf("Send interval reached\n");
 	birdSensorFSM.raiseEvent(SEND_INTERVAL_REACHED);
   } else {
-	printf("Send interval not reached\n");
+	//write the amount of time in seconds left to send
+	auto timeLeft = (SEND_INTERVAL * 60 * 1000) - (millis() - lastTimeSent);
+	auto timeLeftSeconds = timeLeft / 1000;
+	printf("Time left to send: %ld seconds\n", timeLeftSeconds);
 	birdSensorFSM.raiseEvent(SEND_INTERVAL_NOT_REACHED);
   }
 }
@@ -159,51 +166,51 @@ void HASFSM::Sending() {
   joined = true;
 
   // Read data from SD-Card
-  DIR *dp = nullptr;
-  struct dirent *entry = nullptr;
+  DIR *dp = opendir("sd-card/.");
+  struct dirent *entry;
 
   // Loop through every file in the directory
-  dp = opendir("sd-card/.");
-
   if (dp == nullptr) {
-	printf("Fuck\n");
-	birdSensorFSM.raiseEvent(SEND_SUCCEEDED); // TODO: Change to Send failed
+	birdSensorFSM.raiseEvent(JOIN_FAILED); // TODO: Change to Send failed
 	return;
   }
 
-  int count = sd.GetAmountOfFiles(dp);
   std::vector<message_t, SdramAllocator<message_t>> messages;
   int index = 0;
 
-  while ((entry = readdir(dp))) {
-	if (strstr(entry->d_name, ".json")) {
-	  // Open and read file content
-	  char filePath[512];
-	  sprintf(filePath, "sd-card/%s", entry->d_name);
+  while ((entry = readdir(dp)) && index < 15) {
+	// if not json file, skip
+	if (!strstr(entry->d_name, ".json"))
+	  continue;
 
-	  char *bufferString = sd.ReadFileData(filePath);
+	// Open and read file content
+	char filePath[512];
+	sprintf(filePath, "sd-card/%s", entry->d_name);
 
-	  messages.push_back(TTNFormatter::convertStringToMessage(bufferString));
-	  index++;
+	char *bufferString = sd.ReadFileData(filePath);
 
-	  // Send data
-	  // connection.SendPacketCayenne(cayenne.getBuffer(), cayenne.getSize(), 10);
-
-	  // Remove data
-	  // remove(filePath);
-	}
+	messages.push_back(TTNFormatter::convertStringToMessage(bufferString));
+	index++;
+	// Remove data
+	remove(filePath);
   }
 
   payload_t ttnPayload;
   ttnPayload.messageCount = messages.size();
   ttnPayload.messages = messages.data();
-  printf("message %d birdtype: %d\n", count, ttnPayload.messages[count - 1].birdType);
   closedir(dp);
 
   static uint8_t payloadBuffer[TTN_MAX_BUFFER_SIZE];
   auto size = TTNFormatter::convertPayloadToTTN(ttnPayload, payloadBuffer, TTN_MAX_BUFFER_SIZE);
   auto status = connection.CheckStatus();
+  // TODO:
+  //  Make work without checking status 2 times
+  printf("status: %d\n", status);
+  status = connection.CheckStatus();
+  printf("status: %d\n", status);
   connection.SendPacketCayenne(payloadBuffer, size, 10);
+  status = connection.CheckStatus();
+  printf("status: %d\n", status);
   status = connection.CheckStatus();
   printf("status: %d\n", status);
 
@@ -214,11 +221,12 @@ void HASFSM::NotConnected() {
   int currentAttempst = 0;
   while (currentAttempst < MAX_RECONNECT_ATTEMPTS) {
 	if (!connection.SetOTAAJoin(JOIN, 10)) {
-	  Serial.println("Trying to reconnect...");
+	  printf("Failed to connect, retrying in 1 second\n");
 	  currentAttempst++;
 	  delay(1000);
 	} else {
 	  birdSensorFSM.raiseEvent(JOIN_SUCCESFULL);
+	  return;
 	}
   }
 
@@ -254,6 +262,4 @@ void HASFSM::InitHASFSM() {
 	  .addTransition(FSM_States::STATE_NOT_CONNECTED, FSM_Events::CONNECT_FAILED, FSM_States::STATE_NOT_CONNECTED);
   birdSensorFSM
 	  .addTransition(FSM_States::STATE_NOT_CONNECTED, FSM_Events::CONNECTION_TIMEOUT, FSM_States::STATE_LISTENING);
-
-  lastTimeSent = millis();
 }

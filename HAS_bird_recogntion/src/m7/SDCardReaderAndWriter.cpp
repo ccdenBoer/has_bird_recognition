@@ -41,7 +41,7 @@ void SDCardReaderAndWriter::WriteToSDCard(const char *fileName,
   FILE *filePointer = fopen(fileName, "w");
   if (filePointer == nullptr)
   {
-    Serial.println("File not created");
+	printf("Error: %s\n", strerror(errno));
     return;
   }
   printf("File created");
@@ -60,7 +60,7 @@ void SDCardReaderAndWriter::WriteToSDCard(const char *fileName,
   doc["longtitude"] = lon;
   doc["validation"] = validation;
 
-  Serial.println("JSON Created");
+  printf("JSON Created");
 
   char output[1024];
   serializeJson(doc, output);
@@ -72,7 +72,7 @@ void SDCardReaderAndWriter::WriteToSDCard(const char *fileName,
 
   // Close file
   fclose(filePointer);
-  Serial.println("File closed");
+  printf("File closed");
 }
 
 long getFileSize2(FILE *fp)

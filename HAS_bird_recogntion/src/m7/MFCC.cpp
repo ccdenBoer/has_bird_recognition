@@ -5,7 +5,6 @@
 #include "MFCC.h"
 #include "mfccdata.h"
 #include "SdramAllocator.h"
-#include <cstdio>
 
 inline void MFCC::process(float32_t *input, float32_t *outputSlice) {
   arm_mfcc_f32(&mfcc, input, outputSlice, tmp);
@@ -48,14 +47,6 @@ float *MFCC::process_audio(float *input) {
 	memcpy(inputCopy, &input[i * NUM_HOP], FFT_SIZE * sizeof(float));
 	process(inputCopy, &output[i * NUM_DCT_OUTPUTS]);
   }
-
-  //print last 32 values
-  for (size_t i = outputRowsCount - NUM_DCT_OUTPUTS; i < outputRowsCount; i++) {
-	printf("%.16f ", output[outputRowsCount * NUM_DCT_OUTPUTS - NUM_DCT_OUTPUTS + i]);
-  }
-  printf("\n");
-
-
 
   return output;
 }
