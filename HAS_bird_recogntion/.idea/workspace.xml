@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakePresetLoader">{
+  &quot;useNewFormat&quot;: true
+}</component>
+  <component name="CMakeReloadState">
+    <option name="reloaded" value="true" />
+  </component>
+  <component name="CMakeRunConfigurationManager">
+    <generated>
+      <config projectName="HAS_bird_recogntion" targetName="Z_DUMMY_TARGET" />
+      <config projectName="HAS_bird_recogntion" targetName="Production" />
+      <config projectName="HAS_bird_recogntion" targetName="Debug" />
+    </generated>
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="portenta_h7_m7" ENABLED="true" CONFIG_NAME="portenta_h7_m7" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="47dd7fce-4cc6-4107-aba1-5c13bc2c2492" name="Changes" comment="Mfcc creation works correct. prediction get done, might be wrong.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/FSM.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/FSM.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/HASFSM.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/HASFSM.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/Mic.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/Mic.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/NeuralNetwork.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/NeuralNetwork.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/SDCardReaderAndWriter.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/SDCardReaderAndWriter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/SdramAllocator.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/SdramAllocator.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/LightSensor/DFRobot_B_LUX_V30B.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/lib/LightSensor/DFRobot_B_LUX_V30B.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/LightSensor/DFRobot_B_LUX_V30B.h" beforeDir="false" afterPath="$PROJECT_DIR$/lib/LightSensor/DFRobot_B_LUX_V30B.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/m7/FSM.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/FSM.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/m7/FirmwareLoader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/FirmwareLoader.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/m7/HASFSM.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/HASFSM.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/m7/MFCC.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/MFCC.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/m7/Mic.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/Mic.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/m7/NeuralNetwork.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/NeuralNetwork.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/m7/SDCardReaderAndWriter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/SDCardReaderAndWriter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/m7/SensorData.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/m7/SensorData.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+    </option>
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:portenta_h7_m7" />
+  <component name="Git.Rebase.Settings">
+    <option name="NEW_BASE" value="dev" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+    <option name="UPDATE_TYPE" value="REBASE" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2QYGb73y7TUi3apLIEfNuHSZOSz" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "WebServerToolWindowFactoryState": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "dev",
+    "last_opened_file_path": "C:/Git/has_bird_recognition/HAS_bird_recogntion",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "CMakeSettings",
+    "structure.view.defaults.are.configured": "true",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Git\has_bird_recognition\HAS_bird_recogntion\include" />
+      <recent name="C:\Git\has_bird_recognition\HAS_bird_recogntion\src\m7" />
+      <recent name="C:\Git\has_bird_recognition\HAS_bird_recogntion\src\m4" />
+    </key>
+  </component>
+  <component name="RunManager" selected="PlatformIO.PlatformIO Upload">
+    <configuration name="Upload M7 And M4" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="RunConfigurationTask" enabled="true" run_configuration_name="PlatformIO Upload" run_configuration_type="platformio" run_configuration_target="CMakeBuildProfile:portenta_h7_m7" />
+        <option name="RunConfigurationTask" enabled="true" run_configuration_name="PlatformIO Upload" run_configuration_type="platformio" run_configuration_target="CMakeBuildProfile:portenta_h7_m4" />
+      </method>
+    </configuration>
+    <configuration name="Z_DUMMY_TARGET" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="HAS_bird_recogntion" TARGET_NAME="Z_DUMMY_TARGET" CONFIG_NAME="portenta_h7_m7" RUN_TARGET_PROJECT_NAME="HAS_bird_recogntion" RUN_TARGET_NAME="Z_DUMMY_TARGET">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PlatformIO Debug" type="platformio" factoryName="PlatformIO Debug" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="HAS_bird_recogntion" TARGET_NAME="Debug" CONFIG_NAME="portenta_h7_m7" RUN_TARGET_PROJECT_NAME="HAS_bird_recogntion" RUN_TARGET_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PlatformIO Upload" type="platformio" factoryName="PlatformIO Upload" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="HAS_bird_recogntion" TARGET_NAME="Production" CONFIG_NAME="portenta_h7_m7" RUN_TARGET_PROJECT_NAME="HAS_bird_recogntion" RUN_TARGET_NAME="Production">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="CMake Application.Z_DUMMY_TARGET" />
+      <item itemvalue="Custom Build Application.Upload M7 And M4" />
+      <item itemvalue="PlatformIO.PlatformIO Debug" />
+      <item itemvalue="PlatformIO.PlatformIO Upload" />
+    </list>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="47dd7fce-4cc6-4107-aba1-5c13bc2c2492" name="Changes" comment="" />
+      <created>1685523170177</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1685523170177</updated>
+      <workItem from="1685523171200" duration="5425000" />
+      <workItem from="1685540724741" duration="638000" />
+      <workItem from="1685633702887" duration="38000" />
+      <workItem from="1685633744527" duration="2047000" />
+      <workItem from="1685698519834" duration="11886000" />
+      <workItem from="1686044846701" duration="46000" />
+      <workItem from="1686044896451" duration="1589000" />
+      <workItem from="1686052101744" duration="3532000" />
+      <workItem from="1686075050061" duration="4000" />
+      <workItem from="1686126467128" duration="167000" />
+      <workItem from="1686126638673" duration="5014000" />
+      <workItem from="1686131683613" duration="16911000" />
+      <workItem from="1686213409586" duration="11732000" />
+      <workItem from="1686225767899" duration="9636000" />
+      <workItem from="1686250511036" duration="21000" />
+      <workItem from="1686494445571" duration="11387000" />
+      <workItem from="1686509186978" duration="2267000" />
+      <workItem from="1686842971773" duration="15609000" />
+      <workItem from="1686860214775" duration="66000" />
+      <workItem from="1686860301869" duration="10399000" />
+      <workItem from="1686907198356" duration="25387000" />
+      <workItem from="1686953134122" duration="2045000" />
+      <workItem from="1687094313808" duration="5180000" />
+      <workItem from="1687127557041" duration="6805000" />
+      <workItem from="1687162246661" duration="9971000" />
+      <workItem from="1687177117810" duration="7611000" />
+    </task>
+    <task id="LOCAL-00001" summary="git commit failure">
+      <created>1686860230870</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1686860230870</updated>
+    </task>
+    <task id="LOCAL-00002" summary="try one failed">
+      <created>1686920053571</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1686920053571</updated>
+    </task>
+    <task id="LOCAL-00003" summary="faster predictions. converted too using cmsis">
+      <created>1686924280904</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1686924280904</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Mfcc gen works, mic output seems to be broken.">
+      <created>1687162371737</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1687162371737</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VCPKGProject">
+    <isAutomaticEditVcpkgJson value="false" />
+    <isAutomaticCheckingOnLaunch value="false" />
+    <isAutomaticFoundErrors value="true" />
+    <isAutomaticFoundErrors value="true" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="git commit failure" />
+    <MESSAGE value="try one failed" />
+    <MESSAGE value="faster predictions. converted too using cmsis" />
+    <MESSAGE value="Mfcc gen works, mic output seems to be broken." />
+    <option name="LAST_COMMIT_MESSAGE" value="Mfcc gen works, mic output seems to be broken." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/lib/eigen/src/Eigen/src/Core/util/Macros.h</url>
+          <line>1178</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
