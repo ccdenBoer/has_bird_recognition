@@ -10,7 +10,7 @@ QSPIFBlockDevice root;
 mbed::MBRBlockDevice ota_data(&root, 2);
 mbed::FATFileSystem ota_data_fs("qspi");
 
-#define ENABLE_MASS_STORAGE
+//#define ENABLE_MASS_STORAGE
 
 #ifdef ENABLE_MASS_STORAGE
 void USBMSD::begin()

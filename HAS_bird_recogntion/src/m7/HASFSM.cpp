@@ -214,6 +214,12 @@ void HASFSM::Sending() {
   status = connection.CheckStatus();
   printf("status: %d\n", status);
 
+  if (!status) {
+	printf("Failed to send data\n");
+	birdSensorFSM.raiseEvent(JOIN_FAILED);
+	return;
+  }
+
   birdSensorFSM.raiseEvent(SEND_SUCCEEDED);
 }
 
