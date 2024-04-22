@@ -1,7 +1,7 @@
 #include <LoRaConnection.h>
 #include <Arduino.h>
 
-#define LORA_SERIAL Serial3
+#define LORA_SERIAL Serial1
 
 /*
  * Public methods declaration

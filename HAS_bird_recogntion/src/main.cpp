@@ -15,18 +15,20 @@ void toggleLed() {
   delay(500);
 }
 
-//#define USB_CONNECTED
+#define USB_CONNECTED
 void setup() {
   Serial.begin(115200);
-  SDRAM.begin(SDRAM_START_ADDRESS);
-  pinMode(LEDB, OUTPUT);
 
 #ifdef USB_CONNECTED
   while (!Serial) {
 	delay(100);
   }
   delay(100);
+  printf("Serial Connected!\n");
 #endif
+
+  SDRAM.begin(SDRAM_START_ADDRESS);
+  pinMode(LEDB, OUTPUT);
 
   delay(100);
 

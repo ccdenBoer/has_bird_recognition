@@ -5,9 +5,11 @@
 #include <MBRBlockDevice.h>
 #include <FATFileSystem.h>
 #include "PluggableUSBMSD.h"
+#include "SDMMCBlockDevice.h"
 
 QSPIFBlockDevice root;
-mbed::MBRBlockDevice ota_data(&root, 2);
+//mbed::MBRBlockDevice ota_data(&root, 2);
+SDMMCBlockDevice ota_data;
 mbed::FATFileSystem ota_data_fs("qspi");
 
 //#define ENABLE_MASS_STORAGE
@@ -37,19 +39,19 @@ long getFileSize(FILE *fp) {
 void waitForCorrectQspi() {
   int err = ota_data_fs.mount(&ota_data);
   if (err) {
-	printf("Error mounting qspi not formatted correctly\n");
-	while (true) {
-	  delay(10000);
-	}
+	  printf("Error mounting qspi not formatted correctly\n");
+	  while (true) {
+	    delay(10000);
+	  }
   }
   printf("Qspi correctly formatted and has a size of %llu\n", ota_data.size());
   // write small file to QSPI too see if it works
   FILE *fp = fopen("/qspi/placeFwHere", "w");
   if (fp == nullptr) {
 	printf("error opening file\n");
-	while (true) {
-	  delay(10000);
-	}
+	  while (true) {
+	    delay(10000);
+	  }
   }
   fprintf(fp, "Hello World");
   fclose(fp);
@@ -60,7 +62,7 @@ tfLiteModel_t tfliteToSdram() {
   // Copy M4 firmware to SDRAM
   FILE *fw = fopen("/qspi/model.tflite", "r");
   if (fw == nullptr) {
-	printf("Please copy a tfLite model onto the PORTENTA mass storage\t");
+	printf("Please copy a tfLite model onto the PORTENTA mass storage\n");
 	printf("When done, please unmount the mass storage and reset the board\n");
 //	   MassStorage.begin();
 	while (true) {
