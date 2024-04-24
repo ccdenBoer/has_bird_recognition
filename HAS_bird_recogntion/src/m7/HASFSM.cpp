@@ -12,14 +12,14 @@ HASFSM::HASFSM() : model(loadTfliteModel()) {
   printf("Initializing mfcc\n");
   mfcc = MFCC();
   printf("Initializing neural network\n");
-  neuralNetwork = new NeuralNetwork(model.data, tensor_arena_size, 11);
+  neuralNetwork = new NeuralNetwork(model.data, tensor_arena_size, 7);
   printf("Initializing sensors\n");
   sensorData = SensorData();
   printf("Initializing lora connection\n");
   connection = LoRaConnection();
   //connection.InitialSetup();
 
-  printf("Initializing MicroSD reder/writer");
+  printf("Initializing MicroSD reader/writer");
   sd = SDCardReaderAndWriter();
   lastTimeSent = 0;
   sensorData.GetGPSLocation(location);

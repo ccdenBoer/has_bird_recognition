@@ -65,7 +65,7 @@ NeuralNetwork::result_t NeuralNetwork::Predict() {
   printf("NeuralNetwork: Time between predictions: %lu\n", timeBetweenPredictions);
 
   NeuralNetwork::result_t result = NeuralNetwork::result_t();
-  const char *class_names[11] = {"Wilde Eend", "Tjiftjaf", "Koolmees", "Houtduif", "Huismus", "Merel", "Winterkoning", "Fitis", "Vink", "Spreeuw", "Geen Vogel"};
+  const char *class_names[7] = {"Sylvia borin", "Cettia cetti", "Phylloscopus trochilus", "Acrocephalus scirpaceus", "Strix aluco", "Hippolais icterina", "Rallus aquaticus"};
 
   Serial.println("NeuralNetwork: Started prediction");
   TfLiteStatus invoke_status = interpreter->Invoke();
