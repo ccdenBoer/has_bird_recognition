@@ -12,11 +12,14 @@ HASFSM::HASFSM() : model(loadTfliteModel()) {
   printf("Initializing mfcc\n");
   mfcc = MFCC();
   printf("Initializing neural network\n");
-  //neuralNetwork = new NeuralNetwork(model.data, tensor_arena_size, 11);
+  neuralNetwork = new NeuralNetwork(model.data, tensor_arena_size, 11);
   printf("Initializing sensors\n");
   sensorData = SensorData();
   printf("Initializing lora connection\n");
   connection = LoRaConnection();
+  //connection.InitialSetup();
+
+  printf("Initializing MicroSD reder/writer");
   sd = SDCardReaderAndWriter();
   lastTimeSent = 0;
   sensorData.GetGPSLocation(location);
@@ -59,26 +62,26 @@ void HASFSM::Listening() {
   printf("MFCC took %ld ms\n", finish - start);
   mic.audioBufferClear();
 
-  //neuralNetwork->InputData(mfcc_buffer);
+  neuralNetwork->InputData(mfcc_buffer);
   start = millis();
-  //NeuralNetwork::result_t prediction = neuralNetwork->Predict();
+  NeuralNetwork::result_t prediction = neuralNetwork->Predict();
   finish = millis();
   printf("Prediction took %ld ms\n", finish - start);
   // also print in seconds
   printf("Prediction took %f s\n", (finish - start) / 1000.0);
 
   // Check for bird and update AI data
-  //bool birdFound = strcmp(prediction.class_name, "Geen Vogel") != 0;
+  bool birdFound = strcmp(prediction.class_name, "Geen Vogel") != 0;
 
-  //lastRecognizedBird = prediction.predicted_class;
-  //recognitionAccuracy = prediction.confidence;
+  lastRecognizedBird = prediction.predicted_class;
+  recognitionAccuracy = prediction.confidence;
 
   //TODO
   //Fix neural network file
 
-  bool birdFound = true;
-  lastRecognizedBird = 0;
-  recognitionAccuracy = 0;
+  //bool birdFound = true;
+  //lastRecognizedBird = 0;
+  //recognitionAccuracy = 0;
 
   // Raise new event if a bird was found
   if (birdFound) {
@@ -123,9 +126,9 @@ void HASFSM::GatheringData() {
   correctMeasurements =
 	  sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
 
-  static unsigned int fileIndex = 0;
-  char fileName[22];
-  sprintf(fileName, "/sd-card/test%d.json\n", fileIndex);
+  static unsigned int fileIndex = sd.GetAmountOfFiles("/sd-card/measurements/");
+  char fileName[60];
+  sprintf(fileName, "/sd-card/measurements/MEASUREMENT%d.json\n", fileIndex);
   fileIndex++;
 
   // Sent measurements to SDCard

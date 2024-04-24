@@ -13,7 +13,7 @@ void LoRaConnection::InitConnection()
     LORA_SERIAL.begin(9600); // Start the LoRa serial at a BaudRate of 9600
 
     printf("Send key\n");
-    this->SendKey((char *)"2B7E151628AED2A6ABF7158809CF4F3C", (char *)"2B7E151628AED2A6ABF7158809CF4F3C", (char *)"2B7E151628AED2A6ABF7158809CF4F3C");
+    this->SendKey((char *)"B1A9F4100B99FB903D2C271D629CDF89", (char *)"B1A9F4100B99FB903D2C271D629CDF89", (char *)"B1A9F4100B99FB903D2C271D629CDF89");
 
   	printf("Set mode\n");
     this->SetDeviceMode(LWOTAA);
@@ -65,16 +65,19 @@ void LoRaConnection::InitialSetup()
         // DevEui
         this->SendCommand((char *)"AT+ID=DevEui\r\n");
         this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 10);
+        Serial.println("Lora:");
         Serial.println(loraBuffer);
 
         // DevAddr
         this->SendCommand((char *)"AT+ID=DevAddr\r\n");
         this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 10);
+        Serial.println("Lora:");
         Serial.println(loraBuffer);
 
         // AppEUI
         this->SendCommand((char *)"AT+ID=AppEui\r\n");
         this->ReadBuffer(loraBuffer, MAX_BUFFER_LENGTH, 10);
+        Serial.println("Lora:");
         Serial.println(loraBuffer);
     }
     else
