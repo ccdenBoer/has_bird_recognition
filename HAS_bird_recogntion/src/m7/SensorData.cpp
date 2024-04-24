@@ -2,7 +2,7 @@
 #include <Adafruit_GPS.h>
 
 //SensorData sensor;
-#define GPSSerial Serial1
+#define GPSSerial Serial3
 
 Adafruit_GPS GPS(&GPSSerial);
 //float* location = nullptr;
@@ -12,10 +12,10 @@ Adafruit_GPS GPS(&GPSSerial);
 void SensorData::InitSensors() {
   Serial.println("Light init");
   //Init light sensor
-  lightSensor.begin();
+  //lightSensor.begin();
 
   Serial.println("Battery init");
-  pinMode(BATTERY_PERCENTAGE_INPUT, INPUT);
+  //pinMode(BATTERY_PERCENTAGE_INPUT, INPUT);
 
   Serial.println("AHT init");
   //Init AHT20
@@ -29,8 +29,8 @@ void SensorData::InitSensors() {
 
   Serial.println("Rain init");
   //Init of rain sensor
-  pinMode(RAIN_SENSOR_ANALOG_INPUT, INPUT);
-  pinMode(RAIN_SENSOR_DIGITAL_INPUT, INPUT);
+  //pinMode(RAIN_SENSOR_ANALOG_INPUT, INPUT);
+  //pinMode(RAIN_SENSOR_DIGITAL_INPUT, INPUT);
 
   Serial.println("Start GPS...");
   //Init GPS sensor
@@ -79,6 +79,7 @@ int SensorData::GetBatteryPercentage(){
 }
 
 bool SensorData::GetGPSLocation(float buffer[2]) {
+	printf("Getting GPS Location\n");
   char c = GPS.read();
   // if you want to debug, this is a good time to do it!
   if (c & GPSECHO) printf("%c\n",c);

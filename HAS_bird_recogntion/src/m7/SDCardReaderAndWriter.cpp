@@ -97,12 +97,13 @@ char *SDCardReaderAndWriter::ReadFileData(char *fileName)
   return buffer;
 }
 
-int SDCardReaderAndWriter::GetAmountOfFiles(DIR *dp)
+int SDCardReaderAndWriter::GetAmountOfFiles(char *dirName)
 {
   int count = 0;
   struct dirent *entry = nullptr;
+  DIR *dirPointer = opendir(dirName);
 
-  while ((entry = readdir(dp)) != NULL)
+  while ((entry = readdir(dirPointer)) != NULL)
   {
     if (entry->d_type == DT_REG)
     {
@@ -110,7 +111,7 @@ int SDCardReaderAndWriter::GetAmountOfFiles(DIR *dp)
     }
   }
 
-  rewinddir(dp);
+  rewinddir(dirPointer);
 
   printf("Amount of files: %d\n", count);
 

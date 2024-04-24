@@ -18,7 +18,7 @@
 #define GPS_TX_PIN                  0
 #define GPS_RX_PIN                  0
 
-#define GPS_SERIAL                  Serial1 //RX1 and TX
+#define GPS_SERIAL                  Serial3 //RX1 and TX
 #define GPS_ECHO                    false
 
 #define MIN_TEMP                    -45

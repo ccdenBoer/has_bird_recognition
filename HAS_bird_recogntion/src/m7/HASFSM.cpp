@@ -12,11 +12,14 @@ HASFSM::HASFSM() : model(loadTfliteModel()) {
   printf("Initializing mfcc\n");
   mfcc = MFCC();
   printf("Initializing neural network\n");
-  neuralNetwork = new NeuralNetwork(model.data, tensor_arena_size, 11);
+  neuralNetwork = new NeuralNetwork(model.data, tensor_arena_size, 7);
   printf("Initializing sensors\n");
   sensorData = SensorData();
   printf("Initializing lora connection\n");
   connection = LoRaConnection();
+  //connection.InitialSetup();
+
+  printf("Initializing MicroSD reader/writer");
   sd = SDCardReaderAndWriter();
   lastTimeSent = 0;
   sensorData.GetGPSLocation(location);
@@ -46,7 +49,7 @@ void HASFSM::Listening() {
   // printf("Listening\n");
 
   while (!mic.audioBufferReady()) {
-	yield();
+	  yield();
 	return;
   }
 
@@ -69,8 +72,16 @@ void HASFSM::Listening() {
 
   // Check for bird and update AI data
   bool birdFound = strcmp(prediction.class_name, "Geen Vogel") != 0;
+
   lastRecognizedBird = prediction.predicted_class;
   recognitionAccuracy = prediction.confidence;
+
+  //TODO
+  //Fix neural network file
+
+  //bool birdFound = true;
+  //lastRecognizedBird = 0;
+  //recognitionAccuracy = 0;
 
   // Raise new event if a bird was found
   if (birdFound) {
@@ -80,12 +91,12 @@ void HASFSM::Listening() {
 
 void HASFSM::GatheringData() {
   // Gather data
-  auto lightIntensity = sensorData.GetLightIntensity();
+  auto lightIntensity = 0;
 
   auto temperature = sensorData.GetTemperature();
   auto humidity = sensorData.GetHumidity();
 
-  auto raining = sensorData.GetRainThreshold();
+  auto raining = 0;
 
   // TODO:
   //  Fix rain coverage analog read
@@ -98,7 +109,7 @@ void HASFSM::GatheringData() {
 
 
   // Check if day has passed to gather GPS data
-  if ((millis() - lastTimeGSPGathered) > 86400000) {
+  if ((millis() - lastTimeGSPGathered) < 86400000) {
 	int gpsAttempts = 0;
 	while (!sensorData.GetGPSLocation(location)) {
 	  gpsAttempts++;
@@ -115,9 +126,9 @@ void HASFSM::GatheringData() {
   correctMeasurements =
 	  sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
 
-  static unsigned int fileIndex = 0;
-  char fileName[22];
-  sprintf(fileName, "/sd-card/test%d.json\n", fileIndex);
+  static unsigned int fileIndex = sd.GetAmountOfFiles("/sd-card/measurements/");
+  char fileName[60];
+  sprintf(fileName, "/sd-card/measurements/MEASUREMENT%d.json\n", fileIndex);
   fileIndex++;
 
   // Sent measurements to SDCard
@@ -166,6 +177,7 @@ void HASFSM::Sending() {
   joined = true;
 
   // Read data from SD-Card
+  printf("Opening SD-Card\n");
   DIR *dp = opendir("sd-card/.");
   struct dirent *entry;
 
@@ -184,6 +196,7 @@ void HASFSM::Sending() {
 	  continue;
 
 	// Open and read file content
+  printf("Read SD-Card File\n");
 	char filePath[512];
 	sprintf(filePath, "sd-card/%s", entry->d_name);
 
@@ -195,6 +208,7 @@ void HASFSM::Sending() {
 	remove(filePath);
   }
 
+  printf("Create Payload\n");
   payload_t ttnPayload;
   ttnPayload.messageCount = messages.size();
   ttnPayload.messages = messages.data();
@@ -249,23 +263,14 @@ void HASFSM::InitHASFSM() {
   birdSensorFSM.addState(FSM_States::STATE_NOT_CONNECTED, [this] { NotConnected(); });
 
   // Initializing transistions
-  birdSensorFSM
-	  .addTransition(FSM_States::STATE_INITIALIZING, FSM_Events::SENSORS_INITIALIZED, FSM_States::STATE_LISTENING);
-  birdSensorFSM.addTransition(FSM_States::STATE_INITIALIZING,
-							  FSM_Events::INITIALIZING_FAILED,
-							  FSM_States::STATE_INITIALIZING_FAILED);
-
+  birdSensorFSM.addTransition(FSM_States::STATE_INITIALIZING, FSM_Events::SENSORS_INITIALIZED, FSM_States::STATE_LISTENING);
+  birdSensorFSM.addTransition(FSM_States::STATE_INITIALIZING, FSM_Events::INITIALIZING_FAILED, FSM_States::STATE_INITIALIZING_FAILED);
   birdSensorFSM.addTransition(FSM_States::STATE_LISTENING, FSM_Events::BIRD_FOUND, FSM_States::STATE_GATHERING_DATA);
-  birdSensorFSM
-	  .addTransition(FSM_States::STATE_GATHERING_DATA, FSM_Events::SEND_INTERVAL_REACHED, FSM_States::STATE_SENDING);
-  birdSensorFSM.addTransition(FSM_States::STATE_GATHERING_DATA,
-							  FSM_Events::SEND_INTERVAL_NOT_REACHED,
-							  FSM_States::STATE_LISTENING);
+  birdSensorFSM.addTransition(FSM_States::STATE_GATHERING_DATA, FSM_Events::SEND_INTERVAL_REACHED, FSM_States::STATE_SENDING);
+  birdSensorFSM.addTransition(FSM_States::STATE_GATHERING_DATA,FSM_Events::SEND_INTERVAL_NOT_REACHED, FSM_States::STATE_LISTENING);
   birdSensorFSM.addTransition(FSM_States::STATE_SENDING, FSM_Events::SEND_SUCCEEDED, FSM_States::STATE_LISTENING);
   birdSensorFSM.addTransition(FSM_States::STATE_SENDING, FSM_Events::JOIN_FAILED, FSM_States::STATE_NOT_CONNECTED);
   birdSensorFSM.addTransition(FSM_States::STATE_NOT_CONNECTED, FSM_Events::JOIN_SUCCESFULL, FSM_States::STATE_SENDING);
-  birdSensorFSM
-	  .addTransition(FSM_States::STATE_NOT_CONNECTED, FSM_Events::CONNECT_FAILED, FSM_States::STATE_NOT_CONNECTED);
-  birdSensorFSM
-	  .addTransition(FSM_States::STATE_NOT_CONNECTED, FSM_Events::CONNECTION_TIMEOUT, FSM_States::STATE_LISTENING);
+  birdSensorFSM.addTransition(FSM_States::STATE_NOT_CONNECTED, FSM_Events::CONNECT_FAILED, FSM_States::STATE_NOT_CONNECTED);
+  birdSensorFSM.addTransition(FSM_States::STATE_NOT_CONNECTED, FSM_Events::CONNECTION_TIMEOUT, FSM_States::STATE_LISTENING);
 }
