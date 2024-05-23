@@ -4,7 +4,7 @@
 #include <DFRobot_B_LUX_V30B.h>
 #include <DFRobot_AHT20.h>
 #include <Arduino.h>
-#include <Adafruit_GPS.h>
+#include "GPSParser.h"
 
 #define LIGHT_SENSOR_INPUT_PIN      27
 #define LIGHT_SENSOR_SCL_PIN        149
@@ -14,12 +14,6 @@
 #define RAIN_SENSOR_DIGITAL_INPUT   71
 
 #define BATTERY_PERCENTAGE_INPUT    PIN_A2 //A2
-
-#define GPS_TX_PIN                  0
-#define GPS_RX_PIN                  0
-
-#define GPS_SERIAL                  Serial3 //RX1 and TX
-#define GPS_ECHO                    false
 
 #define MIN_TEMP                    -45
 #define MAX_TEMP                    85
@@ -53,7 +47,8 @@ class SensorData {
         int     GetRainSurface();     //Method which returns the coverage of the rain on the sensor
 
         //GPS sensor
-        bool  GetGPSLocation(float buffer[2]);     //Method which returns the current location of the sensor
+        void getDateTime(char* dateTime);
+        void getLocation(float location[2]);
 
         //Battery Percentage
         int GetBatteryPercentage(); //Method which returns the current percentage of the battery capacity
@@ -67,8 +62,8 @@ class SensorData {
     private:
         DFRobot_B_LUX_V30B  lightSensor = DFRobot_B_LUX_V30B(LIGHT_SENSOR_INPUT_PIN, LIGHT_SENSOR_SCL_PIN, LIGHT_SENSOR_SDA_PIN);
         DFRobot_AHT20       tempAndHumiditySensor;
+        GPSParser           gpsParser;
 
-        Adafruit_GPS        GPS     = Adafruit_GPS(&GPS_SERIAL);
         uint32_t            timer   = millis();
 };
 

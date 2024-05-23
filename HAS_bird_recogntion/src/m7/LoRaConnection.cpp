@@ -1,7 +1,7 @@
 #include <LoRaConnection.h>
 #include <Arduino.h>
 
-#define LORA_SERIAL Serial1
+#define LORA_SERIAL Serial3
 
 /*
  * Public methods declaration
@@ -49,7 +49,7 @@ void LoRaConnection::InitialSetup()
     printf("memset\n");
 
     LORA_SERIAL.begin(9600);
-	printf("Serial start\n");
+	printf("LoRa Serial start\n");
 
     // Serial.println("LoRa Initial");
     this->SendCommand("AT\r\n");

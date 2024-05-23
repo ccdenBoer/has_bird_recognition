@@ -4,12 +4,11 @@
 #include "tensorflow/lite/micro/system_setup.h"
 #include "tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h"
 
-NeuralNetwork::NeuralNetwork(uint8_t *model_data, int tensor_arena_size, int numberOfClasses) {
+NeuralNetwork::NeuralNetwork(uint8_t *model_data, int tensor_arena_size) {
   tflite::InitializeTarget();
   printf("Starting NN init\n");
 
   this->tensor_arena_size = tensor_arena_size;
-  this->numberOfClasses = numberOfClasses;
   this->error_reporter = new tflite::MicroErrorReporter();
   printf("NeuralNetwork: Created error reporter\n");
   this->model = tflite::GetModel(model_data);
@@ -26,7 +25,7 @@ NeuralNetwork::NeuralNetwork(uint8_t *model_data, int tensor_arena_size, int num
   tensor_arena = Uint8Allocator.allocate(size);
 
   if (tensor_arena == nullptr) {
-	printf("NeuralNetwork: Tensor arena allocation failed\n");
+	  printf("NeuralNetwork: Tensor arena allocation failed\n");
   }
 
   printf("NeuralNetwork: Created tensor arena size: %d\n", size);
@@ -34,7 +33,9 @@ NeuralNetwork::NeuralNetwork(uint8_t *model_data, int tensor_arena_size, int num
   printf("NeuralNetwork: Interpreter created\n");
   this->interpreter->AllocateTensors();
   printf("NeuralNetwork: AllocateTensors done\n");
+  printf("neural network crashes here -----before\n");
   this->input_data = interpreter->typed_input_tensor<float>(0);
+  printf("neural network crashes here -----after\n");
 
   //get input shape from model
   this->input_shape = interpreter->input_tensor(0)->dims->data;
@@ -65,7 +66,7 @@ NeuralNetwork::result_t NeuralNetwork::Predict() {
   printf("NeuralNetwork: Time between predictions: %lu\n", timeBetweenPredictions);
 
   NeuralNetwork::result_t result = NeuralNetwork::result_t();
-  const char *class_names[7] = {"Sylvia borin", "Cettia cetti", "Phylloscopus trochilus", "Acrocephalus scirpaceus", "Strix aluco", "Hippolais icterina", "Rallus aquaticus"};
+  const char *class_names[NUMBER_OF_CLASSES] = {"Sylvia borin", "Cettia cetti", "Phylloscopus trochilus", "Acrocephalus scirpaceus", "Strix aluco", "Hippolais icterina", "Rallus aquaticus"};
 
   Serial.println("NeuralNetwork: Started prediction");
   TfLiteStatus invoke_status = interpreter->Invoke();
@@ -82,7 +83,7 @@ NeuralNetwork::result_t NeuralNetwork::Predict() {
   float max_confidence = 0;
   int index = -1;
   Serial.println("NeuralNetwork: Compute prediction");
-  for (int i = 0; i < this->numberOfClasses; i++) {
+  for (int i = 0; i < NUMBER_OF_CLASSES; i++) {
 	auto prediction = output->data.f[i];
 	Serial.print("Output ");
 	Serial.print(class_names[i]);

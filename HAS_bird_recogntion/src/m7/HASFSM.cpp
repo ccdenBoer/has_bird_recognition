@@ -3,8 +3,9 @@
 #include <SdramAllocator.h>
 #include <TTNFormatter.h>
 
-int tensor_arena_size = 1024 * 1024 * 5;
+int tensor_arena_size = 1024 * 1024 * 4;
 float location[2];
+static int totalMeasurements;
 
 HASFSM::HASFSM() : model(loadTfliteModel()) {
   printf("Initializing mic\n");
@@ -12,17 +13,16 @@ HASFSM::HASFSM() : model(loadTfliteModel()) {
   printf("Initializing mfcc\n");
   mfcc = MFCC();
   printf("Initializing neural network\n");
-  neuralNetwork = new NeuralNetwork(model.data, tensor_arena_size, 7);
+  neuralNetwork = new NeuralNetwork(model.data, tensor_arena_size);
   printf("Initializing sensors\n");
   sensorData = SensorData();
   printf("Initializing lora connection\n");
   connection = LoRaConnection();
-  //connection.InitialSetup();
-
-  printf("Initializing MicroSD reader/writer");
+  connection.InitialSetup();
+  
+  printf("Initializing MicroSD reader/writer\n");
   sd = SDCardReaderAndWriter();
   lastTimeSent = 0;
-  sensorData.GetGPSLocation(location);
 }
 
 void HASFSM::Initializing() {
@@ -32,6 +32,9 @@ void HASFSM::Initializing() {
   connection.InitConnection();
 
   sd.InitSDCardReaderAndWriter();
+
+  //get the total files in the measurment folder so not all get sent every time
+  totalMeasurements = sd.GetAmountOfFiles("/sd-card/measurements/");
 
   // Raise new event after checking mic
   if (mic.begin()) {
@@ -109,26 +112,20 @@ void HASFSM::GatheringData() {
 
 
   // Check if day has passed to gather GPS data
-  if ((millis() - lastTimeGSPGathered) < 86400000) {
-	int gpsAttempts = 0;
-	while (!sensorData.GetGPSLocation(location)) {
-	  gpsAttempts++;
-	  if (gpsAttempts > 10) {
-		break;
-	  }
-	}
-	lastTimeGSPGathered = millis();
-  }
+    char dateTime[30];
+  sensorData.getDateTime(dateTime);
+  printf("Current time: %s\n", dateTime);
 
-
+	sensorData.getLocation(location);
 
   // Validate
   correctMeasurements =
 	  sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
 
-  static unsigned int fileIndex = sd.GetAmountOfFiles("/sd-card/measurements/");
-  char fileName[60];
-  sprintf(fileName, "/sd-card/measurements/MEASUREMENT%d.json\n", fileIndex);
+  static int fileIndex = sd.GetAmountOfFiles("/sd-card/measurements/");
+  char fileName[80];
+  sprintf(fileName, "/sd-card/measurements/%s_%d.json\n", dateTime, fileIndex);
+  printf("Filename for new Measurement:%s\n", fileName);
   fileIndex++;
 
   // Sent measurements to SDCard
@@ -178,7 +175,7 @@ void HASFSM::Sending() {
 
   // Read data from SD-Card
   printf("Opening SD-Card\n");
-  DIR *dp = opendir("sd-card/.");
+  DIR *dp = opendir("/sd-card/measurements/");
   struct dirent *entry;
 
   // Loop through every file in the directory
@@ -188,9 +185,9 @@ void HASFSM::Sending() {
   }
 
   std::vector<message_t, SdramAllocator<message_t>> messages;
-  int index = 0;
+  int index = totalMeasurements;
 
-  while ((entry = readdir(dp)) && index < 15) {
+  while ((entry = readdir(dp)) && index < (totalMeasurements + 15)) {
 	// if not json file, skip
 	if (!strstr(entry->d_name, ".json"))
 	  continue;
@@ -198,14 +195,15 @@ void HASFSM::Sending() {
 	// Open and read file content
   printf("Read SD-Card File\n");
 	char filePath[512];
-	sprintf(filePath, "sd-card/%s", entry->d_name);
+	sprintf(filePath, "/sd-card/measurements/%s", entry->d_name);
+  printf("File to payload: %s\n", filePath);
 
 	char *bufferString = sd.ReadFileData(filePath);
 
 	messages.push_back(TTNFormatter::convertStringToMessage(bufferString));
 	index++;
 	// Remove data
-	remove(filePath);
+	//remove(filePath);
   }
 
   printf("Create Payload\n");
@@ -234,6 +232,7 @@ void HASFSM::Sending() {
 	return;
   }
 
+  totalMeasurements += index;
   birdSensorFSM.raiseEvent(SEND_SUCCEEDED);
 }
 
