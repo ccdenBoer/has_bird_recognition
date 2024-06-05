@@ -23,13 +23,13 @@ bool SDCardReaderAndWriter::InitSDCardReaderAndWriter()
 }
 
 void SDCardReaderAndWriter::WriteToSDCard(const char *fileName,
+                                          char* dateTime,
                                           int birdType,
                                           float birdAccuracy,
                                           float lightIntensity,
                                           float temp,
                                           float hum,
-                                          int rainSurface,
-                                          bool raining,
+                                          float rainLastHour,
                                           int batteryPercentage,
                                           float lat,
                                           float lon,
@@ -44,23 +44,23 @@ void SDCardReaderAndWriter::WriteToSDCard(const char *fileName,
 	printf("Error: %s\n", strerror(errno));
     return;
   }
-  printf("File created");
+  printf("File created\n");
 
   // Create JSON object
   StaticJsonDocument<AMOUNT_OF_ITEMS_TO_WRITE> doc;
   doc["birdType"] = birdType;
+  doc["date/time"] = dateTime;
   doc["birdAccuracy"] = birdAccuracy;
   doc["lightIntensity"] = lightIntensity;
   doc["temperature"] = temp;
   doc["humidity"] = hum;
-  doc["rainCoverage"] = rainSurface;
-  doc["raining"] = raining;
+  doc["rainLastHour"] = rainLastHour;
   doc["batteryPercentage"] = batteryPercentage;
   doc["lattitude"] = lat;
   doc["longtitude"] = lon;
   doc["validation"] = validation;
 
-  printf("JSON Created");
+  printf("JSON Created\n");
 
   char output[1024];
   serializeJson(doc, output);
@@ -72,7 +72,7 @@ void SDCardReaderAndWriter::WriteToSDCard(const char *fileName,
 
   // Close file
   fclose(filePointer);
-  printf("File closed");
+  printf("File closed\n");
 }
 
 long getFileSize2(FILE *fp)

@@ -28,6 +28,7 @@ HASFSM::HASFSM() : model(loadTfliteModel()) {
 void HASFSM::Initializing() {
   mfcc.begin(SAMPLE_RATE, SAMPLE_TIME);
   sensorData.InitSensors();
+
   printf("Initializing\n");
   connection.InitConnection();
 
@@ -45,12 +46,10 @@ void HASFSM::Initializing() {
 }
 
 void HASFSM::InitializingFailed() {
-  printf("Initializing failed\n");
+  printf("Initializing failed\n"); 
 }
 
 void HASFSM::Listening() {
-  // printf("Listening\n");
-
   while (!mic.audioBufferReady()) {
 	  yield();
 	return;
@@ -79,13 +78,6 @@ void HASFSM::Listening() {
   lastRecognizedBird = prediction.predicted_class;
   recognitionAccuracy = prediction.confidence;
 
-  //TODO
-  //Fix neural network file
-
-  //bool birdFound = true;
-  //lastRecognizedBird = 0;
-  //recognitionAccuracy = 0;
-
   // Raise new event if a bird was found
   if (birdFound) {
 	birdSensorFSM.raiseEvent(BIRD_FOUND);
@@ -94,49 +86,50 @@ void HASFSM::Listening() {
 
 void HASFSM::GatheringData() {
   // Gather data
-  auto lightIntensity = 0;
+  float lightIntensity = 0;
+  printf("Light Intensity: %f\n", lightIntensity);
 
-  auto temperature = sensorData.GetTemperature();
-  auto humidity = sensorData.GetHumidity();
+  float rainLastHour = sensorData.GetRainLastHour();
+  printf("Rain last hour: %f mm\n", rainLastHour);
 
-  auto raining = 0;
-
-  // TODO:
-  //  Fix rain coverage analog read
-  //  auto rainCoverage = sensorData.GetRainSurface();
-  auto rainCoverage = 0;
+  float temperature = sensorData.GetTemperature();
+  printf("Temperature: %f C\n", temperature);
+  float humidity = sensorData.GetHumidity();
+  printf("Humidity: %f %\n", humidity);
 
   // TODO:
   //  Fix battery percentage analog read
-  //  batteryPercentage = sensorData.GetBatteryPercentage();
+  auto batteryPercentage = 0;
 
-
-  // Check if day has passed to gather GPS data
-    char dateTime[30];
+  // Get the current UTC time and location
+  char dateTime[40];
   sensorData.getDateTime(dateTime);
-  printf("Current time: %s\n", dateTime);
+  printf("Current date/time: %s\n", dateTime);
 
-	sensorData.getLocation(location);
+	//sensorData.getLocation(location);
+  location[0] = 0;
+  location[1] = 0;
+  printf("Longitude: %f, Latitude: %f\n", location[0],location[1]);
 
   // Validate
   correctMeasurements =
-	  sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
+	  sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainLastHour, batteryPercentage);
 
   static int fileIndex = sd.GetAmountOfFiles("/sd-card/measurements/");
-  char fileName[80];
+  char fileName[60];
   sprintf(fileName, "/sd-card/measurements/%s_%d.json\n", dateTime, fileIndex);
   printf("Filename for new Measurement:%s\n", fileName);
   fileIndex++;
 
   // Sent measurements to SDCard
   sd.WriteToSDCard(fileName,
+           dateTime,
 				   lastRecognizedBird,
 				   recognitionAccuracy,
 				   lightIntensity,
 				   temperature,
 				   humidity,
-				   rainCoverage,
-				   raining,
+				   rainLastHour,
 				   batteryPercentage,
 				   location[0],
 				   location[1],
@@ -144,7 +137,6 @@ void HASFSM::GatheringData() {
   printf("Data written to SD card\n");
 
   //  check written data
-
   sd.ReadFileData(fileName);
 
   // Check send interval
@@ -231,7 +223,6 @@ void HASFSM::Sending() {
 	birdSensorFSM.raiseEvent(JOIN_FAILED);
 	return;
   }
-
   totalMeasurements += index;
   birdSensorFSM.raiseEvent(SEND_SUCCEEDED);
 }

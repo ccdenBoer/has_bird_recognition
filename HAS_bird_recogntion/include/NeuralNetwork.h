@@ -15,7 +15,7 @@
 #undef NEED_ABS_RESTORED
 #endif
 
-#define NUMBER_OF_CLASSES 7
+#define NUMBER_OF_CLASSES 20
 
 class NeuralNetwork {
     private:

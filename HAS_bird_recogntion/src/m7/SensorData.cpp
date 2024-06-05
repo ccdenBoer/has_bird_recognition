@@ -1,9 +1,7 @@
 #include "SensorData.h"
 
-//float* location = nullptr;
-
 void SensorData::InitSensors() {
-  Serial.println("Light init");
+  //Serial.println("Light init");
   //Init light sensor
   //lightSensor.begin();
 
@@ -22,8 +20,10 @@ void SensorData::InitSensors() {
 
   Serial.println("Rain init");
   //Init of rain sensor
-  //pinMode(RAIN_SENSOR_ANALOG_INPUT, INPUT);
-  //pinMode(RAIN_SENSOR_DIGITAL_INPUT, INPUT);
+    while (!rainfallSensor.begin()) {
+      Serial.println("Rainfall initialization failed.");
+      delay(1000);
+  }
 
   Serial.println("Start GPS...");
   gpsParser.setup();
@@ -32,7 +32,7 @@ void SensorData::InitSensors() {
 }
 
 float SensorData::GetLightIntensity() {
-  return lightSensor.lightStrengthLux();
+  return 0;
 }
 
 float SensorData::GetTemperature() {
@@ -47,12 +47,8 @@ float SensorData::GetHumidity() {
   return tempAndHumiditySensor.getHumidity_RH();
 }
 
-bool SensorData::GetRainThreshold() {
-  return digitalRead(RAIN_SENSOR_DIGITAL_INPUT);
-}
-
-int SensorData::GetRainSurface() {
-  return map(analogRead(RAIN_SENSOR_ANALOG_INPUT), 1950, 0, 0, 256);
+float SensorData::GetRainLastHour() {
+  return rainfallSensor.getRainfall(1);
 }
 
 int SensorData::GetBatteryPercentage(){
@@ -79,8 +75,7 @@ void SensorData::getLocation(float location[2]){
 uint8_t SensorData::ValidateSensorData(float lightIntensity,
 									   float temp,
 									   float hum,
-									   int rainSurface,
-									   bool raining,
+									   float rainLastHour,
 									   int percentage) {
   //Check light intensity, cant be under 0 and above 200klx
   bool correctLightIntensity = (lightIntensity >= MIN_LIGHT_VALUE && lightIntensity <= MAX_LIGHT_VALUE);
@@ -92,15 +87,14 @@ uint8_t SensorData::ValidateSensorData(float lightIntensity,
   bool correctHumidity = (hum >= MIN_HUM && hum <= MAX_HUM);
 
   //Check rain coverage, cant be under 0 and above 256
-  bool corretRainCoverage = (rainSurface >= MIN_COVERAGE && rainSurface < MAX_COVERAGE);
+  bool correctRain = (rainLastHour >= MIN_COVERAGE);
 
   //Check percentage, cant be below 0% or above 100%
   bool correctPercentage = (percentage >= MIN_BATTERY_PERCENTAGE && percentage <= MAX_BATTERY_PERCENTAGE);
 
-  return (correctLightIntensity << 5)
-	  | (correctTemperature << 4)
-	  | (correctHumidity << 3)
-	  | (raining << 2)
-	  | (corretRainCoverage << 1)
+  return (correctLightIntensity << 4)
+	  | (correctTemperature << 3)
+	  | (correctHumidity << 2)
+	  | (correctRain << 1)
 	  | (correctPercentage << 0);
 }

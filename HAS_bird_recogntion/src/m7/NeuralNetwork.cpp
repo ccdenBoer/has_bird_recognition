@@ -33,9 +33,7 @@ NeuralNetwork::NeuralNetwork(uint8_t *model_data, int tensor_arena_size) {
   printf("NeuralNetwork: Interpreter created\n");
   this->interpreter->AllocateTensors();
   printf("NeuralNetwork: AllocateTensors done\n");
-  printf("neural network crashes here -----before\n");
   this->input_data = interpreter->typed_input_tensor<float>(0);
-  printf("neural network crashes here -----after\n");
 
   //get input shape from model
   this->input_shape = interpreter->input_tensor(0)->dims->data;
@@ -66,7 +64,28 @@ NeuralNetwork::result_t NeuralNetwork::Predict() {
   printf("NeuralNetwork: Time between predictions: %lu\n", timeBetweenPredictions);
 
   NeuralNetwork::result_t result = NeuralNetwork::result_t();
-  const char *class_names[NUMBER_OF_CLASSES] = {"Sylvia borin", "Cettia cetti", "Phylloscopus trochilus", "Acrocephalus scirpaceus", "Strix aluco", "Hippolais icterina", "Rallus aquaticus"};
+  const char *class_names[NUMBER_OF_CLASSES] = {
+    "Grutto (Limosa limosa)",
+    "Kievit (Vanellus vanellus)",
+    "Tureluur (Tringa totanus)",
+    "Scholekster (Haematopus ostralegus)",
+    "Wulp (Numenius arquata)",
+    "Watersnip (Gallinago gallinago)",
+    "Kemphaan (Calidris pugnax)",
+    "Slobeend (Spatula clypeata)",
+    "Kuifeend (Aythya fuligula)",
+    "Zomertaling (Spatula querquedula)",
+    "Wintertaling (Anas crecca)",
+    "Veldleeuwerik (Alauda arvensis)",
+    "Graspieper (Anthus pratensis)",
+    "Gele kwikstaart (Motacilla flava)",
+    "Kluut (Recurvirostra avosetta)",
+    "Krakeend (Mareca strepera)",
+    "Visdief (Sterna hirundo)",
+    "Zwarte stern (Chlidonias niger)",
+    "Kwartelkoning (Crex crex)",
+    "Paapje (Saxicola rubetra)",
+  };
 
   Serial.println("NeuralNetwork: Started prediction");
   TfLiteStatus invoke_status = interpreter->Invoke();

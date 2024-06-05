@@ -3,7 +3,7 @@
 void GPSParser::readGPS(){
   while (gps.available( gpsPort )) {
     fix = gps.read();
-    print_info();
+    //print_info();
   }
 }
 
@@ -61,29 +61,68 @@ void GPSParser::setup(){
 }
 
 bool GPSParser::getDateTime(char* dateTime){
+  
   readGPS();
-    if (fix.valid.date) {
-        // format yy-mm-dd :: hh:mm:ss
-        // easy format to sort filenames by
-        sprintf(dateTime, "%d-%d-%d_%d:%d:%d", fix.dateTime.full_year(), fix.dateTime.month, fix.dateTime.day, fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds);
-        return true;
+  if (fix.valid.date) {
+    char buffer[80];
+      // format yy-mm-dd :: hh:mm:ss
+      // easy format to sort filenames by
+    sprintf(dateTime, "%d-", fix.dateTime.full_year());
+    sprintf(buffer, "%s", dateTime);
+    
+    if(fix.dateTime.month < 10){
+        sprintf(dateTime, "%s0%d-", buffer, fix.dateTime.month);
     } else {
-        Serial.println("No valid date/time on fix");
-        print_info();
-        return false;
+        sprintf(dateTime, "%s%d-", buffer, fix.dateTime.month);
     }
+    sprintf(buffer, "%s", dateTime);
+    
+    if(fix.dateTime.date < 10){
+        sprintf(dateTime, "%s0%d_", buffer, fix.dateTime.date);
+    } else {
+        sprintf(dateTime, "%s%d_", buffer, fix.dateTime.date);
+    }
+    
+    sprintf(buffer, "%s", dateTime);
+    if(fix.dateTime.hours < 10){
+        sprintf(dateTime, "%s0%d.", buffer, fix.dateTime.hours);
+    } else {
+        sprintf(dateTime, "%s%d.", buffer, fix.dateTime.hours);
+    }
+    
+    sprintf(buffer, "%s", dateTime);
+    if(fix.dateTime.minutes < 10){
+        sprintf(dateTime, "%s0%d.", buffer, fix.dateTime.minutes);
+    } else {
+        sprintf(dateTime, "%s%d.", buffer, fix.dateTime.minutes);
+    }
+    
+    sprintf(buffer, "%s", dateTime);
+    if(fix.dateTime.seconds < 10){
+        sprintf(dateTime, "%s0%d", buffer, fix.dateTime.seconds);
+    } else {
+        sprintf(dateTime, "%s%d", buffer, fix.dateTime.seconds);
+    }
+    
+    return true;
+    
+  } else {
+    //Serial.println("No valid date/time on fix");
+    //print_info();
+    return false;
+  }
 }
 
 
 bool GPSParser::getCoordinates(float location[2]){
   readGPS();
-    if (fix.valid.location) {
-        location[0] = fix.longitude();
-        location[1] = fix.latitude();
-        return true;
-    } else {
-        Serial.println("No valid location on fix");
-        print_info();
-        return false;
-    }
+  if (fix.valid.location) {
+    location[0] = fix.longitude();
+    location[1] = fix.latitude();
+    return true;
+  } else {
+    //Serial.println("No valid location on fix");
+    //print_info();
+    return false;
+  }
 }

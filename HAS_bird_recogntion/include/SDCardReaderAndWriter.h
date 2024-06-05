@@ -14,7 +14,19 @@ class SDCardReaderAndWriter {
 
         static bool InitSDCardReaderAndWriter();
 
-        void WriteToSDCard(const char *fileName,int birdType, float birdAccuracy, float lightIntensity, float temp, float hum, int rainSurface, bool raining, int batteryPercentage, float lat, float lon, uint8_t validation);
+        void WriteToSDCard(
+            const char *fileName,
+            char* dateTime,
+            int birdType, 
+            float birdAccuracy, 
+            float lightIntensity, 
+            float temp, 
+            float hum, 
+            float rainLastHour,
+            int batteryPercentage, 
+            float lat, 
+            float lon, 
+            uint8_t validation);
         char* ReadFileData(char* fileName);
         int   GetAmountOfFiles(char *dirName);
 

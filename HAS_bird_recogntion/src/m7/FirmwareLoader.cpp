@@ -60,7 +60,7 @@ void waitForCorrectQspi() {
 tfLiteModel_t tfliteToSdram() {
   //  MPU_Config();
   // Copy M4 firmware to SDRAM
-  FILE *fw = fopen("/qspi/model.tflite", "r");
+  FILE *fw = fopen("/qspi/WeidevogelsModel.tflite", "r");
   if (fw == nullptr) {
 	printf("Please copy a tfLite model onto the PORTENTA mass storage\n");
 	printf("When done, please unmount the mass storage and reset the board\n");

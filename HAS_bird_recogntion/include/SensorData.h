@@ -5,13 +5,22 @@
 #include <DFRobot_AHT20.h>
 #include <Arduino.h>
 #include "GPSParser.h"
+#include "DFRobot_RainfallSensor.h"
+#include "Wire.h"
 
-#define LIGHT_SENSOR_INPUT_PIN      27
-#define LIGHT_SENSOR_SCL_PIN        149
-#define LIGHT_SENSOR_SDA_PIN        150
+#define LIGHT_SENSOR_INPUT_PIN      26
 
-#define RAIN_SENSOR_ANALOG_INPUT    PIN_A0 //A0
-#define RAIN_SENSOR_DIGITAL_INPUT   71
+#define I2C1_SCL_PIN         145
+#define I2C1_SDA_PIN         146
+
+#define I2C2_SCL_PIN         147
+#define I2C2_SDA_PIN         148
+
+#define I2C3_SCL_PIN        149
+#define I2C3_SDA_PIN        150
+
+#define RAIN_SENSOR_SCL_PIN I2C1_SCL_PIN
+#define RAIN_SENSOR_SDA_PIN I2C1_SDA_PIN
 
 #define BATTERY_PERCENTAGE_INPUT    PIN_A2 //A2
 
@@ -43,8 +52,7 @@ class SensorData {
         float   GetHumidity();        //Method to get the humidity from the SEN0527 T/H sensor
 
         //Rain sensor
-        bool    GetRainThreshold();   //Method which returns if the sensor is wet or not
-        int     GetRainSurface();     //Method which returns the coverage of the rain on the sensor
+        float    GetRainLastHour();   //Method which returns the mm of rain in the last hour
 
         //GPS sensor
         void getDateTime(char* dateTime);
@@ -54,17 +62,17 @@ class SensorData {
         int GetBatteryPercentage(); //Method which returns the current percentage of the battery capacity
 
         //Validate measurements
-        uint8_t ValidateSensorData(float lightIntensity, float temp, float hum, int rainSurface, bool raining, int percentage);
+        uint8_t ValidateSensorData(float lightIntensity, float temp, float hum, float rainLastHour, int percentage);
 
         SensorData() {}
         ~SensorData(){}
 
     private:
-        DFRobot_B_LUX_V30B  lightSensor = DFRobot_B_LUX_V30B(LIGHT_SENSOR_INPUT_PIN, LIGHT_SENSOR_SCL_PIN, LIGHT_SENSOR_SDA_PIN);
-        DFRobot_AHT20       tempAndHumiditySensor;
-        GPSParser           gpsParser;
-
-        uint32_t            timer   = millis();
+        MbedI2C                     rainWire = MbedI2C(RAIN_SENSOR_SDA_PIN, RAIN_SENSOR_SCL_PIN);
+        DFRobot_AHT20               tempAndHumiditySensor;
+        GPSParser                   gpsParser;
+        DFRobot_RainfallSensor_I2C  rainfallSensor = DFRobot_RainfallSensor_I2C(&rainWire);
+        uint32_t                    timer = millis();
 };
 
 #endif
