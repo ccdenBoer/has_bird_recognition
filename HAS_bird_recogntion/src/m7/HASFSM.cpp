@@ -5,23 +5,29 @@
 
 int tensor_arena_size = 1024 * 1024 * 4;
 float location[2];
+char modelName[40];
 static int totalMeasurements;
 
-HASFSM::HASFSM() : model(loadTfliteModel()) {
+HASFSM::HASFSM() {
+  printf("Initializing MicroSD reader/writer\n");
+  sd = SDCardReaderAndWriter();
+  sd.InitSDCardReaderAndWriter();
+  printf("Getting model name\n");
+  sd.GetModelName(modelName);
+  printf("Modelname: %s\n", modelName);
+  printf("Loading model\n");
+  model = loadTfliteModel(modelName);
   printf("Initializing mic\n");
   mic = Mic();
   printf("Initializing mfcc\n");
   mfcc = MFCC();
   printf("Initializing neural network\n");
-  neuralNetwork = new NeuralNetwork(model.data, tensor_arena_size);
+  neuralNetwork = new NeuralNetwork(model.data, tensor_arena_size, modelName, &sd);
   printf("Initializing sensors\n");
   sensorData = SensorData();
   printf("Initializing lora connection\n");
   connection = LoRaConnection();
   connection.InitialSetup();
-  
-  printf("Initializing MicroSD reader/writer\n");
-  sd = SDCardReaderAndWriter();
   lastTimeSent = 0;
 }
 
@@ -31,8 +37,6 @@ void HASFSM::Initializing() {
 
   printf("Initializing\n");
   connection.InitConnection();
-
-  sd.InitSDCardReaderAndWriter();
 
   //get the total files in the measurment folder so not all get sent every time
   totalMeasurements = sd.GetAmountOfFiles("/sd-card/measurements/");

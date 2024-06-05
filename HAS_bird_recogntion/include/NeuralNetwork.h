@@ -9,13 +9,14 @@
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/schema/schema_generated.h"
+#include <SDCardReaderAndWriter.h>
 
 #ifdef NEED_ABS_RESTORED
 #define abs NEED_ABS_RESTORED
 #undef NEED_ABS_RESTORED
 #endif
 
-#define NUMBER_OF_CLASSES 20
+#define MAX_NUMBER_OF_CLASSES 40
 
 class NeuralNetwork {
     private:
@@ -28,6 +29,8 @@ class NeuralNetwork {
         int*                        input_shape; //size 3: [HEIGHT, WIDTH, CHANNELS]
 		size_t						input_size;
 		void*						input_data;
+        int                         total_classes;
+        char*                       class_names[MAX_NUMBER_OF_CLASSES];
     public:
         struct result_t{
             int predicted_class;
@@ -35,7 +38,7 @@ class NeuralNetwork {
             const char* class_name;
         };
 
-        NeuralNetwork(uint8_t* model_data, int tensor_arena_size);
+        NeuralNetwork(uint8_t* model_data, int tensor_arena_size, char* modelName, SDCardReaderAndWriter* sd);
         ~NeuralNetwork();
 
         void InputData(float *data);

@@ -87,7 +87,13 @@ long getFileSize2(FILE *fp)
 char buffer[1024 * 10];
 char *SDCardReaderAndWriter::ReadFileData(char *fileName)
 {
+  printf("Reading from %s\n", fileName);
   FILE *filePointer = fopen(fileName, "r");
+  if (filePointer == nullptr)
+  {
+	printf("Error: %s\n", strerror(errno));
+    return NULL;
+  }
   int end = getFileSize2(filePointer);
 
   fread(buffer, end + 1, 1, filePointer);
@@ -117,3 +123,49 @@ int SDCardReaderAndWriter::GetAmountOfFiles(char *dirName)
 
   return count;
 }
+
+void SDCardReaderAndWriter::ReadJson(char* fileName){
+  char* json = ReadFileData(fileName);
+  deserializeJson(doc, json);
+}
+
+void SDCardReaderAndWriter::GetModelName(char* modelName){
+  ReadJson("/sd-card/config.json");
+  const char* model = doc["model"];
+  sprintf(modelName, "%s", model);
+  printf("Model: %s", model);
+  delay(5000);
+}
+
+void SDCardReaderAndWriter::GetModelData(char* modelName, char** birds, int* classes, int max_classes){
+  char fileName[80];
+  sprintf(fileName, "/sd-card/models/%s/%s_vogels.json", modelName, modelName);
+  ReadJson(fileName);
+
+  *classes = doc["total_birds"];
+  if(*classes > max_classes){
+    printf("Error: More classes than can be assigned -> increase MAX_NUMBER_OF_CLASSES\nMax: %d, from file: %d\n", max_classes, *classes);
+    return;
+  }
+
+  printf("Total classes: %d\n", *classes);
+
+  for(int i = 0; i < *classes; i++){
+    const char* bird = doc["birds"][i];
+
+    // Allocate memory for the string
+    birds[i] = (char*) malloc(strlen(bird) + 1);
+
+    if (birds[i] == NULL) {
+        printf("Memory allocation failed\n");
+        return;
+    }
+
+    // Copy the string to the allocated memory
+    strcpy(birds[i], bird);
+
+    printf("Added bird: %s\n", birds[i]);
+  }
+
+}
+

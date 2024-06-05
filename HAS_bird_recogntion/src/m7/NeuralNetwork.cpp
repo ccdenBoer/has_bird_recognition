@@ -4,7 +4,7 @@
 #include "tensorflow/lite/micro/system_setup.h"
 #include "tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h"
 
-NeuralNetwork::NeuralNetwork(uint8_t *model_data, int tensor_arena_size) {
+NeuralNetwork::NeuralNetwork(uint8_t *model_data, int tensor_arena_size, char* modelName, SDCardReaderAndWriter* sd) {
   tflite::InitializeTarget();
   printf("Starting NN init\n");
 
@@ -41,6 +41,9 @@ NeuralNetwork::NeuralNetwork(uint8_t *model_data, int tensor_arena_size) {
   this->input_size = interpreter->input_tensor(0)->bytes;
   memset(this->input_data, 0, this->input_size);
   printf("NeuralNetwork: Input of %d bytes zero initialized\n", this->input_size);
+
+  //get result data
+  sd->GetModelData(modelName, class_names, &total_classes, MAX_NUMBER_OF_CLASSES);
 }
 
 NeuralNetwork::~NeuralNetwork() {
@@ -64,28 +67,6 @@ NeuralNetwork::result_t NeuralNetwork::Predict() {
   printf("NeuralNetwork: Time between predictions: %lu\n", timeBetweenPredictions);
 
   NeuralNetwork::result_t result = NeuralNetwork::result_t();
-  const char *class_names[NUMBER_OF_CLASSES] = {
-    "Grutto (Limosa limosa)",
-    "Kievit (Vanellus vanellus)",
-    "Tureluur (Tringa totanus)",
-    "Scholekster (Haematopus ostralegus)",
-    "Wulp (Numenius arquata)",
-    "Watersnip (Gallinago gallinago)",
-    "Kemphaan (Calidris pugnax)",
-    "Slobeend (Spatula clypeata)",
-    "Kuifeend (Aythya fuligula)",
-    "Zomertaling (Spatula querquedula)",
-    "Wintertaling (Anas crecca)",
-    "Veldleeuwerik (Alauda arvensis)",
-    "Graspieper (Anthus pratensis)",
-    "Gele kwikstaart (Motacilla flava)",
-    "Kluut (Recurvirostra avosetta)",
-    "Krakeend (Mareca strepera)",
-    "Visdief (Sterna hirundo)",
-    "Zwarte stern (Chlidonias niger)",
-    "Kwartelkoning (Crex crex)",
-    "Paapje (Saxicola rubetra)",
-  };
 
   Serial.println("NeuralNetwork: Started prediction");
   TfLiteStatus invoke_status = interpreter->Invoke();
@@ -102,7 +83,7 @@ NeuralNetwork::result_t NeuralNetwork::Predict() {
   float max_confidence = 0;
   int index = -1;
   Serial.println("NeuralNetwork: Compute prediction");
-  for (int i = 0; i < NUMBER_OF_CLASSES; i++) {
+  for (int i = 0; i < total_classes; i++) {
 	auto prediction = output->data.f[i];
 	Serial.print("Output ");
 	Serial.print(class_names[i]);

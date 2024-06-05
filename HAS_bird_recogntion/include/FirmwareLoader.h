@@ -7,4 +7,4 @@ struct tfLiteModel_t {
   uint32_t size;
 };
 
-tfLiteModel_t loadTfliteModel();
+tfLiteModel_t loadTfliteModel(char* modelName);

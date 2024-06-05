@@ -29,8 +29,12 @@ class SDCardReaderAndWriter {
             uint8_t validation);
         char* ReadFileData(char* fileName);
         int   GetAmountOfFiles(char *dirName);
+        void GetModelName(char* modelName);
+        void GetModelData(char* modelName, char** birds, int* classes, int max_classes);
 
     private:
+        JsonDocument doc;
+        void ReadJson(char* fileName);
 };
 
 #endif
