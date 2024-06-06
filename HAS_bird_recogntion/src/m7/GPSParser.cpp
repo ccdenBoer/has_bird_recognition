@@ -58,59 +58,30 @@ void GPSParser::setup(){
   GPS_SERIAL.begin( 9600 );
 
   readGPS();
+
+  //Time setup
+  printf("Setting up timezone and time\n");
+  while(!fix.valid.date){
+    readGPS();
+  }
+
+  setTime(fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds, fix.dateTime.date, fix.dateTime.month, fix.dateTime.full_year());        //another way to set the time (hr,min,sec,day,mnth,yr)
+  printf("Time: %d-%d-%d_%.2d.%.2d.%.2d\n", fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds, fix.dateTime.date, fix.dateTime.month, fix.dateTime.full_year());
+
 }
 
 bool GPSParser::getDateTime(char* dateTime){
+
+  time_t utc = now();
+  time_t local = myTZ.toLocal(utc, &tcr);
+
+  // format yy-mm-dd :: hh:mm:ss
+  // easy format to sort filenames by
+  sprintf(dateTime, "%d-%d-%d_%.2d.%.2d.%.2d", year(local), month(local), day(local), hour(local), minute(local), second(local));
   
   readGPS();
-  if (fix.valid.date) {
-    char buffer[80];
-      // format yy-mm-dd :: hh:mm:ss
-      // easy format to sort filenames by
-    sprintf(dateTime, "%d-", fix.dateTime.full_year());
-    sprintf(buffer, "%s", dateTime);
     
-    if(fix.dateTime.month < 10){
-        sprintf(dateTime, "%s0%d-", buffer, fix.dateTime.month);
-    } else {
-        sprintf(dateTime, "%s%d-", buffer, fix.dateTime.month);
-    }
-    sprintf(buffer, "%s", dateTime);
-    
-    if(fix.dateTime.date < 10){
-        sprintf(dateTime, "%s0%d_", buffer, fix.dateTime.date);
-    } else {
-        sprintf(dateTime, "%s%d_", buffer, fix.dateTime.date);
-    }
-    
-    sprintf(buffer, "%s", dateTime);
-    if(fix.dateTime.hours < 10){
-        sprintf(dateTime, "%s0%d.", buffer, fix.dateTime.hours);
-    } else {
-        sprintf(dateTime, "%s%d.", buffer, fix.dateTime.hours);
-    }
-    
-    sprintf(buffer, "%s", dateTime);
-    if(fix.dateTime.minutes < 10){
-        sprintf(dateTime, "%s0%d.", buffer, fix.dateTime.minutes);
-    } else {
-        sprintf(dateTime, "%s%d.", buffer, fix.dateTime.minutes);
-    }
-    
-    sprintf(buffer, "%s", dateTime);
-    if(fix.dateTime.seconds < 10){
-        sprintf(dateTime, "%s0%d", buffer, fix.dateTime.seconds);
-    } else {
-        sprintf(dateTime, "%s%d", buffer, fix.dateTime.seconds);
-    }
-    
-    return true;
-    
-  } else {
-    //Serial.println("No valid date/time on fix");
-    //print_info();
-    return false;
-  }
+  return true;
 }
 
 

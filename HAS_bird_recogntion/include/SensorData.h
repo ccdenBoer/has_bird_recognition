@@ -10,17 +10,17 @@
 
 #define LIGHT_SENSOR_INPUT_PIN      26
 
-#define I2C1_SCL_PIN         145
-#define I2C1_SDA_PIN         146
+#define I2C0_SCL_PIN         145
+#define I2C0_SDA_PIN         146
 
-#define I2C2_SCL_PIN         147
-#define I2C2_SDA_PIN         148
+#define I2C1_SCL_PIN         147
+#define I2C1_SDA_PIN         148
 
-#define I2C3_SCL_PIN        149
-#define I2C3_SDA_PIN        150
+#define I2C2_SCL_PIN        149
+#define I2C2_SDA_PIN        150
 
-#define RAIN_SENSOR_SCL_PIN I2C1_SCL_PIN
-#define RAIN_SENSOR_SDA_PIN I2C1_SDA_PIN
+#define RAIN_SENSOR_SCL_PIN I2C2_SCL_PIN
+#define RAIN_SENSOR_SDA_PIN I2C2_SDA_PIN
 
 #define BATTERY_PERCENTAGE_INPUT    PIN_A2 //A2
 

@@ -62,7 +62,7 @@ void SDCardReaderAndWriter::WriteToSDCard(const char *fileName,
 
   printf("JSON Created\n");
 
-  char output[1024];
+  char output[256];
   serializeJson(doc, output);
 
   printf("written data is: %s\n", output);
