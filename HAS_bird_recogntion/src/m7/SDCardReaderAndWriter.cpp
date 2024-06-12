@@ -129,12 +129,15 @@ void SDCardReaderAndWriter::ReadJson(char* fileName){
   deserializeJson(doc, json);
 }
 
-void SDCardReaderAndWriter::GetModelName(char* modelName){
+void SDCardReaderAndWriter::GetConfig(char* modelName, char* key){
   ReadJson("/sd-card/config.json");
   const char* model = doc["model"];
   sprintf(modelName, "%s", model);
-  printf("Model: %s", model);
-  delay(5000);
+  printf("Model: %s\n", model);
+
+  const char* keyTemp = doc["key"];
+  sprintf(key, "%s", keyTemp);
+  printf("Key: %s\n", key);
 }
 
 void SDCardReaderAndWriter::GetModelData(char* modelName, char** birds, int* classes, int max_classes){
@@ -169,3 +172,53 @@ void SDCardReaderAndWriter::GetModelData(char* modelName, char** birds, int* cla
 
 }
 
+void SDCardReaderAndWriter::SaveAudio(float* buffer, int buffer_size, int sample_rate, int sample_time){
+  FILE *audiofile = fopen("/sd-card/audio.wav", "w");
+  printf("Saving audio file\n");
+  if (audiofile == nullptr)
+  {
+	printf("Error: %s\n", strerror(errno));
+    return;
+  }
+
+  float frequency = 1/(buffer_size*sample_rate);
+
+  fwrite("RIFF", 4, 1, audiofile);
+  int32_t RIFFChunkSize = 36 + buffer_size * sizeof(float);
+  fwrite(&RIFFChunkSize, 4, 1, audiofile);
+  fwrite("WAVE", 4, 1, audiofile);
+  fwrite("fmt ", 4, 1, audiofile);
+  int32_t fmtChunk = 16;
+  fwrite(&fmtChunk, 4, 1, audiofile);
+  int16_t format = 3; // 3 means IEEE float
+  fwrite(&format, 2, 1, audiofile);
+  int16_t channels = 1;
+  fwrite(&channels, 2, 1, audiofile);
+  fwrite(&sample_rate, 4, 1, audiofile);
+  int32_t byteRate = sample_rate * sizeof(float);
+  fwrite(&byteRate, 4, 1, audiofile);
+  int16_t blockAlign = sizeof(float);
+  fwrite(&blockAlign, 2, 1, audiofile);
+  int16_t bitsPerSample = 8 * sizeof(float);
+  fwrite(&bitsPerSample, 2, 1, audiofile);
+  fwrite("data", 4, 1, audiofile);
+  int32_t dataChunkSize = buffer_size * sizeof(float);
+  fwrite(&dataChunkSize, 4, 1, audiofile);
+
+  double averageVolCount = 0;
+
+  for (int i = 0; i < buffer_size; ++i) // Single cycle
+  {
+    float val = buffer[i];
+    fwrite(&val, sizeof(float), 1, audiofile);
+    averageVolCount += val;
+    //printf("Pos: %d\nbuffer: %f\n", i, buffer[i]);
+  }
+
+  double averageVol = averageVolCount/buffer_size;
+
+  fclose(audiofile);
+
+  printf("Average volume: %f\n", averageVol);
+  printf("Finished writing wav\n");
+}

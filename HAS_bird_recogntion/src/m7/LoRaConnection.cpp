@@ -7,13 +7,13 @@
  * Public methods declaration
  */
 
-void LoRaConnection::InitConnection()
+void LoRaConnection::InitConnection(char* key)
 {
     memset(loraBuffer, 0, 256);
     LORA_SERIAL.begin(9600); // Start the LoRa serial at a BaudRate of 9600
 
     printf("Send key\n");
-    this->SendKey((char *)"B1A9F4100B99FB903D2C271D629CDF89", (char *)"B1A9F4100B99FB903D2C271D629CDF89", (char *)"B1A9F4100B99FB903D2C271D629CDF89");
+    this->SendKey(key, key, key);
 
   	printf("Set mode\n");
     this->SetDeviceMode(LWOTAA);

@@ -65,8 +65,11 @@ void GPSParser::setup(){
     readGPS();
   }
 
-  setTime(fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds, fix.dateTime.date, fix.dateTime.month, fix.dateTime.full_year());        //another way to set the time (hr,min,sec,day,mnth,yr)
-  printf("Time: %d-%d-%d_%.2d.%.2d.%.2d\n", fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds, fix.dateTime.date, fix.dateTime.month, fix.dateTime.full_year());
+  setTime(fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds, fix.dateTime.date, fix.dateTime.month, fix.dateTime.full_year());
+  time_t utc = now();
+  time_t local = myTZ.toLocal(utc, &tcr);
+
+  printf("Date/Time: %d-%.2d-%.2d_%.2d.%.2d.%.2d\n", year(local), month(local), day(local), hour(local), minute(local), second(local));
 
 }
 
@@ -77,7 +80,7 @@ bool GPSParser::getDateTime(char* dateTime){
 
   // format yy-mm-dd :: hh:mm:ss
   // easy format to sort filenames by
-  sprintf(dateTime, "%d-%d-%d_%.2d.%.2d.%.2d", year(local), month(local), day(local), hour(local), minute(local), second(local));
+  sprintf(dateTime, "%d-%.2d-%.2d_%.2d.%.2d.%.2d", year(local), month(local), day(local), hour(local), minute(local), second(local));
   
   readGPS();
     

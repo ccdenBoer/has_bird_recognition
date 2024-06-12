@@ -3,9 +3,10 @@
 #include <SdramAllocator.h>
 #include <TTNFormatter.h>
 
-int tensor_arena_size = 1024 * 1024 * 4;
-float location[2];
+int tensor_arena_size = 1024 * 1024 * 5;
+float location[2] = {0, 0};
 char modelName[40];
+char key[34];
 static int totalMeasurements;
 
 HASFSM::HASFSM() {
@@ -13,7 +14,7 @@ HASFSM::HASFSM() {
   sd = SDCardReaderAndWriter();
   sd.InitSDCardReaderAndWriter();
   printf("Getting model name\n");
-  sd.GetModelName(modelName);
+  sd.GetConfig(modelName, key);
   printf("Modelname: %s\n", modelName);
   printf("Loading model\n");
   model = loadTfliteModel(modelName);
@@ -27,7 +28,7 @@ HASFSM::HASFSM() {
   sensorData = SensorData();
   printf("Initializing lora connection\n");
   connection = LoRaConnection();
-  connection.InitialSetup();
+  //connection.InitialSetup(); //Get DevEui, DevAddr, AppEui, from a new module
   lastTimeSent = 0;
 }
 
@@ -36,7 +37,7 @@ void HASFSM::Initializing() {
   sensorData.InitSensors();
 
   printf("Initializing\n");
-  connection.InitConnection();
+  connection.InitConnection(key);
 
   //get the total files in the measurment folder so not all get sent every time
   totalMeasurements = sd.GetAmountOfFiles("/sd-card/measurements/");
@@ -61,6 +62,8 @@ void HASFSM::Listening() {
 
   auto audioBuffer = mic.audioBufferGet();
 
+  mic.SaveAudio(&sd);
+
   // Start timer
   auto start = millis();
   auto mfcc_buffer = mfcc.process_audio(audioBuffer.data);
@@ -77,13 +80,15 @@ void HASFSM::Listening() {
   printf("Prediction took %f s\n", (finish - start) / 1000.0);
 
   // Check for bird and update AI data
-  bool birdFound = strcmp(prediction.class_name, "Geen Vogel") != 0;
+  //bool birdFound = strcmp(prediction.class_name, "Geen Vogel") != 0;
 
   lastRecognizedBird = prediction.predicted_class;
   recognitionAccuracy = prediction.confidence;
 
+  printf("Confidence: %f\n", recognitionAccuracy);
+
   // Raise new event if a bird was found
-  if (birdFound) {
+  if (recognitionAccuracy > 0.0) {
 	birdSensorFSM.raiseEvent(BIRD_FOUND);
   }
 }
@@ -110,9 +115,8 @@ void HASFSM::GatheringData() {
   sensorData.getDateTime(dateTime);
   printf("Current date/time: %s\n", dateTime);
 
-	//sensorData.getLocation(location);
-  location[0] = 0;
-  location[1] = 0;
+	sensorData.getLocation(location);
+
   printf("Longitude: %f, Latitude: %f\n", location[0],location[1]);
 
   // Validate

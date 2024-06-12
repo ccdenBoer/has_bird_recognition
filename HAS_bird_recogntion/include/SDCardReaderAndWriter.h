@@ -4,7 +4,7 @@
 #include <SDMMCBlockDevice.h>
 #include <FATFileSystem.h>
 #include <ArduinoJson.h>
-
+//#include "AudioTools.h"
 #define AMOUNT_OF_ITEMS_TO_WRITE    JSON_OBJECT_SIZE(11)
 
 class SDCardReaderAndWriter {
@@ -29,8 +29,9 @@ class SDCardReaderAndWriter {
             uint8_t validation);
         char* ReadFileData(char* fileName);
         int   GetAmountOfFiles(char *dirName);
-        void GetModelName(char* modelName);
+        void GetConfig(char* modelName, char* key);
         void GetModelData(char* modelName, char** birds, int* classes, int max_classes);
+        void SaveAudio(float* buffer, int buffer_size, int sample_rate, int sample_time);
 
     private:
         JsonDocument doc;

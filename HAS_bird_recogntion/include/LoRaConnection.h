@@ -55,7 +55,7 @@ class LoRaConnection
         LoRaConnection() = default;
         ~LoRaConnection()= default;
 
-        void InitConnection();
+        void InitConnection(char* key);
 
         void InitialSetup();
         

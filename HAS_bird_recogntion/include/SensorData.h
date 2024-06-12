@@ -19,8 +19,8 @@
 #define I2C2_SCL_PIN        149
 #define I2C2_SDA_PIN        150
 
-#define RAIN_SENSOR_SCL_PIN I2C2_SCL_PIN
-#define RAIN_SENSOR_SDA_PIN I2C2_SDA_PIN
+#define RAIN_SENSOR_SCL_PIN I2C0_SCL_PIN
+#define RAIN_SENSOR_SDA_PIN I2C0_SDA_PIN
 
 #define BATTERY_PERCENTAGE_INPUT    PIN_A2 //A2
 
@@ -56,7 +56,7 @@ class SensorData {
 
         //GPS sensor
         void getDateTime(char* dateTime);
-        void getLocation(float location[2]);
+        bool getLocation(float location[2]);
 
         //Battery Percentage
         int GetBatteryPercentage(); //Method which returns the current percentage of the battery capacity

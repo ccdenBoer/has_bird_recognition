@@ -5,6 +5,7 @@
 #pragma once
 #include <vector>
 #include "Arduino.h"
+#include "SDCardReaderAndWriter.h"
 
 #define SAMPLE_RATE 16000
 #define SAMPLE_TIME 10
@@ -22,9 +23,11 @@ public:
   audio_buffer_t audioBufferGet();
   bool audioBufferReady() const;
   bool audioBufferClear();
+  void SaveAudio(SDCardReaderAndWriter* sd);
 
 private:
   float* buffer = nullptr;
+  uint32_t* bufferInt = nullptr;
   volatile uint32_t currentSample = 0;
 
   [[noreturn]] static void thread(void *arg);

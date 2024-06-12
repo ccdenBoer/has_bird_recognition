@@ -66,10 +66,17 @@ void SensorData::getDateTime(char* dateTime){
   }
 }
 
-void SensorData::getLocation(float location[2]){
-  while(!gpsParser.getCoordinates(location)){
-    //delay(1000);
+bool SensorData::getLocation(float location[2]){
+  unsigned long startTime = millis();
+  bool done = false;
+  while(!done){
+    done = gpsParser.getCoordinates(location);
+    if((millis() - startTime) > 10000 && !done){
+      printf("Could not get location in 10 seconds!\n");
+      return false;
+    }
   }
+  return true;
 }
 
 uint8_t SensorData::ValidateSensorData(float lightIntensity,
