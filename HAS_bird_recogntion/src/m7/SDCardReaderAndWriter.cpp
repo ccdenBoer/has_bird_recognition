@@ -48,6 +48,7 @@ void SDCardReaderAndWriter::WriteToSDCard(const char *fileName,
 
   // Create JSON object
   StaticJsonDocument<AMOUNT_OF_ITEMS_TO_WRITE> doc;
+  doc["birdList"] = birdList;
   doc["birdType"] = birdType;
   doc["date/time"] = dateTime;
   doc["birdAccuracy"] = birdAccuracy;
@@ -145,6 +146,8 @@ void SDCardReaderAndWriter::GetModelData(char* modelName, char** birds, int* cla
   sprintf(fileName, "/sd-card/models/%s/%s_vogels.json", modelName, modelName);
   ReadJson(fileName);
 
+  birdList = doc["list_id"];
+
   *classes = doc["total_birds"];
   if(*classes > max_classes){
     printf("Error: More classes than can be assigned -> increase MAX_NUMBER_OF_CLASSES\nMax: %d, from file: %d\n", max_classes, *classes);
@@ -181,8 +184,7 @@ void SDCardReaderAndWriter::SaveAudio(float* buffer, int buffer_size, int sample
     return;
   }
 
-  float frequency = 1/(buffer_size*sample_rate);
-
+  //create the wav file header
   fwrite("RIFF", 4, 1, audiofile);
   int32_t RIFFChunkSize = 36 + buffer_size * sizeof(float);
   fwrite(&RIFFChunkSize, 4, 1, audiofile);
@@ -207,7 +209,8 @@ void SDCardReaderAndWriter::SaveAudio(float* buffer, int buffer_size, int sample
 
   double averageVolCount = 0;
 
-  for (int i = 0; i < buffer_size; ++i) // Single cycle
+  //save the float32 audio
+  for (int i = 0; i < buffer_size; ++i)
   {
     float val = buffer[i];
     fwrite(&val, sizeof(float), 1, audiofile);

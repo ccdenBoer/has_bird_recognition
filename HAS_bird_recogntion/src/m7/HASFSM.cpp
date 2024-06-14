@@ -3,11 +3,12 @@
 #include <SdramAllocator.h>
 #include <TTNFormatter.h>
 
-int tensor_arena_size = 1024 * 1024 * 5;
+int tensor_arena_size = 1024 * 1024 * 4.9;
 float location[2] = {0, 0};
 char modelName[40];
 char key[34];
-static int totalMeasurements;
+int totalMeasurements;
+int sendMeasurements;
 
 HASFSM::HASFSM() {
   printf("Initializing MicroSD reader/writer\n");
@@ -41,6 +42,7 @@ void HASFSM::Initializing() {
 
   //get the total files in the measurment folder so not all get sent every time
   totalMeasurements = sd.GetAmountOfFiles("/sd-card/measurements/");
+  sendMeasurements = totalMeasurements;
 
   // Raise new event after checking mic
   if (mic.begin()) {
@@ -131,18 +133,21 @@ void HASFSM::GatheringData() {
 
   // Sent measurements to SDCard
   sd.WriteToSDCard(fileName,
-           dateTime,
-				   lastRecognizedBird,
-				   recognitionAccuracy,
-				   lightIntensity,
-				   temperature,
-				   humidity,
-				   rainLastHour,
-				   batteryPercentage,
-				   location[0],
-				   location[1],
-				   correctMeasurements);
+                   dateTime,
+                   lastRecognizedBird,
+				           recognitionAccuracy,
+				           lightIntensity,
+				           temperature,
+				           humidity,
+				           rainLastHour,
+				           batteryPercentage,
+				           location[0],
+				           location[1],
+				           correctMeasurements);
   printf("Data written to SD card\n");
+
+  //Increase the number of measurements
+  totalMeasurements++;
 
   //  check written data
   sd.ReadFileData(fileName);
@@ -167,9 +172,9 @@ void HASFSM::Sending() {
   printf("Sending...\n");
   static bool joined = false;
   if (!joined && !connection.SetOTAAJoin(JOIN, 10)) {
-	printf("failed to connect");
-	birdSensorFSM.raiseEvent(JOIN_FAILED);
-	return;
+	  printf("failed to connect");
+	  birdSensorFSM.raiseEvent(JOIN_FAILED);
+	  return;
   }
   joined = true;
 
@@ -184,27 +189,58 @@ void HASFSM::Sending() {
 	return;
   }
 
-  std::vector<message_t, SdramAllocator<message_t>> messages;
-  int index = totalMeasurements;
+std::vector<message_t, SdramAllocator<message_t>> messages;
+int index = sendMeasurements;
 
-  while ((entry = readdir(dp)) && index < (totalMeasurements + 15)) {
-	// if not json file, skip
-	if (!strstr(entry->d_name, ".json"))
-	  continue;
-
-	// Open and read file content
-  printf("Read SD-Card File\n");
-	char filePath[512];
-	sprintf(filePath, "/sd-card/measurements/%s", entry->d_name);
-  printf("File to payload: %s\n", filePath);
-
-	char *bufferString = sd.ReadFileData(filePath);
-
-	messages.push_back(TTNFormatter::convertStringToMessage(bufferString));
-	index++;
-	// Remove data
-	//remove(filePath);
+for(int i = 0; i < index; i++){
+  if(readdir(dp) == nullptr){
+    break;
   }
+}
+
+while ((entry = readdir(dp)) && index < (totalMeasurements) && index < (sendMeasurements + 30)) {
+
+    //null pointer if out of files
+    if(entry == nullptr){
+      break;
+    }
+
+    // if not json file, skip
+    if (!strstr(entry->d_name, ".json")) {
+        continue;
+    }
+
+    // Open and read file content
+    printf("Read SD-Card File\n");
+    char filePath[512];
+    sprintf(filePath, "/sd-card/measurements/%s", entry->d_name);
+    printf("File to payload: %s\n", filePath);
+
+    char *bufferString = sd.ReadFileData(filePath);
+
+    if (bufferString == nullptr) {
+        printf("Failed to read file data.\n");
+        continue;
+    }
+
+    //printf("Buffer String: %s\n", bufferString);
+
+    message_t message = TTNFormatter::convertStringToMessage(bufferString);
+    //printf("Message - BirdList: %d, BirdType: %d, BirdAccuracy: %d, Date: %u, Time: %u, LightIntensity: %u, Temperature: %u, Humidity: %u, RainLastHour: %u, BatteryPercentage: %u, Lattitude: %u, Longitude: %u, Validation: %u\n", 
+    //    message.birdList, message.birdType, message.birdAccuracy, message.date, message.time, message.lightIntensity, message.temperature, message.humidity, message.rainLastHour, message.batteryPercentage, message.lattitude, message.longtitude, message.validation);
+
+    try {
+        messages.push_back(message);
+        printf("Message added. Total messages: %d\n", messages.size());
+    } catch (const std::exception &e) {
+        printf("Exception occurred: %s\n", e.what());
+        continue;
+    }
+
+    index++;
+    // Remove data
+    //remove(filePath);
+}
 
   printf("Create Payload\n");
   payload_t ttnPayload;
@@ -214,6 +250,7 @@ void HASFSM::Sending() {
 
   static uint8_t payloadBuffer[TTN_MAX_BUFFER_SIZE];
   auto size = TTNFormatter::convertPayloadToTTN(ttnPayload, payloadBuffer, TTN_MAX_BUFFER_SIZE);
+
   auto status = connection.CheckStatus();
   // TODO:
   //  Make work without checking status 2 times
@@ -231,7 +268,7 @@ void HASFSM::Sending() {
 	birdSensorFSM.raiseEvent(JOIN_FAILED);
 	return;
   }
-  totalMeasurements += index;
+  sendMeasurements += messages.size();
   birdSensorFSM.raiseEvent(SEND_SUCCEEDED);
 }
 

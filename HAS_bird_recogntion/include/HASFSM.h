@@ -38,13 +38,15 @@ enum FSM_Events {
 };
 
 typedef struct {
+  uint8_t birdList;
   uint8_t birdType;
   uint8_t birdAccuracy;
+  uint32_t date;
+  uint32_t time;
   uint16_t lightIntensity;
   uint8_t temperature;
   uint8_t humidity;
-  uint8_t raincoverage;
-  uint8_t raining;
+  uint8_t rainLastHour;
   uint8_t batteryPercentage;
   uint16_t lattitude;
   uint16_t longtitude;

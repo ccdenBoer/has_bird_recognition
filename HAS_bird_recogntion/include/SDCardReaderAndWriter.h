@@ -5,19 +5,21 @@
 #include <FATFileSystem.h>
 #include <ArduinoJson.h>
 //#include "AudioTools.h"
-#define AMOUNT_OF_ITEMS_TO_WRITE    JSON_OBJECT_SIZE(11)
+#define AMOUNT_OF_ITEMS_TO_WRITE    JSON_OBJECT_SIZE(12)
 
 class SDCardReaderAndWriter {
     public:
+        int birdList = -1;
+
         SDCardReaderAndWriter(){};
         ~SDCardReaderAndWriter(){};
 
         static bool InitSDCardReaderAndWriter();
 
         void WriteToSDCard(
-            const char *fileName,
+            const char *fileName, 
             char* dateTime,
-            int birdType, 
+            int birdType,
             float birdAccuracy, 
             float lightIntensity, 
             float temp, 

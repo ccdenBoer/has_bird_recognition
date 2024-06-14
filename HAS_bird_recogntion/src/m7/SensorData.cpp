@@ -48,7 +48,14 @@ float SensorData::GetHumidity() {
 }
 
 float SensorData::GetRainLastHour() {
-  return rainfallSensor.getRainfall(1);
+  float val = 0;
+    try {
+      val = rainfallSensor.getRainfall(1);
+      printf("BITCH: %f\n", val);
+    } catch (const std::exception &e) {
+      printf("Exception occurred: %s\n", e.what());
+    }
+  return val;
 }
 
 int SensorData::GetBatteryPercentage(){
