@@ -90,7 +90,7 @@ void HASFSM::Listening() {
   printf("Confidence: %f\n", recognitionAccuracy);
 
   // Raise new event if a bird was found
-  if (recognitionAccuracy > 0.0) {
+  if (recognitionAccuracy > 0.7) {
 	birdSensorFSM.raiseEvent(BIRD_FOUND);
   }
 }

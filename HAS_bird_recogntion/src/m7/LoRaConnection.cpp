@@ -315,11 +315,15 @@ bool LoRaConnection::SendPacketCayenne(unsigned char *buffer, unsigned char leng
 
     this->SendCommand((char *)"AT+MSGHEX=\"");
 
+    printf("Payload bytes:\n");
+
     for (unsigned char i = 0; i < length; i++)
     {
         sprintf(temp, "%02x", buffer[i]);
+        printf("%s", temp);
         LORA_SERIAL.write(temp);
     }
+    printf("\n");
 
     this->SendCommand((char *)"\"\r\n");
 
