@@ -1,0 +1,26 @@
+{
+"list_id":2,
+"total_birds":20,
+"birds":[
+   "Grutto (Limosa limosa)",
+    "Kievit (Vanellus vanellus)",
+    "Paapje (Saxicola rubetra)",
+    "Tureluur (Tringa totanus)",
+    "Scholekster (Haematopus ostralegus)",
+    "Wulp (Numenius arquata)",
+    "Watersnip (Gallinago gallinago)",
+    "Kemphaan (Calidris pugnax)",
+    "Slobeend (Spatula clypeata)",
+    "Kwartelkoning (Crex crex)",
+    "Kuifeend (Aythya fuligula)",
+    "Zomertaling (Spatula querquedula)",
+    "Wintertaling (Anas crecca)",
+    "Veldleeuwerik (Alauda arvensis)",
+    "Graspieper (Anthus pratensis)",
+    "Gele kwikstaart (Motacilla flava)",
+    "Kluut (Recurvirostra avosetta)",
+    "Krakeend (Mareca strepera)",
+    "Visdief (Sterna hirundo)",
+    "Zwarte stern (Chlidonias niger)",
+]
+}

@@ -61,9 +61,16 @@ void Mic::tick() {
 	converted = converted >> 14;
 	float max = 1 << 17;
 	auto f = static_cast<float>(converted);
+  float convert = (f / max); 
+  
+  float amplification_factor = 7;
+  float amplified_val = convert * amplification_factor;
+  if (amplified_val > 1.0f) amplified_val = 1.0f;
+  if (amplified_val < -1.0f) amplified_val = -1.0f;
+  
 
 	//convert 32bit signed to float
-	buffer[currentSample++] = (f / max);
+	buffer[currentSample++] = amplified_val;
 	if (currentSample >= BUFFER_SIZE) {
 	  break;
 	}
@@ -83,4 +90,8 @@ bool Mic::audioBufferClear() {
 	return true;
   }
   return false;
+}
+
+void Mic::SaveAudio(SDCardReaderAndWriter* sd){
+  sd->SaveAudio(buffer, BUFFER_SIZE, SAMPLE_RATE, SAMPLE_TIME);
 }

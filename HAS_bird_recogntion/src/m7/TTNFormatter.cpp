@@ -2,26 +2,63 @@
 
 message_t TTNFormatter::convertStringToMessage(char *messageString)
 {
+
+    // Ensure messageString is not null
+    if (messageString == nullptr) {
+        printf("messageString is null\n");
+        // Return a default message or handle error appropriately
+        return message_t{};
+    }
+
     // Convert data
     DynamicJsonDocument doc(1024);
-    deserializeJson(doc, messageString);
+    DeserializationError error = deserializeJson(doc, messageString);
+    if (error) {
+        printf("deserializeJson() failed: %s\n", error.c_str());
+        // Return a default message or handle error appropriately
+        return message_t{};
+    }
+
+    const char* dateTime = doc["date/time"];
+    if (!dateTime) {
+        printf("date/time is missing in the JSON\n");
+        // Return a default message or handle error appropriately
+        return message_t{};
+    }
+
+    uint32_t date, time;
+    
+    // Extract the date part
+    unsigned int year, month, day;
+    sscanf(dateTime, "%4u-%2u-%2u", &year, &month, &day);
+    // Reformat the date to yyyymmdd
+    date = year * 10000 + month * 100 + day;
+
+    // Extract the time part
+    unsigned int hour, minute, second;
+    sscanf(dateTime + 11, "%2u.%2u.%2u", &hour, &minute, &second);
+    // Reformat the time to hhmmss
+    time = hour * 10000 + minute * 100 + second;
 
     message_t message;
 
-  	message.birdType = doc["birdType"];
-  	message.birdAccuracy = (uint8_t)(doc["birdAccuracy"].as<float>() * 256.0f);
-  	message.lightIntensity = doc["lightIntensity"];
-  	message.temperature = doc["temperature"];
-  	message.humidity = doc["humidity"];
-  	message.raincoverage = doc["rainCoverage"];
-  	message.raining = doc["raining"];
-  	message.batteryPercentage = doc["batteryPercentage"];
-  	message.lattitude = doc["lattitude"];
-  	message.longtitude = doc["longtitude"];
-  	message.validation = doc["validation"];
+    message.birdList = doc["birdList"];
+    message.birdType = doc["birdType"];
+    message.birdAccuracy = static_cast<uint8_t>(doc["birdAccuracy"].as<float>() * 256.0f);
+    message.date = date;
+    message.time = time;
+    message.lightIntensity = doc["lightIntensity"];
+    message.temperature = doc["temperature"];
+    message.humidity = doc["humidity"];
+    message.rainLastHour = doc["rainLastHour"];
+    message.batteryPercentage = doc["batteryPercentage"];
+    message.lattitude = doc["lattitude"];
+    message.longtitude = doc["longtitude"];
+    message.validation = doc["validation"];
 
     return message;
 }
+
 
 size_t TTNFormatter::convertPayloadToTTN(payload_t payload, uint8_t *buffer, size_t bufferSize)
 {

@@ -1,19 +1,19 @@
 #include <LoRaConnection.h>
 #include <Arduino.h>
 
-#define LORA_SERIAL Serial1
+#define LORA_SERIAL Serial3
 
 /*
  * Public methods declaration
  */
 
-void LoRaConnection::InitConnection()
+void LoRaConnection::InitConnection(char* key)
 {
     memset(loraBuffer, 0, 256);
     LORA_SERIAL.begin(9600); // Start the LoRa serial at a BaudRate of 9600
 
     printf("Send key\n");
-    this->SendKey((char *)"B1A9F4100B99FB903D2C271D629CDF89", (char *)"B1A9F4100B99FB903D2C271D629CDF89", (char *)"B1A9F4100B99FB903D2C271D629CDF89");
+    this->SendKey(key, key, key);
 
   	printf("Set mode\n");
     this->SetDeviceMode(LWOTAA);
@@ -49,7 +49,7 @@ void LoRaConnection::InitialSetup()
     printf("memset\n");
 
     LORA_SERIAL.begin(9600);
-	printf("Serial start\n");
+	printf("LoRa Serial start\n");
 
     // Serial.println("LoRa Initial");
     this->SendCommand("AT\r\n");
@@ -315,11 +315,15 @@ bool LoRaConnection::SendPacketCayenne(unsigned char *buffer, unsigned char leng
 
     this->SendCommand((char *)"AT+MSGHEX=\"");
 
+    printf("Payload bytes:\n");
+
     for (unsigned char i = 0; i < length; i++)
     {
         sprintf(temp, "%02x", buffer[i]);
+        printf("%s", temp);
         LORA_SERIAL.write(temp);
     }
+    printf("\n");
 
     this->SendCommand((char *)"\"\r\n");
 

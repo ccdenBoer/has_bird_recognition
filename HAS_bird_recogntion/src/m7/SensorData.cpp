@@ -1,16 +1,7 @@
 #include "SensorData.h"
-#include <Adafruit_GPS.h>
-
-//SensorData sensor;
-#define GPSSerial Serial3
-
-Adafruit_GPS GPS(&GPSSerial);
-//float* location = nullptr;
-
-#define GPSECHO false
 
 void SensorData::InitSensors() {
-  Serial.println("Light init");
+  //Serial.println("Light init");
   //Init light sensor
   //lightSensor.begin();
 
@@ -29,24 +20,19 @@ void SensorData::InitSensors() {
 
   Serial.println("Rain init");
   //Init of rain sensor
-  //pinMode(RAIN_SENSOR_ANALOG_INPUT, INPUT);
-  //pinMode(RAIN_SENSOR_DIGITAL_INPUT, INPUT);
+    while (!rainfallSensor.begin()) {
+      Serial.println("Rainfall initialization failed.");
+      delay(1000);
+  }
 
   Serial.println("Start GPS...");
-  //Init GPS sensor
-  GPSSerial.begin(9600);
-  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
-  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
-  GPS.sendCommand(PGCMD_ANTENNA);
-  delay(1000);
-  GPSSerial.println(PMTK_Q_RELEASE);
-
+  gpsParser.setup();
   Serial.println("GPS Started...");
 
 }
 
 float SensorData::GetLightIntensity() {
-  return lightSensor.lightStrengthLux();
+  return 0;
 }
 
 float SensorData::GetTemperature() {
@@ -61,12 +47,15 @@ float SensorData::GetHumidity() {
   return tempAndHumiditySensor.getHumidity_RH();
 }
 
-bool SensorData::GetRainThreshold() {
-  return digitalRead(RAIN_SENSOR_DIGITAL_INPUT);
-}
-
-int SensorData::GetRainSurface() {
-  return map(analogRead(RAIN_SENSOR_ANALOG_INPUT), 1950, 0, 0, 256);
+float SensorData::GetRainLastHour() {
+  float val = 0;
+    try {
+      val = rainfallSensor.getRainfall(1);
+      printf("Rain Last Hour: %f\n", val);
+    } catch (const std::exception &e) {
+      printf("Exception occurred: %s\n", e.what());
+    }
+  return val;
 }
 
 int SensorData::GetBatteryPercentage(){
@@ -78,66 +67,29 @@ int SensorData::GetBatteryPercentage(){
 	return percent;
 }
 
-bool SensorData::GetGPSLocation(float buffer[2]) {
-	printf("Getting GPS Location\n");
-  char c = GPS.read();
-  // if you want to debug, this is a good time to do it!
-  if (c & GPSECHO) printf("%c\n",c);
-  // if a sentence is received, we can check the checksum, parse it...
-  if (GPS.newNMEAreceived()) {
-	// a tricky thing here is if we print the NMEA sentence, or data
-	// we end up not listening and catching other sentences!
-	// so be very wary if using OUTPUT_ALLDATA and trying to print out data
- 	//this also sets the newNMEAreceived() flag to false
-	printf("gps last nmea: %s\n", GPS.lastNMEA());
-	if (!GPS.parse(GPS.lastNMEA())) // this also sets the newNMEAreceived() flag to false
-	  return false; // we can fail to parse a sentence in which case we should just wait for another
+void SensorData::getDateTime(char* dateTime){
+  while(!gpsParser.getDateTime(dateTime)){
+    //delay(1000);
   }
+}
 
-  // approximately every 2 seconds or so, print out the current stats
-  if (millis() - timer > 2000) {
-	timer = millis(); // reset the timer
-	printf("Time: %02d:%02d:%02d.%03d\n", GPS.hour, GPS.minute, GPS.seconds, GPS.milliseconds);
-
-	printf("Date: %02d/%02d/20%02d\n", GPS.day, GPS.month, GPS.year);
-	printf("Fix: %d quality: %d\n", (int)GPS.fix, (int)GPS.fixquality);
-
-	if (GPS.fix) {
-	  //Replacement using printf
-	  printf("Location: %04f%c, %04f%c\n", GPS.latitude, GPS.lat, GPS.longitude, GPS.lon);
-	  printf("Speed (knots): %f\n", GPS.speed);
-	  printf("Angle: %f\n", GPS.angle);
-	  printf("Altitude: %f\n", GPS.altitude);
-	  printf("Satellites: %d\n", (int)GPS.satellites);
-	  printf("Antenna status: %d\n", (int)GPS.antenna);
-
-	  //Lat
-	  //Get first two numbers of float
-	  auto ddValue = std::floor(GPS.latitude / 100.0f);
-	  auto mmValue = std::fmod(GPS.latitude, 100.0f);
-	  auto newLat = ddValue + (mmValue / 60.0f);
-
-	  //Lon
-	  //Get first two numbers of float
-	  auto ddValue2 = std::floor(GPS.longitude / 100.0f);
-	  auto mmValue2 = std::fmod(GPS.longitude, 100.0f);
-	  auto newLon = ddValue2 + (mmValue2 / 60.0f);
-
-	  buffer[0] = newLat;
-	  buffer[1] = newLon;
-
-	  return true;
-	}
+bool SensorData::getLocation(float location[2]){
+  unsigned long startTime = millis();
+  bool done = false;
+  while(!done){
+    done = gpsParser.getCoordinates(location);
+    if((millis() - startTime) > 10000 && !done){
+      printf("Could not get location in 10 seconds!\n");
+      return false;
+    }
   }
-
-  return false;
+  return true;
 }
 
 uint8_t SensorData::ValidateSensorData(float lightIntensity,
 									   float temp,
 									   float hum,
-									   int rainSurface,
-									   bool raining,
+									   float rainLastHour,
 									   int percentage) {
   //Check light intensity, cant be under 0 and above 200klx
   bool correctLightIntensity = (lightIntensity >= MIN_LIGHT_VALUE && lightIntensity <= MAX_LIGHT_VALUE);
@@ -149,15 +101,14 @@ uint8_t SensorData::ValidateSensorData(float lightIntensity,
   bool correctHumidity = (hum >= MIN_HUM && hum <= MAX_HUM);
 
   //Check rain coverage, cant be under 0 and above 256
-  bool corretRainCoverage = (rainSurface >= MIN_COVERAGE && rainSurface < MAX_COVERAGE);
+  bool correctRain = (rainLastHour >= MIN_COVERAGE);
 
   //Check percentage, cant be below 0% or above 100%
   bool correctPercentage = (percentage >= MIN_BATTERY_PERCENTAGE && percentage <= MAX_BATTERY_PERCENTAGE);
 
-  return (correctLightIntensity << 5)
-	  | (correctTemperature << 4)
-	  | (correctHumidity << 3)
-	  | (raining << 2)
-	  | (corretRainCoverage << 1)
+  return (correctLightIntensity << 4)
+	  | (correctTemperature << 3)
+	  | (correctHumidity << 2)
+	  | (correctRain << 1)
 	  | (correctPercentage << 0);
 }

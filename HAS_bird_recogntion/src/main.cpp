@@ -15,7 +15,7 @@ void toggleLed() {
   delay(500);
 }
 
-#define USB_CONNECTED
+//#define USB_CONNECTED
 void setup() {
   Serial.begin(115200);
 

@@ -11,6 +11,8 @@
 #include <MFCC.h>
 
 #define SEND_INTERVAL 15 //Minutes
+//#define SAVE_AUDIO //save latest recording as audio.wav to the sd card
+#define MAX_NUMBER_OF_MEASUREMENTS_TO_SEND 7//lora can only handle packets to 256 bytes, 256/34 = 7.5, so only 7 measurements can be send at a time
 
 enum FSM_States {
   STATE_INITIALIZING,
@@ -38,13 +40,15 @@ enum FSM_Events {
 };
 
 typedef struct {
+  uint8_t birdList;
   uint8_t birdType;
   uint8_t birdAccuracy;
+  uint32_t date;
+  uint32_t time;
   uint16_t lightIntensity;
   uint8_t temperature;
   uint8_t humidity;
-  uint8_t raincoverage;
-  uint8_t raining;
+  uint8_t rainLastHour;
   uint8_t batteryPercentage;
   uint16_t lattitude;
   uint16_t longtitude;

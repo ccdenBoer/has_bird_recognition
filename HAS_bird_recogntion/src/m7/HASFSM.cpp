@@ -3,35 +3,46 @@
 #include <SdramAllocator.h>
 #include <TTNFormatter.h>
 
-int tensor_arena_size = 1024 * 1024 * 5;
-float location[2];
+int tensor_arena_size = 1024 * 1024 * 4.9;
+float location[2] = {0, 0};
+char modelName[40];
+char key[34];
+int totalMeasurements;
+int sendMeasurements;
 
-HASFSM::HASFSM() : model(loadTfliteModel()) {
+HASFSM::HASFSM() {
+  printf("Initializing MicroSD reader/writer\n");
+  sd = SDCardReaderAndWriter();
+  sd.InitSDCardReaderAndWriter();
+  printf("Getting model name\n");
+  sd.GetConfig(modelName, key);
+  printf("Modelname: %s\n", modelName);
+  printf("Loading model\n");
+  model = loadTfliteModel(modelName);
   printf("Initializing mic\n");
   mic = Mic();
   printf("Initializing mfcc\n");
   mfcc = MFCC();
   printf("Initializing neural network\n");
-  neuralNetwork = new NeuralNetwork(model.data, tensor_arena_size, 7);
+  neuralNetwork = new NeuralNetwork(model.data, tensor_arena_size, modelName, &sd);
   printf("Initializing sensors\n");
   sensorData = SensorData();
   printf("Initializing lora connection\n");
   connection = LoRaConnection();
-  //connection.InitialSetup();
-
-  printf("Initializing MicroSD reader/writer");
-  sd = SDCardReaderAndWriter();
+  //connection.InitialSetup(); //Get DevEui, DevAddr, AppEui, from a new module
   lastTimeSent = 0;
-  sensorData.GetGPSLocation(location);
 }
 
 void HASFSM::Initializing() {
   mfcc.begin(SAMPLE_RATE, SAMPLE_TIME);
   sensorData.InitSensors();
-  printf("Initializing\n");
-  connection.InitConnection();
 
-  sd.InitSDCardReaderAndWriter();
+  printf("Initializing\n");
+  connection.InitConnection(key);
+
+  //get the total files in the measurment folder so not all get sent every time
+  totalMeasurements = sd.GetAmountOfFiles("/sd-card/measurements/");
+  sendMeasurements = totalMeasurements;
 
   // Raise new event after checking mic
   if (mic.begin()) {
@@ -42,18 +53,20 @@ void HASFSM::Initializing() {
 }
 
 void HASFSM::InitializingFailed() {
-  printf("Initializing failed\n");
+  printf("Initializing failed\n"); 
 }
 
 void HASFSM::Listening() {
-  // printf("Listening\n");
-
   while (!mic.audioBufferReady()) {
 	  yield();
 	return;
   }
 
   auto audioBuffer = mic.audioBufferGet();
+
+  #ifdef SAVE_AUDIO
+  mic.SaveAudio(&sd);
+  #endif
 
   // Start timer
   auto start = millis();
@@ -71,83 +84,74 @@ void HASFSM::Listening() {
   printf("Prediction took %f s\n", (finish - start) / 1000.0);
 
   // Check for bird and update AI data
-  bool birdFound = strcmp(prediction.class_name, "Geen Vogel") != 0;
+  //bool birdFound = strcmp(prediction.class_name, "Geen Vogel") != 0;
 
   lastRecognizedBird = prediction.predicted_class;
   recognitionAccuracy = prediction.confidence;
 
-  //TODO
-  //Fix neural network file
-
-  //bool birdFound = true;
-  //lastRecognizedBird = 0;
-  //recognitionAccuracy = 0;
+  printf("Confidence: %f\n", recognitionAccuracy);
 
   // Raise new event if a bird was found
-  if (birdFound) {
+  if (recognitionAccuracy > 0.7) {
 	birdSensorFSM.raiseEvent(BIRD_FOUND);
   }
 }
 
 void HASFSM::GatheringData() {
   // Gather data
-  auto lightIntensity = 0;
+  float lightIntensity = 0;
+  printf("Light Intensity: %f\n", lightIntensity);
 
-  auto temperature = sensorData.GetTemperature();
-  auto humidity = sensorData.GetHumidity();
+  float rainLastHour = sensorData.GetRainLastHour();
+  printf("Rain last hour: %f mm\n", rainLastHour);
 
-  auto raining = 0;
-
-  // TODO:
-  //  Fix rain coverage analog read
-  //  auto rainCoverage = sensorData.GetRainSurface();
-  auto rainCoverage = 0;
+  float temperature = sensorData.GetTemperature();
+  printf("Temperature: %f C\n", temperature);
+  float humidity = sensorData.GetHumidity();
+  printf("Humidity: %f %\n", humidity);
 
   // TODO:
   //  Fix battery percentage analog read
-  //  batteryPercentage = sensorData.GetBatteryPercentage();
+  auto batteryPercentage = 0;
 
+  // Get the current UTC time and location
+  char dateTime[40];
+  sensorData.getDateTime(dateTime);
+  printf("Current date/time: %s\n", dateTime);
 
-  // Check if day has passed to gather GPS data
-  if ((millis() - lastTimeGSPGathered) < 86400000) {
-	int gpsAttempts = 0;
-	while (!sensorData.GetGPSLocation(location)) {
-	  gpsAttempts++;
-	  if (gpsAttempts > 10) {
-		break;
-	  }
-	}
-	lastTimeGSPGathered = millis();
-  }
+	sensorData.getLocation(location);
 
-
+  printf("Longitude: %f, Latitude: %f\n", location[0],location[1]);
 
   // Validate
   correctMeasurements =
-	  sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainCoverage, raining, batteryPercentage);
+	  sensorData.ValidateSensorData(lightIntensity, temperature, humidity, rainLastHour, batteryPercentage);
 
-  static unsigned int fileIndex = sd.GetAmountOfFiles("/sd-card/measurements/");
+  static int fileIndex = sd.GetAmountOfFiles("/sd-card/measurements/");
   char fileName[60];
-  sprintf(fileName, "/sd-card/measurements/MEASUREMENT%d.json\n", fileIndex);
+  sprintf(fileName, "/sd-card/measurements/%s_%d.json\n", dateTime, fileIndex);
+  printf("Filename for new Measurement:%s\n", fileName);
   fileIndex++;
 
   // Sent measurements to SDCard
   sd.WriteToSDCard(fileName,
-				   lastRecognizedBird,
-				   recognitionAccuracy,
-				   lightIntensity,
-				   temperature,
-				   humidity,
-				   rainCoverage,
-				   raining,
-				   batteryPercentage,
-				   location[0],
-				   location[1],
-				   correctMeasurements);
+                   dateTime,
+                   lastRecognizedBird,
+				           recognitionAccuracy,
+				           lightIntensity,
+				           temperature,
+				           humidity,
+				           rainLastHour,
+				           batteryPercentage,
+				           location[0],
+				           location[1],
+				           correctMeasurements);
   printf("Data written to SD card\n");
 
-  //  check written data
+  //Increase the number of measurements
+  totalMeasurements++;
 
+  //  check written data
   sd.ReadFileData(fileName);
 
   // Check send interval
@@ -170,15 +174,15 @@ void HASFSM::Sending() {
   printf("Sending...\n");
   static bool joined = false;
   if (!joined && !connection.SetOTAAJoin(JOIN, 10)) {
-	printf("failed to connect");
-	birdSensorFSM.raiseEvent(JOIN_FAILED);
-	return;
+	  printf("failed to connect");
+	  birdSensorFSM.raiseEvent(JOIN_FAILED);
+	  return;
   }
   joined = true;
 
   // Read data from SD-Card
   printf("Opening SD-Card\n");
-  DIR *dp = opendir("sd-card/.");
+  DIR *dp = opendir("/sd-card/measurements/");
   struct dirent *entry;
 
   // Loop through every file in the directory
@@ -187,26 +191,58 @@ void HASFSM::Sending() {
 	return;
   }
 
-  std::vector<message_t, SdramAllocator<message_t>> messages;
-  int index = 0;
+std::vector<message_t, SdramAllocator<message_t>> messages;
+int index = sendMeasurements;
 
-  while ((entry = readdir(dp)) && index < 15) {
-	// if not json file, skip
-	if (!strstr(entry->d_name, ".json"))
-	  continue;
-
-	// Open and read file content
-  printf("Read SD-Card File\n");
-	char filePath[512];
-	sprintf(filePath, "sd-card/%s", entry->d_name);
-
-	char *bufferString = sd.ReadFileData(filePath);
-
-	messages.push_back(TTNFormatter::convertStringToMessage(bufferString));
-	index++;
-	// Remove data
-	remove(filePath);
+for(int i = 0; i < index; i++){
+  if(readdir(dp) == nullptr){
+    break;
   }
+}
+
+while ((entry = readdir(dp)) && index < (totalMeasurements) && index < (sendMeasurements + MAX_NUMBER_OF_MEASUREMENTS_TO_SEND)) {
+
+    //null pointer if out of files
+    if(entry == nullptr){
+      break;
+    }
+
+    // if not json file, skip
+    if (!strstr(entry->d_name, ".json")) {
+        continue;
+    }
+
+    // Open and read file content
+    printf("Read SD-Card File\n");
+    char filePath[512];
+    sprintf(filePath, "/sd-card/measurements/%s", entry->d_name);
+    printf("File to payload: %s\n", filePath);
+
+    char *bufferString = sd.ReadFileData(filePath);
+
+    if (bufferString == nullptr) {
+        printf("Failed to read file data.\n");
+        continue;
+    }
+
+    //printf("Buffer String: %s\n", bufferString);
+
+    message_t message = TTNFormatter::convertStringToMessage(bufferString);
+    //printf("Message - BirdList: %d, BirdType: %d, BirdAccuracy: %d, Date: %u, Time: %u, LightIntensity: %u, Temperature: %u, Humidity: %u, RainLastHour: %u, BatteryPercentage: %u, Lattitude: %u, Longitude: %u, Validation: %u\n", 
+    //    message.birdList, message.birdType, message.birdAccuracy, message.date, message.time, message.lightIntensity, message.temperature, message.humidity, message.rainLastHour, message.batteryPercentage, message.lattitude, message.longtitude, message.validation);
+
+    try {
+        messages.push_back(message);
+        printf("Message added. Total messages: %d\n", messages.size());
+    } catch (const std::exception &e) {
+        printf("Exception occurred: %s\n", e.what());
+        continue;
+    }
+
+    index++;
+    // Remove data
+    //remove(filePath);
+}
 
   printf("Create Payload\n");
   payload_t ttnPayload;
@@ -216,6 +252,7 @@ void HASFSM::Sending() {
 
   static uint8_t payloadBuffer[TTN_MAX_BUFFER_SIZE];
   auto size = TTNFormatter::convertPayloadToTTN(ttnPayload, payloadBuffer, TTN_MAX_BUFFER_SIZE);
+
   auto status = connection.CheckStatus();
   // TODO:
   //  Make work without checking status 2 times
@@ -233,7 +270,7 @@ void HASFSM::Sending() {
 	birdSensorFSM.raiseEvent(JOIN_FAILED);
 	return;
   }
-
+  sendMeasurements += messages.size();
   birdSensorFSM.raiseEvent(SEND_SUCCEEDED);
 }
 
