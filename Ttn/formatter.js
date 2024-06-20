@@ -65,8 +65,8 @@ function decodeUplink(input) {
       var rainLastHour = bytes[i + 5];
       var batteryPercentage = bytes[i + 6];
       var validation = bytes[i + 7];
-      var latitude = ((bytes[i + 8])) | ((bytes[i + 9]) << 8) | ((bytes[i+ 10]) << 16) | (bytes[i + 11] << 24);
-      var longitude = ((bytes[i + 12])) | ((bytes[i + 13]) << 8) | ((bytes[i+ 14]) << 16) | (bytes[i + 15] << 24);
+      var latitude = (((bytes[i + 8])) | ((bytes[i + 9]) << 8) | ((bytes[i+ 10]) << 16) | (bytes[i + 11] << 24)) / 10000000;
+      var longitude = (((bytes[i + 12])) | ((bytes[i + 13]) << 8) | ((bytes[i+ 14]) << 16) | (bytes[i + 15] << 24)) / 10000000;
       var date = ((bytes[i + 16])) | ((bytes[i + 17]) << 8) | ((bytes[i + 18]) << 16) | (bytes[i + 19] << 24);
       var time = ((bytes[i + 20])) | ((bytes[i + 21]) << 8) | ((bytes[i + 22]) << 16) | (bytes[i + 23] << 24);
       var light = ((bytes[i + 24]) << 8) | ((bytes[i + 25]));

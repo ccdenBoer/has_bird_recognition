@@ -48,8 +48,8 @@ typedef struct {
   uint8_t rainLastHour;
   uint8_t batteryPercentage;
   uint8_t validation;
-  uint32_t lattitude;
-  uint32_t longtitude;
+  uint32_t latitude;
+  uint32_t longitude;
   uint32_t date;
   uint32_t time;
   uint16_t lightIntensity;

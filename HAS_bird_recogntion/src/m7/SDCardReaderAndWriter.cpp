@@ -57,8 +57,8 @@ void SDCardReaderAndWriter::WriteToSDCard(const char *fileName,
   doc["humidity"] = hum;
   doc["rainLastHour"] = rainLastHour;
   doc["batteryPercentage"] = batteryPercentage;
-  doc["lattitude"] = lat;
-  doc["longtitude"] = lon;
+  doc["latitude"] = lat;
+  doc["longitude"] = lon;
   doc["validation"] = validation;
 
   printf("JSON Created\n");

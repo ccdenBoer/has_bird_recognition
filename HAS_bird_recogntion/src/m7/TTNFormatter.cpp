@@ -52,9 +52,19 @@ message_t TTNFormatter::convertStringToMessage(char *messageString)
     message.humidity = doc["humidity"];
     message.rainLastHour = doc["rainLastHour"];
     message.batteryPercentage = doc["batteryPercentage"];
-    message.lattitude = doc["lattitude"];
-    message.longtitude = doc["longtitude"];
+
+    float lattitude = doc["latitude"];
+    float longitude = doc["longitude"];
+    int lattitude_i = lattitude * 10000000;
+    int longitude_i = longitude * 10000000;
+    message.latitude = lattitude_i;
+    message.longitude = longitude_i;
+
     message.validation = doc["validation"];
+
+    //printf("In message: %d, %d\n", message.longitude, message.latitude);
+    //printf("In JSON: %f, %f\n", lattitude, longitude);
+    //printf("Casting: %d, %d\n", lattitude_i, longitude_i);
 
     return message;
 }
