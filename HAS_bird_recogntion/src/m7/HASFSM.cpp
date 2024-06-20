@@ -64,7 +64,9 @@ void HASFSM::Listening() {
 
   auto audioBuffer = mic.audioBufferGet();
 
+  #ifdef SAVE_AUDIO
   mic.SaveAudio(&sd);
+  #endif
 
   // Start timer
   auto start = millis();
@@ -198,7 +200,7 @@ for(int i = 0; i < index; i++){
   }
 }
 
-while ((entry = readdir(dp)) && index < (totalMeasurements) && index < (sendMeasurements + 30)) {
+while ((entry = readdir(dp)) && index < (totalMeasurements) && index < (sendMeasurements + MAX_NUMBER_OF_MEASUREMENTS_TO_SEND)) {
 
     //null pointer if out of files
     if(entry == nullptr){

@@ -11,6 +11,8 @@
 #include <MFCC.h>
 
 #define SEND_INTERVAL 15 //Minutes
+//#define SAVE_AUDIO //save latest recording as audio.wav to the sd card
+#define MAX_NUMBER_OF_MEASUREMENTS_TO_SEND 7//lora can only handle packets to 256 bytes, 256/34 = 7.5, so only 7 measurements can be send at a time
 
 enum FSM_States {
   STATE_INITIALIZING,
