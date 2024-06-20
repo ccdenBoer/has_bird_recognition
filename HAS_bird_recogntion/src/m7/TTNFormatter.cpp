@@ -71,8 +71,8 @@ size_t TTNFormatter::convertPayloadToTTN(payload_t payload, uint8_t *buffer, siz
   buffer[0] = (uint8_t)payload.messageCount;
   buffer[1] = sizeof(message_t);
   for(int i = 0; i < payload.messageCount; i++) {
-	auto *message = (message_t *) &payload.messages[i];
-	memcpy(&buffer[2 + (i * sizeof(message_t))], message, sizeof(message_t));
+	  auto *message = (message_t *) &payload.messages[i];
+	  memcpy(&buffer[2 + (i * sizeof(message_t))], message, sizeof(message_t));
   }
   return payloadSize;
 }

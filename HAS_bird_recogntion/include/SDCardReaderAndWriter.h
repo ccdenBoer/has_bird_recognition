@@ -33,7 +33,7 @@ class SDCardReaderAndWriter {
         int   GetAmountOfFiles(char *dirName);
         void GetConfig(char* modelName, char* key);
         void GetModelData(char* modelName, char** birds, int* classes, int max_classes);
-        void SaveAudio(float* buffer, int buffer_size, int sample_rate, int sample_time);
+        void SaveAudio(float* buffer, int buffer_size, int sample_rate, int sample_time, int id);
 
     private:
         JsonDocument doc;

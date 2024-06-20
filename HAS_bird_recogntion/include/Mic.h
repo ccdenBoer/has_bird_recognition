@@ -23,7 +23,7 @@ public:
   audio_buffer_t audioBufferGet();
   bool audioBufferReady() const;
   bool audioBufferClear();
-  void SaveAudio(SDCardReaderAndWriter* sd);
+  void SaveAudio(SDCardReaderAndWriter* sd, int id);
 
 private:
   float* buffer = nullptr;

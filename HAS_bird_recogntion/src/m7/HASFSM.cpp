@@ -65,7 +65,7 @@ void HASFSM::Listening() {
   auto audioBuffer = mic.audioBufferGet();
 
   #ifdef SAVE_AUDIO
-  mic.SaveAudio(&sd);
+  mic.SaveAudio(&sd, sd.GetAmountOfFiles("/sd-card/measurements/") + 1);
   #endif
 
   // Start timer

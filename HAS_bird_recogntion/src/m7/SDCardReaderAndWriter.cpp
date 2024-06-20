@@ -63,7 +63,7 @@ void SDCardReaderAndWriter::WriteToSDCard(const char *fileName,
 
   printf("JSON Created\n");
 
-  char output[256];
+  char output[300];
   serializeJson(doc, output);
 
   printf("written data is: %s\n", output);
@@ -175,8 +175,10 @@ void SDCardReaderAndWriter::GetModelData(char* modelName, char** birds, int* cla
 
 }
 
-void SDCardReaderAndWriter::SaveAudio(float* buffer, int buffer_size, int sample_rate, int sample_time){
-  FILE *audiofile = fopen("/sd-card/audio.wav", "w");
+void SDCardReaderAndWriter::SaveAudio(float* buffer, int buffer_size, int sample_rate, int sample_time, int id){
+  char file[25];
+  sprintf(file, "/sd-card/audio%d.wav", id);
+  FILE *audiofile = fopen(file, "w");
   printf("Saving audio file\n");
   if (audiofile == nullptr)
   {

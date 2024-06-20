@@ -92,6 +92,6 @@ bool Mic::audioBufferClear() {
   return false;
 }
 
-void Mic::SaveAudio(SDCardReaderAndWriter* sd){
-  sd->SaveAudio(buffer, BUFFER_SIZE, SAMPLE_RATE, SAMPLE_TIME);
+void Mic::SaveAudio(SDCardReaderAndWriter* sd, int id){
+  sd->SaveAudio(buffer, BUFFER_SIZE, SAMPLE_RATE, SAMPLE_TIME, id);
 }
