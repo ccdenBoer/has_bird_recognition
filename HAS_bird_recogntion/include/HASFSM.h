@@ -12,7 +12,7 @@
 
 #define SEND_INTERVAL 15 //Minutes
 //#define SAVE_AUDIO //save latest recording as audio.wav to the sd card
-#define MAX_NUMBER_OF_MEASUREMENTS_TO_SEND 9//lora can only handle packets to 256 bytes, 256/28 = 9.5, so only 9 measurements can be send at a time
+#define MAX_NUMBER_OF_MEASUREMENTS_TO_SEND 8//lora can only handle packets to 256 bytes, 256/28 = 9.5, including some other data only 8 measurements can be send at a time
 
 enum FSM_States {
   STATE_INITIALIZING,
