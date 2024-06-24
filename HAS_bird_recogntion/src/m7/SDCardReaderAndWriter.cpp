@@ -176,8 +176,8 @@ void SDCardReaderAndWriter::GetModelData(char* modelName, char** birds, int* cla
 }
 
 void SDCardReaderAndWriter::SaveAudio(float* buffer, int buffer_size, int sample_rate, int sample_time, int id){
-  char file[25];
-  sprintf(file, "/sd-card/audio%d.wav", id);
+  char file[40];
+  sprintf(file, "/sd-card/recordings/audio%d.wav", id);
   FILE *audiofile = fopen(file, "w");
   printf("Saving audio file\n");
   if (audiofile == nullptr)
